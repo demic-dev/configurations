@@ -100,6 +100,18 @@ in
           mode = "600";
         };
 
+        # Dedicated PASSPHRASELESS key used ONLY by git-agecrypt to decrypt secrets/sensitive/*.age
+        # silently. The login key above is passphrase-protected, which makes git-agecrypt prompt on
+        # every git command; this key avoids that. Its public key is a recipient in
+        # root/git-agecrypt.toml, and the git home module points git-agecrypt at this path.
+        age.secrets.git-agecrypt-key = {
+          file = ../../secrets/git-agecrypt-key.age;
+          path = "/home/michele/.ssh/git-agecrypt_ed25519";
+          owner = "michele";
+          group = "users";
+          mode = "600";
+        };
+
         # agenix (not home-manager) owns the git email files because the user's ssh key is passphrase-protected, which breaks home-manager's agenix integration.
         age.secrets.git-email = {
           file = ../../secrets/git-email.age;

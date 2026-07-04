@@ -3,6 +3,7 @@ let
   micheleAtBach = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjDuFgmRgyjZ/Ye/QiFetZ6r+W9SGB4ufJcxzCF0ALP";
   micheleAtSatie = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKUnGzmayiQ8SazjVxi8KPAmgJQQssVbSCpAerMn0Eve";
 
+
   micheles = [ micheleAtBach micheleAtSatie ];
 
   bachSystem = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK7rFUiGulUCjRKMua3OXkAyfnvkZLHwBud4kb37gT83";
@@ -53,4 +54,9 @@ in
   
   "michele-password.age".publicKeys = [ micheleAtSatie satieSystem ];
   "michele-at-satie.age".publicKeys = [ micheleAtSatie satieSystem ];
+
+  # Passphraseless key used ONLY by git-agecrypt to decrypt secrets/sensitive/*.age silently.
+  # Deployed to satie's ~/.ssh/git-agecrypt_ed25519; its public key is a recipient in
+  # ../git-agecrypt.toml. Encrypted to satie's host key so agenix can decrypt it at boot.
+  "git-agecrypt-key.age".publicKeys = [ micheleAtSatie satieSystem ];
 }
