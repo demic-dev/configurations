@@ -31,7 +31,7 @@ in
               echo "usage: update-remote <hostname>" >&2
               return 1
             end
-            nixos-rebuild switch --flake ${configPath}#$argv[1] --target-host $argv[1] --sudo
+            nixos-rebuild switch --flake ${configPath}#$argv[1] --target-host $argv[1] --sudo --ask-elevate-password
           '';
         };
 
