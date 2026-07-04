@@ -1,12 +1,14 @@
 { ... }:
 {
   flake.nixosModules.immich =
-{ config, pkgs, env, ... }:
+{ pkgs, env, ... }:
 let
   fqdn = env.cloudSettings.fqdn;
   domain = "${env.cloudSettings.services.immich.subdomain}.${env.cloudSettings.fqdn}";
   port = env.cloudSettings.services.immich.port;
   redisPort = port + 1;
+
+  mountPoint = "/var/tmp/immich-borgbase/";
 
   immichPath = "/data/immich";
 in
@@ -68,6 +70,7 @@ in
       user = "immich";
       group = "immich";
     }
+    mountPoint
   ];
 
   # Fail2Ban Jail
@@ -117,11 +120,10 @@ in
     preHook = ''
       ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist@borgbase && true
       ${pkgs.zfs}/bin/zfs snapshot rpool/safe/persist@borgbase
-      /run/current-system/sw/bin/mkdir -p /var/tmp/borgjobs
-      /run/wrappers/bin/mount --bind /persist/.zfs/snapshot/borgbase /var/tmp/borgjobs/
+      /run/wrappers/bin/mount --bind /persist/.zfs/snapshot/borgbase ${mountPoint}
     '';
     postHook = ''
-      /run/wrappers/bin/umount /var/tmp/borgjobs/
+      /run/wrappers/bin/umount ${mountPoint}
       ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist@borgbase
     '';
     encryption = {

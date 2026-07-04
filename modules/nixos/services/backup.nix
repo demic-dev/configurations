@@ -1,7 +1,10 @@
 { ... }:
 {
   flake.nixosModules.backup =
-{ config, pkgs, env, ... }:
+{ pkgs, env, ... }:
+let
+  mountDirectory = "/var/tmp/borgjobs/";
+in
 {
   services.sanoid = {
     enable = true;
@@ -37,11 +40,10 @@
     preHook = ''
       ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist@borgbase && true
       ${pkgs.zfs}/bin/zfs snapshot rpool/safe/persist@borgbase
-      /run/current-system/sw/bin/mkdir -p /var/tmp/borgjobs
-      /run/wrappers/bin/mount --bind /persist/.zfs/snapshot/borgbase /var/tmp/borgjobs/
+      /run/wrappers/bin/mount --bind /persist/.zfs/snapshot/borgbase ${mountDirectory} 
     '';
     postHook = ''
-      /run/wrappers/bin/umount /var/tmp/borgjobs/
+      /run/wrappers/bin/umount ${mountDirectory}
       ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist@borgbase
     '';
     encryption = {
@@ -55,6 +57,8 @@
     user = "root";
     group = "root";
   };
+
+  environment.persistence."/persist".directories = [ mountDirectory ];
 
   # Adds personal repo to Known Hosts. Otherwise impermanence erases it
   programs.ssh.knownHosts."*.repo.borgbase.com" = {
