@@ -1,4 +1,4 @@
-{ config, libs, pkgs, env, ... }:
+{ env, ... }:
 let
   ipv4 = env.userSettings.bach.network.ip.v4;
   gateway = env.userSettings.bach.network.gateway;
