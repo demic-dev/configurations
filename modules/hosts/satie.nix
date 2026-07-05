@@ -176,7 +176,7 @@ in
             kdePackages.dolphin
             kdePackages.kde-cli-tools
             obsidian
-            vscode
+            vscodium
             inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
             vimPlugins.typst-preview-nvim
             websocat # websocket client required by TypstPreview
