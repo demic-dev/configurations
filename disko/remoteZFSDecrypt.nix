@@ -1,9 +1,5 @@
 { env, ... }:
 let
-  ipv4 = env.userSettings.bach.network.ip.v4;
-  gateway = env.userSettings.bach.network.gateway;
-  subnetMask = env.userSettings.bach.network.subnetMask;
-
   satieSSH = env.userSettings.satie.publicSSH;
 in
 {
@@ -13,7 +9,10 @@ in
   };
 
   boot = {
-    kernelParams = [ "ip=${ipv4}::${gateway}:${subnetMask}::enp7s0:none" ];
+    # No ip= kernel param since the systemd stage-1 initrd migration:
+    # networking.interfaces/defaultGateway are translated into the initrd's networkd
+    # config (40-enp7s0.network), which takes priority over anything
+    # systemd-network-generator would derive from ip=.
     supportedFilesystems = [ "zfs" ];
 
     loader = {
@@ -22,7 +21,13 @@ in
     };
 
     initrd = {
-      systemd.enable = false;
+      systemd.enable = true;
+
+      # Systemd stage-1 asks for the ZFS key via systemd-ask-password, so SSH
+      # login goes straight to the pending "Enter key for rpool/..." prompt and
+      # disconnects once answered; if the prompt never appears (pool import
+      # failed), debug from the VNC console emergency shell instead.
+      systemd.users.root.shell = "/bin/systemd-tty-ask-password-agent";
 
       kernelModules = [
         "virtio-pci"
@@ -40,20 +45,6 @@ in
             satieSSH
           ];
         };
-
-        # this will automatically load the zfs password prompt on login
-        # and kill the other prompt so boot can continue
-        postCommands = ''
-          cat <<EOF > /root/.profile
-          if pgrep -x "zfs" > /dev/null
-          then
-            zfs load-key -a
-            killall zfs
-          else
-            echo "zfs not running -- maybe the pool is taking some time to load for some unforseen reason."
-          fi
-          EOF
-        '';
       };
     };
   };
