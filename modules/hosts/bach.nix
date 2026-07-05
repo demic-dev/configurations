@@ -53,7 +53,23 @@ in
           defaultGateway = env.userSettings.bach.network.gateway;
           firewall.enable = true;
         };
+        # Pins uids/gids for system accounts that NixOS would otherwise allocate dynamically.
+        # Needed because /var/lib/nixos (where those allocations are recorded) isn't persisted,
+        # so an unpinned id could shift on every reboot of this impermanence-wiped root.
         users.users.dhcpcd.uid = 997;
+        users.groups.dhcpcd.gid = 997;
+
+        users.users.mandb.uid = 980;
+        users.groups.mandb.gid = 980;
+
+        users.users.nscd.uid = 981;
+        users.groups.nscd.gid = 981;
+
+        users.users.systemd-oom.uid = 982;
+        users.groups.systemd-oom.gid = 982;
+
+        users.groups.resolvconf.gid = 983;
+        users.groups.systemd-coredump.gid = 984;
 
         virtualisation.docker.enable = true;
         virtualisation.oci-containers.backend = "docker";
@@ -63,7 +79,7 @@ in
         programs.fish.enable = true;
 
         environment.systemPackages = with pkgs; [
-          inputs.agenix.packages.${pkgs.system}.default
+          inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
           tailscale
           btop
           gcc
@@ -118,6 +134,8 @@ in
           home.homeDirectory = "/home/michele";
 
           programs.neovim.enable = true;
+          programs.neovim.withRuby = false;
+          programs.neovim.withPython3 = false;
 
           # `update` / `update-remote` come from the shared fish home module.
 

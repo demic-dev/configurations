@@ -39,6 +39,7 @@
   };
 
   users.users.sshd.uid = 993;
+  users.groups.sshd.gid = 993;
 }
   ;
 }
