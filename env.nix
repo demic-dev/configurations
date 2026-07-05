@@ -24,6 +24,9 @@
         subdomain = "calibre";
         port = 10291;
       };
+      static-files = {
+        subdomain = "files";
+      };
     };
   };
 

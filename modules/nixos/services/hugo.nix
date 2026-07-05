@@ -1,11 +1,28 @@
 { ... }:
 {
   flake.nixosModules.hugo =
-{ config, pkgs, env, ... }:
+{ pkgs, env, ... }:
 let
   fqdn = env.cloudSettings.fqdn;
   webRoot = "/var/www/${fqdn}";
   githubUri = "demic-dev/website";
+  filesRoot = "/data/static-files";
+
+  # Download cv with my name already on it for smoother organization
+  staticFilesLocations = {
+    "= /resume" = {
+      alias = "${filesRoot}/resume.pdf";
+      extraConfig = ''
+        add_header Content-Disposition 'inline; filename="michele-de-cillis-cv.pdf"';
+      '';
+    };
+    "= /resume-ats" = {
+      alias = "${filesRoot}/resume-ATS.pdf";
+      extraConfig = ''
+        add_header Content-Disposition 'inline; filename="michele-de-cillis-cv-ATS.pdf"';
+      '';
+    };
+  };
 in
 {
   systemd.services.${fqdn} = {
@@ -34,6 +51,8 @@ in
       forceSSL = true;
 
       root = webRoot;
+
+      locations = staticFilesLocations;
     };
     "www.${fqdn}" = {
       serverName = "www.${fqdn}";
@@ -43,6 +62,8 @@ in
       forceSSL = true;
 
       root = webRoot;
+
+      locations = staticFilesLocations;
     };
   };
 }

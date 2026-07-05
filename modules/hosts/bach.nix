@@ -32,6 +32,7 @@ in
       miniflux
       hugo
       ghost
+      static-files
 
       ({ pkgs, ... }: {
         nixpkgs.hostPlatform = "aarch64-linux";
