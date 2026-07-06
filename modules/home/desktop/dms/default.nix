@@ -29,7 +29,7 @@
     # Activation script finds profile + creates symlink
     ".config/zen-link".text = ''
       #!/bin/sh
-      PROFILE_DIR=$(find ~/.zen -maxdepth 2 -type d -name "*.Default Profile" | head -n1)
+      PROFILE_DIR=$(find ~/.config/zen -maxdepth 2 -type d -name "*.Default Profile" | head -n1)
       [ -n "$PROFILE_DIR" ] || exit 1
       mkdir -p "$PROFILE_DIR/chrome"
       ln -sf ${config.xdg.configHome}/DankMaterialShell/zen.css "$PROFILE_DIR/chrome/userChrome.css"
