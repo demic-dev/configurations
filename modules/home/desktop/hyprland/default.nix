@@ -163,7 +163,7 @@
         "$mainMod,E,exec,$fileManager"
         "$mainMod,M,exec,zen"
         "$mainMod,S,exec, $terminal --command=~/repos/spotatui/result/bin/spotatui"
-        "$mainMod SHIFT,M,exec, $terminal --command=\"~/repos/WebClients/applications/authenticator/src-tauri/target/aarch64-unknown-linux-gnu/release/proton-authenticator\""
+        "$mainMod SHIFT,M,exec, proton-authenticator"
 
         # Lock
         "$mainMod,L,exec,dms ipc call lock lock"
