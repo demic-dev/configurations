@@ -8,7 +8,7 @@ let
   port = env.cloudSettings.services.immich.port;
   redisPort = port + 1;
 
-  mountPoint = "/var/tmp/immich-borgbase/";
+  mountPoint = "/var/tmp/immich-borgbase";
 
   immichPath = "/data/immich";
 in
@@ -70,7 +70,6 @@ in
       user = "immich";
       group = "immich";
     }
-    mountPoint
   ];
 
   # Fail2Ban Jail
@@ -99,7 +98,7 @@ in
 
     locations."/" = {
       recommendedProxySettings = true;
-      proxyPass = "http://localhost:${builtins.toString port}";
+      proxyPass = "http://localhost:${toString port}";
       proxyWebsockets = true;
       extraConfig = ''
         proxy_set_header Host $host; 
@@ -113,18 +112,44 @@ in
     };
   };
 
-  services.borgbackup.jobs."immich-backup-borgbase" = {
-    paths = [ immichPath ];
+  services.nginx.virtualHosts."bach.tailcd20d8.ts.net" = {
+    serverName = "bach.tailcd20d8.ts.net";
+
+    enableACME = false;
+    useACMEHost = fqdn;
+    forceSSL = true;
+
+    locations."/" = {
+      recommendedProxySettings = true;
+      proxyPass = "http://localhost:${toString port}";
+      proxyWebsockets = true;
+      extraConfig = ''
+        proxy_set_header Host $host; 
+        proxy_set_header X-Forwarded-Proto $scheme; 
+        proxy_set_header X-Real-IP $remote_addr; 
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_max_temp_file_size 16384m; 
+
+        client_max_body_size 100000m;
+      '';
+    };
+  };
+
+  services.borgbackup.jobs."immich" = {
+    # immich media lives on the rpool/safe/persist/data dataset (mounted at /persist/data),
+    # so snapshot that dataset directly. immichPath is "/data/immich", i.e. "immich" within it.
+    paths = [ "${mountPoint}/immich" ];
 
     repo = env.cloudSettings.services.immich.borg-repository;
     preHook = ''
-      ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist@borgbase && true
-      ${pkgs.zfs}/bin/zfs snapshot rpool/safe/persist@borgbase
-      /run/wrappers/bin/mount --bind /persist/.zfs/snapshot/borgbase ${mountPoint}
+      ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist/data@immich || true
+      ${pkgs.zfs}/bin/zfs snapshot rpool/safe/persist/data@immich
+      ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
+      /run/wrappers/bin/mount --bind /persist/data/.zfs/snapshot/immich ${mountPoint}
     '';
     postHook = ''
-      /run/wrappers/bin/umount ${mountPoint}
-      ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist@borgbase
+      /run/wrappers/bin/umount ${mountPoint} || true
+      ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist/data@immich || true
     '';
     encryption = {
       mode = "repokey-blake2";
@@ -132,7 +157,7 @@ in
     };
     environment.BORG_RSH = "ssh -i /home/michele/.ssh/id_ed25519";
     compression = "auto,lzma";
-    startAt = "daily";
+    startAt = "*-*-* 02:00:00";
 
     user = "root";
     group = "root";

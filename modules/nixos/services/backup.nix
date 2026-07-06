@@ -3,7 +3,7 @@
   flake.nixosModules.backup =
 { pkgs, env, ... }:
 let
-  mountDirectory = "/var/tmp/borgjobs/";
+  mountDirectory = "/var/tmp/borgjobs";
 in
 {
   services.sanoid = {
@@ -16,35 +16,40 @@ in
       autosnap = true;
     };
 
+    # recursive so the child dataset rpool/safe/persist/data (Nextcloud, Immich,
+    # static-files) is snapshotted too — it is NOT covered otherwise.
     datasets."rpool/safe/persist" = {
       useTemplate = [ "backup" ];
+      recursive = true;
     };
   };
 
-  services.borgbackup.jobs."borgbase" = {
+  services.borgbackup.jobs."generic" = {
     paths = [
-      "/home"
-      "/data"
-      "/etc/machine-id"
-      "/var/log"
-      "/var/lib/acme"
-      "/var/lib/calibre-web"
-      "/var/lib/postgresql"
-      "/var/lib/tailscale"
-    ];
-    exclude = [
-      # Until the single-backup-per-service is not ready, I exclude immich declaratively
-      "/data/immich"
+      "${mountDirectory}/home"
+      "${mountDirectory}/data/nextcloud"
+      "${mountDirectory}/data/static-files"
+      "${mountDirectory}/etc/machine-id"
+      "${mountDirectory}/var/log"
+      "${mountDirectory}/var/lib/acme"
+      "${mountDirectory}/var/lib/calibre-web"
+      "${mountDirectory}/var/lib/postgresql"
+      "${mountDirectory}/var/lib/tailscale"
     ];
     repo = env.userSettings.bach.borg-repository;
+    # /persist and /persist/data are separate ZFS datasets, so snapshot recursively and
+    # bind-mount both the parent snapshot and the data child snapshot into place.
     preHook = ''
-      ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist@borgbase && true
-      ${pkgs.zfs}/bin/zfs snapshot rpool/safe/persist@borgbase
-      /run/wrappers/bin/mount --bind /persist/.zfs/snapshot/borgbase ${mountDirectory} 
+      ${pkgs.zfs}/bin/zfs destroy -r rpool/safe/persist@generic || true
+      ${pkgs.zfs}/bin/zfs snapshot -r rpool/safe/persist@generic
+      ${pkgs.coreutils}/bin/mkdir -p ${mountDirectory}
+      /run/wrappers/bin/mount --bind /persist/.zfs/snapshot/generic ${mountDirectory}
+      /run/wrappers/bin/mount --bind /persist/data/.zfs/snapshot/generic ${mountDirectory}/data
     '';
     postHook = ''
-      /run/wrappers/bin/umount ${mountDirectory}
-      ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist@borgbase
+      /run/wrappers/bin/umount ${mountDirectory}/data || true
+      /run/wrappers/bin/umount ${mountDirectory} || true
+      ${pkgs.zfs}/bin/zfs destroy -r rpool/safe/persist@generic || true
     '';
     encryption = {
       mode = "repokey-blake2";
@@ -52,13 +57,11 @@ in
     };
     environment.BORG_RSH = "ssh -i /home/michele/.ssh/id_ed25519";
     compression = "auto,lzma";
-    startAt = "daily";
+    startAt = "*-*-* 01:00:00";
 
     user = "root";
     group = "root";
   };
-
-  environment.persistence."/persist".directories = [ mountDirectory ];
 
   # Adds personal repo to Known Hosts. Otherwise impermanence erases it
   programs.ssh.knownHosts."*.repo.borgbase.com" = {

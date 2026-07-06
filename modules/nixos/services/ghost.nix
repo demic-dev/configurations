@@ -77,15 +77,17 @@ in
     locations."/" = {
       recommendedProxySettings = true;
 
-      proxyPass = "http://localhost:${builtins.toString port}";
+      proxyPass = "http://localhost:${toString port}";
       proxyWebsockets = true;
     };
   };
 
-  # Adding to Borgbase's backup
-  services.borgbackup.jobs."borgbase".paths = lib.mkMerge [
-    "/var/lib/${serviceName}"
-    "/var/lib/${serviceDb}"
+  # Adding to the generic Borg job. It backs up from the /persist snapshot bind-mounted
+  # at /var/tmp/borgjobs, so paths must carry that prefix (keep in sync with backup.nix's
+  # mountDirectory). listOf paths from multiple modules concatenate automatically.
+  services.borgbackup.jobs."generic".paths = [
+    "/var/tmp/borgjobs/var/lib/${serviceName}"
+    "/var/tmp/borgjobs/var/lib/${serviceDb}"
   ];
 
   # Persistence
