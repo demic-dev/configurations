@@ -16,6 +16,22 @@
         mkdir -p "$out/share/icons"
         cp -r ${./assets/macOS-cursor} "$out/share/icons/macOS-cursor"
       '';
+
+      # Bitwarden is installed per-user via home-manager, so its polkit action
+      # lands in the user profile where the system polkit daemon never looks.
+      # Expose just the .policy at system level so the "Unlock with system
+      # authentication" action (com.bitwarden.Bitwarden.unlock) is registered
+      # with polkitd; the rule below then auto-approves it. Keeps the ~200MB app
+      # out of the system profile. NOTE: this only covers the polkit side — the
+      # app's own setup routine additionally insists on finding the policy at the
+      # hardcoded path /usr/share/polkit-1/actions (see the tmpfiles rule below),
+      # otherwise it aborts biometric enrollment with "Failed to set up polkit
+      # policy" and never writes the unlock key to the keyring.
+      bitwardenPolkitAction = pkgs.runCommandLocal "bitwarden-polkit-action" { } ''
+        mkdir -p "$out/share/polkit-1/actions"
+        cp ${pkgs.bitwarden-desktop}/share/polkit-1/actions/com.bitwarden.Bitwarden.policy \
+           "$out/share/polkit-1/actions/"
+      '';
     in
     {
     programs.hyprland.enable = true;
@@ -42,6 +58,26 @@
     };
 
     security.polkit.enable = true;
+    # Silently approve Bitwarden's keyring-unlock for the active local session so
+    # the desktop app opens already unlocked (no master password / polkit prompt).
+    # Trade-off: vault security then rests on the login session + keyring, both of
+    # which unlock at login. The action defaults to auth_self without this.
+    security.polkit.extraConfig = ''
+      polkit.addRule(function(action, subject) {
+        if (action.id == "com.bitwarden.Bitwarden.unlock" &&
+            subject.active && subject.local) {
+          return polkit.Result.YES;
+        }
+      });
+    '';
+    # Bitwarden's biometric setup writes its polkit policy to a hardcoded
+    # /usr/share/polkit-1/actions path; on NixOS that tree is read-only, so the
+    # write fails and enrollment aborts. Pre-place the file (symlinked to the
+    # app's own copy) so the check passes and the app skips the write.
+    systemd.tmpfiles.rules = [
+      "L+ /usr/share/polkit-1/actions/com.bitwarden.Bitwarden.policy - - - - ${pkgs.bitwarden-desktop}/share/polkit-1/actions/com.bitwarden.Bitwarden.policy"
+    ];
+
     security.pam.services.greetd.enableGnomeKeyring = true;
     services.gnome.gnome-keyring.enable = true;
     # gcr provides the gcr-ssh-agent / pkcs11 D-Bus services the keyring relies on.
@@ -59,7 +95,7 @@
     programs.nix-ld.enable = true;
     programs.nix-ld.libraries = with pkgs; [ tinymist ];
 
-    environment.systemPackages = [ macosCursor ];
+    environment.systemPackages = [ macosCursor bitwardenPolkitAction ];
 
     environment.pathsToLink = [
       "/share/applications"
