@@ -10,6 +10,12 @@
     fcitx5
   ];
 
+  # Provide the macOS hyprcursor theme declaratively from the repo-vendored asset,
+  # replacing the previously hand-placed ~/.local/share/icons/macOS-cursor directory.
+  # HYPRCURSOR_THEME=macOS (set in the env block below) resolves against this. The
+  # same asset is installed system-wide in modules/nixos/desktop.nix for the greeter.
+  xdg.dataFile."icons/macOS-cursor".source = ../../../nixos/assets/macOS-cursor;
+
   systemd.user.targets.hyprland-session.Unit.Wants = [
     "xdg-desktop-autostart.target"
   ];
