@@ -178,6 +178,7 @@ in
             obsidian
             vscodium
             librepods
+            inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
             vimPlugins.typst-preview-nvim
             websocat # websocket client required by TypstPreview
           ];
