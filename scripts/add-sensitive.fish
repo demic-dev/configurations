@@ -20,7 +20,7 @@ if test -z "$name"
     exit 1
 end
 
-set -l rel "secrets/sensitive/$name.age"
+set -l rel "../secrets/sensitive/$name.age"
 if test -e "$rel"
     echo "Warning: $rel already exists." >&2
 else
