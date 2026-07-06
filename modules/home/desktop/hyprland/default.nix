@@ -7,7 +7,6 @@
     hypridle
     wl-clipboard
     hyprpolkitagent
-    fcitx5
   ];
 
   # Provide the macOS hyprcursor theme declaratively from the repo-vendored asset,
@@ -51,24 +50,17 @@
         # socket-activated systemd user services, so starting the daemon here again
         # only races them for the same sockets. Let systemd own it.
         "systemctl --user start hyprpolkitagent"
-        "fcitx5 -d"
       ];
 
       env = [
         "XCURSOR_SIZE,24"
         "HYPRCURSOR_SIZE,24"
         "HYPRCURSOR_THEME,macOS"
-        "XCURSOR_THEME,macOS"
-        "GTK_IM_MODULE,wayland"
-        "QT_IM_MODULES,wayland;fcitx;ibus"
-        "XMODIFIERS,@im=fcitx"
-        "GLFW_IM_MODULE,fcitx"
-        "SDL_IM_MODULE,fcitx"
-        # gcr-ssh-agent serves this socket (the modern replacement for gnome-keyring's
-        # ssh component); confirmed live as the active SSH_AUTH_SOCK.
+        # XCURSOR_THEME dropped: the macOS theme ships only a hyprcursor variant (no
+        # xcursor cursors/ dir), so XCURSOR_THEME=macOS resolved to a nonexistent theme
+        # and XWayland/GTK clients fell back to the default anyway. XCURSOR_SIZE stays
+        # — it still sizes that fallback cursor for XCursor-based clients.
         "SSH_AUTH_SOCK,$XDG_RUNTIME_DIR/gcr/ssh"
-        # GPG_AGENT_SOCK dropped: no gpg agent is configured and nothing listens on
-        # $XDG_RUNTIME_DIR/gpg-agent, so the variable only pointed at a dead path.
       ];
 
       monitor = [

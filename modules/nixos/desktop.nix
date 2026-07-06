@@ -29,13 +29,13 @@
       # in modules/home/desktop/hyprland/default.nix.
       # Mirror the user session's monitor + cursor env (modules/home/desktop/hyprland).
       # The macOS hyprcursor theme is provided system-wide via environment.systemPackages
-      # below, so the greeter's Hyprland can resolve HYPRCURSOR_THEME here.
+      # below, so the greeter's Hyprland can resolve HYPRCURSOR_THEME here. Only the
+      # hyprcursor vars are set: the greeter runs a single Qt Wayland shell under Hyprland
+      # with no XWayland/XCursor clients, so XCURSOR_THEME/XCURSOR_SIZE would be inert.
       compositor.customConfig = ''
         monitor = ,2560x1600@144,auto,1.25
         env = HYPRCURSOR_THEME,macOS
         env = HYPRCURSOR_SIZE,24
-        env = XCURSOR_THEME,macOS
-        env = XCURSOR_SIZE,24
       '';
       configHome = lib.removeSuffix "/" homePath;
       configFiles = [ "${homePath}.config/DankMaterialShell/settings.json" ];
