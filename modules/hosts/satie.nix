@@ -177,7 +177,7 @@ in
             kdePackages.kde-cli-tools
             obsidian
             vscodium
-            inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+            librepods
             vimPlugins.typst-preview-nvim
             websocat # websocket client required by TypstPreview
           ];
