@@ -1,6 +1,7 @@
 { env, ... }:
 let
-  satieSSH = env.userSettings.satie.publicSSH;
+  satieSSH = env.userSettings.satie.ssh.michele.value;
+  bootSSHLocation = env.userSettings.bach.ssh.boot.location;
 in
 {
   services.zfs.autoScrub = {
@@ -38,8 +39,9 @@ in
         ssh = {
           enable = true;
           port = 2222;
+
           hostKeys = [
-            "/persist/etc/secrets/initrd/ssh_host_ed25519_key"
+            bootSSHLocation
           ];
           authorizedKeys = [
             satieSSH

@@ -23,6 +23,9 @@ in
       # users
       michele
 
+      # services
+      ssh
+
       ({ config, pkgs, lib, ... }: {
         networking = {
           hostName = env.userSettings.satie.host;
@@ -43,12 +46,11 @@ in
           };
         };
 
-
         time.timeZone = "Europe/Amsterdam";
 
         users.users.michele = {
           hashedPasswordFile = config.age.secrets.michele-password.path;
-          openssh.authorizedKeys.keys = [ env.userSettings.satie.publicSSH ];
+          openssh.authorizedKeys.keys = [ env.userSettings.bach.ssh.michele.value ];
         };
 
         programs.fish.enable = true;
@@ -63,7 +65,6 @@ in
 
         environment.systemPackages = with pkgs; [
           vim
-          openssh
           python3
           gnumake
           unzip
@@ -83,18 +84,10 @@ in
 
         services.tailscale.enable = true;
 
-        services.openssh = {
-          enable = true;
-          hostKeys = [{
-            type = "ed25519";
-            path = "/etc/ssh/ssh_host_ed25519_key";
-          }];
-        };
-
         age.secrets.michele-password.file = ../../secrets/michele-password.age;
         age.secrets.michele-at-satie = {
           file = ../../secrets/michele-at-satie.age;
-          path = "/home/michele/.ssh/id_ed25519";
+          path = env.userSettings.satie.ssh.michele.location;
           owner = "michele";
           group = "users";
           mode = "600";
@@ -106,7 +99,7 @@ in
         # root/git-agecrypt.toml, and the git home module points git-agecrypt at this path.
         age.secrets.git-agecrypt-key = {
           file = ../../secrets/git-agecrypt-key.age;
-          path = "/home/michele/.ssh/git-agecrypt_ed25519";
+          path = env.userSettings.satie.ssh.git-agecrypt.location;
           owner = "michele";
           group = "users";
           mode = "600";
@@ -207,7 +200,7 @@ in
             fish.enable = true;
           };
 
-         home.file.".ssh/id_ed25519.pub".text = env.userSettings.satie.publicSSH;
+         home.file.".ssh/id_ed25519.pub".text = env.userSettings.satie.ssh.michele.value;
 
           home.stateVersion = "26.05";
           programs.home-manager.enable = true;

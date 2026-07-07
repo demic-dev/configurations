@@ -1,13 +1,16 @@
 let
+  # Imported directly (not as a module argument) so the plain `agenix` CLI, which does a
+  # bare `import ./secrets.nix`, can still evaluate this file.
+  env = import ../env.nix { lib = (import <nixpkgs> { }).lib; };
 
-  micheleAtBach = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjDuFgmRgyjZ/Ye/QiFetZ6r+W9SGB4ufJcxzCF0ALP";
-  micheleAtSatie = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKUnGzmayiQ8SazjVxi8KPAmgJQQssVbSCpAerMn0Eve";
+  micheleAtBach = env.userSettings.bach.ssh.michele.value;
+  micheleAtSatie = env.userSettings.satie.ssh.michele.value;
 
 
   micheles = [ micheleAtBach micheleAtSatie ];
 
-  bachSystem = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK7rFUiGulUCjRKMua3OXkAyfnvkZLHwBud4kb37gT83";
-  satieSystem = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBjIqDJcBd5/kw+kA8DNdM1KB2IZivH17GrIN+wEiTp5";
+  bachSystem = env.userSettings.bach.ssh.root.value;
+  satieSystem = env.userSettings.satie.ssh.root.value;
 
   systems = [ bachSystem satieSystem ];
 in
@@ -53,7 +56,18 @@ in
   "noreply-github-email.age".publicKeys = micheles ++ systems;
   
   "michele-password.age".publicKeys = [ micheleAtSatie satieSystem ];
-  "michele-at-satie.age".publicKeys = [ micheleAtSatie satieSystem ];
+
+  # SSH private keys, for single-host recovery (see docs/RECOVERY.md).
+  # root-at-* are NOT deployed — recovery blobs only — so each is encrypted to the
+  # OTHER host, the one that would need to hand it back.
+  "root-at-bach.age".publicKeys = [ satieSystem ];
+  "root-at-satie.age".publicKeys = [ bachSystem ];
+
+  # michele-at-* ARE deployed on their own host at boot (hence that host's system key);
+  # on recovery they come back for free once the host's root key is restored.
+  "michele-at-bach.age".publicKeys = [ bachSystem ];
+  "michele-at-satie.age".publicKeys = [ satieSystem ];
+
 
   # Passphraseless key used ONLY by git-agecrypt to decrypt secrets/sensitive/*.age silently.
   # Deployed to satie's ~/.ssh/git-agecrypt_ed25519; its public key is a recipient in

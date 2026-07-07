@@ -1,8 +1,10 @@
 { ... }:
 {
   flake.nixosModules.ssh =
-{ config, pkgs, ... }:
-
+{ config, pkgs, env, ... }:
+let
+  rootSSH = env.userSettings.${config.networking.hostName}.ssh.root.location;
+in
 {
   services.openssh = {
     enable = true;
@@ -27,12 +29,7 @@
 
     hostKeys = [
       {
-        bits = 4096;
-        path = "/persist/etc/ssh/ssh_host_rsa_key";
-        type = "rsa";
-      }
-      {
-        path = "/persist/etc/ssh/ssh_host_ed25519_key";
+        path = rootSSH;
         type = "ed25519";
       }
     ];

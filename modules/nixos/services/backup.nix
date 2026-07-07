@@ -35,6 +35,8 @@ in
       "${mountDirectory}/var/lib/calibre-web"
       "${mountDirectory}/var/lib/postgresql"
       "${mountDirectory}/var/lib/tailscale"
+      "${mountDirectory}/etc/ssh"
+      "${mountDirectory}/home/.ssh"
     ];
     repo = env.userSettings.bach.borg-repository;
     # /persist and /persist/data are separate ZFS datasets, so snapshot recursively and
@@ -55,7 +57,8 @@ in
       mode = "repokey-blake2";
       passCommand = "cat /run/agenix/backup_passphrase";
     };
-    environment.BORG_RSH = "ssh -i /home/michele/.ssh/id_ed25519";
+
+    environment.BORG_RSH = "ssh -i ${env.userSettings.bach.ssh.root.location} -o IdentitiesOnly=yes";
     compression = "auto,lzma";
     startAt = "*-*-* 01:00:00";
 
@@ -64,7 +67,7 @@ in
   };
 
   # Adds personal repo to Known Hosts. Otherwise impermanence erases it
-  programs.ssh.knownHosts."*.repo.borgbase.com" = {
+  services.openssh.knownHosts."*.repo.borgbase.com" = {
     publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMS3185JdDy7ffnr0nLWqVy8FaAQeVh1QYUSiNpW5ESq";
   };
 

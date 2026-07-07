@@ -5,9 +5,12 @@
 # host's keys are skipped (agenix can't decrypt them, so a plain `agenix --rekey` would fail on
 # them). The git-agecrypt files under ./sensitive/ are not agenix secrets and are untouched.
 #
-# Usage: ./rekey.fish [path/to/ssh_public_key]     (default: ~/.ssh/id_ed25519.pub)
+# Usage: ./scripts/rekey.fish [path/to/ssh_public_key]     (default: ~/.ssh/id_ed25519.pub)
 
-cd (dirname (status filename)); or exit 1
+# This script lives in scripts/ but operates on the sibling secrets/ dir — secrets.nix and
+# the *.age files live there — so resolve that relative to the script's own location,
+# independent of the caller's cwd.
+cd (dirname (status filename))/../secrets; or exit 1
 
 set -l pubkey_file $argv[1]
 if test -z "$pubkey_file"

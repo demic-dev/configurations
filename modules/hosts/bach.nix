@@ -61,8 +61,7 @@ in
           firewall.enable = true;
         };
         # Pins uids/gids for system accounts that NixOS would otherwise allocate dynamically.
-        # Needed because /var/lib/nixos (where those allocations are recorded) isn't persisted,
-        # so an unpinned id could shift on every reboot of this impermanence-wiped root.
+        # Needed because /var/lib/nixos (where those allocations are recorded) isn't persisted, so an unpinned id could shift on every reboot of this impermanence-wiped root.
         users.users.dhcpcd.uid = 997;
         users.groups.dhcpcd.gid = 997;
 
@@ -109,7 +108,7 @@ in
           extraGroups = [ "docker" ];
           initialHashedPassword = "$6$DptngetaTDY6G.qa$tEWVAEGlpkvzUltZXYaZpQz4c40KOQG3eQXhwhcQn33oM02NyemgBFSa/G6Mzb9iKbTroI7uKd7AWgBfKuUGF.";
           openssh.authorizedKeys.keys = [
-            env.userSettings.bach.publicSSH
+            env.userSettings.satie.ssh.michele.value
           ];
         };
 
@@ -126,6 +125,14 @@ in
 
         # Before changing, read the option docs (man configuration.nix).
         system.stateVersion = "24.11";
+
+        age.secrets.michele-at-bach = {
+          file = ../../secrets/michele-at-bach.age;
+          path = env.userSettings.bach.ssh.michele.location;
+          owner = "michele";
+          group = "users";
+          mode = "600";
+        };
 
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
