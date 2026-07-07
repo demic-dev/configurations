@@ -6,6 +6,7 @@
   home.packages = with pkgs; [
     hypridle
     wl-clipboard
+    wl-clip-persist
     hyprpolkitagent
   ];
 
@@ -46,6 +47,7 @@
 
       exec-once = [
         "dms run"
+        "wl-clip-persist --clipboard regular"
         # gnome-keyring (pkcs11/secrets) and gcr-ssh-agent are already started as
         # socket-activated systemd user services, so starting the daemon here again
         # only races them for the same sockets. Let systemd own it.
