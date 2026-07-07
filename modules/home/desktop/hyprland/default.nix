@@ -49,17 +49,16 @@
         # gnome-keyring (pkcs11/secrets) and gcr-ssh-agent are already started as
         # socket-activated systemd user services, so starting the daemon here again
         # only races them for the same sockets. Let systemd own it.
+        "librepods"
+        "bitwarden --hidden"
         "systemctl --user start hyprpolkitagent"
       ];
 
       env = [
+        # XCURSOR_SIZE still sizes that fallback cursor for XCursor-based clients.
         "XCURSOR_SIZE,24"
         "HYPRCURSOR_SIZE,24"
         "HYPRCURSOR_THEME,macOS"
-        # XCURSOR_THEME dropped: the macOS theme ships only a hyprcursor variant (no
-        # xcursor cursors/ dir), so XCURSOR_THEME=macOS resolved to a nonexistent theme
-        # and XWayland/GTK clients fell back to the default anyway. XCURSOR_SIZE stays
-        # — it still sizes that fallback cursor for XCursor-based clients.
         "SSH_AUTH_SOCK,$XDG_RUNTIME_DIR/gcr/ssh"
       ];
 
