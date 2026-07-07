@@ -155,7 +155,8 @@ in
       mode = "repokey-blake2";
       passCommand = "cat /run/agenix/immich-backup_passphrase";
     };
-    environment.BORG_RSH = "ssh -i /home/michele/.ssh/id_ed25519";
+
+    environment.BORG_RSH = "ssh -i ${env.userSettings.bach.ssh.root.location} -o IdentitiesOnly=yes";
     compression = "auto,lzma";
     startAt = "*-*-* 02:00:00";
 
