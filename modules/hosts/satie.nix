@@ -34,6 +34,8 @@ in
         
           networkmanager = {
             enable = true;
+            # Without this, NetworkManager pushes the DHCP-provided DNS servers into resolvconf alongside our static `nameservers` record above. `dns = "none"` stops NM from touching DNS.
+            dns = "none";
             wifi.backend = "iwd";
             wifi.powersave = false;
             wifi.macAddress = "random";
