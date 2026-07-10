@@ -93,6 +93,8 @@
   "showBatteryPercentOnlyOnBattery": false,
   "showBatteryTime": false,
   "showBatteryTimeOnlyOnBattery": false,
+  "batteryPillStyle": false,
+  "batteryPillPercentSign": false,
   "showControlCenterButton": true,
   "showCapsLockIndicator": true,
   "controlCenterShowNetworkIcon": true,
@@ -125,11 +127,6 @@
       "width": 100
     },
     {
-      "id": "nightMode",
-      "enabled": true,
-      "width": 100
-    },
-    {
       "id": "wifi",
       "enabled": true,
       "width": 50
@@ -150,31 +147,37 @@
       "width": 50
     },
     {
-      "id": "colorPicker",
+      "id": "plugin_librepods",
       "enabled": true,
-      "width": 50
+      "width": 75
     },
     {
-      "id": "diskUsage",
+      "id": "doNotDisturb",
       "enabled": true,
-      "width": 50,
-      "instanceId": "mmcntpdsc1w0q7uegs7kv1d5bl9nj6",
-      "mountPath": "/"
+      "width": 25
     },
     {
       "id": "idleInhibitor",
       "enabled": true,
-      "width": 50
+      "width": 25
     },
     {
-      "id": "builtin_vpn",
+      "id": "colorPicker",
       "enabled": true,
-      "width": 50
+      "width": 25
     },
     {
-      "id": "plugin_dankKDEConnect",
+      "id": "builtin_tailscale",
       "enabled": true,
-      "width": 100
+      "width": 25
+    },
+    {
+      "id": "diskUsage",
+      "enabled": true,
+      "width": 25,
+      "instanceId": "mmcntpdsc1w0q7uegs7kv1d5bl9nj6",
+      "mountPath": "/",
+      "showMountPath": false
     }
   ],
   "showWorkspaceIndex": false,
@@ -229,6 +232,7 @@
   "clockCompactMode": false,
   "focusedWindowCompactMode": false,
   "focusedWindowSize": 1,
+  "focusedWindowShowIcon": true,
   "runningAppsCompactMode": true,
   "barMaxVisibleApps": 0,
   "barMaxVisibleRunningApps": 0,
@@ -368,7 +372,7 @@
   "notepadEdgeGap": 0,
   "soundsEnabled": true,
   "useSystemSoundTheme": false,
-  "soundLogin": true,
+  "soundLogin": false,
   "soundNewNotification": true,
   "soundVolumeChanged": true,
   "soundPluggedIn": true,
@@ -391,7 +395,9 @@
   "batteryNotifyCritical": true,
   "batteryLowThreshold": 20,
   "batteryNotifyLow": false,
-  "batteryNotificationType": 0,
+  "batteryChargeLimitNotificationType": 0,
+  "batteryLowNotificationType": 0,
+  "batteryCriticalNotificationType": 0,
   "batteryAutoPowerSaver": false,
   "lockBeforeSuspend": false,
   "loginctlLockIntegration": true,
@@ -400,7 +406,9 @@
   "fadeToDpmsEnabled": true,
   "fadeToDpmsGracePeriod": 5,
   "launchPrefix": "",
-  "brightnessDevicePins": {},
+  "brightnessDevicePins": {
+    "eDP-1": "backlight:apple-panel-bl"
+  },
   "wifiNetworkPins": {},
   "bluetoothDevicePins": {},
   "audioInputDevicePins": {},
@@ -496,7 +504,6 @@
   "maxFprintTries": 15,
   "enableU2f": false,
   "u2fMode": "or",
-  "lockScreenActiveMonitor": "all",
   "lockScreenInactiveColor": "#000000",
   "lockScreenNotificationMode": 0,
   "lockScreenVideoEnabled": false,
@@ -617,12 +624,16 @@
       ],
       "rightWidgets": [
         {
+          "id": "airpods",
+          "enabled": true
+        },
+        {
           "id": "privacyIndicator",
           "enabled": true
         },
         {
           "id": "systemTray",
-          "enabled": true
+          "enabled": false
         },
         {
           "id": "memUsage",
@@ -871,5 +882,5 @@
   "barInsetPaddingShared": -1,
   "barInsetPaddingSyncAll": false,
   "frameBarInsetPadding": -1,
-  "configVersion": 11
+  "configVersion": 12
 }
