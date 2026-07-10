@@ -83,6 +83,24 @@
     # gcr provides the gcr-ssh-agent / pkcs11 D-Bus services the keyring relies on.
     services.dbus.packages = [ pkgs.gcr ];
 
+    # Bluetooth audio: headphones connect but WirePlumber leaves the card in the "off"/headset profile on reconnect, so no output sink appears. Prefer AAC and force A2DP as the default profile
+    services.pipewire.wireplumber.extraConfig."10-bluez" = {
+      "monitor.bluez.properties" = {
+        "bluez5.enable-sbc-xq" = true;
+        "bluez5.enable-msbc" = true;
+        "bluez5.enable-hw-volume" = true;
+        "bluez5.roles" = [ "a2dp_sink" "a2dp_source" "bap_sink" "bap_source" "hsp_hs" "hfp_hf" ];
+        "bluez5.codecs" = [ "aac" "sbc_xq" "sbc" ];
+        "bluez5.autoswitch-profile" = true;
+      };
+      "monitor.bluez.rules" = [
+        {
+          matches = [ { "device.name" = "~bluez_card.*"; } ];
+          actions.update-props."device.profile" = "a2dp-sink";
+        }
+      ];
+    };
+
     services.logind.settings.Login.HandlePowerKey = "ignore";
 
     services.upower.enable = true;
