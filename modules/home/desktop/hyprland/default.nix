@@ -154,7 +154,7 @@
         # Open Applications
         "$mainMod,return,exec,$terminal"
         "$mainMod,E,exec,$fileManager"
-        "$mainMod,M,exec,zen"
+        "$mainMod,M,exec,zen-beta"
         "$mainMod,S,exec, $terminal --command=~/repos/spotatui/result/bin/spotatui"
         "$mainMod SHIFT,M,exec, proton-authenticator"
 

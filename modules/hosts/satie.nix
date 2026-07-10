@@ -95,10 +95,7 @@ in
           mode = "600";
         };
 
-        # Dedicated PASSPHRASELESS key used ONLY by git-agecrypt to decrypt secrets/sensitive/*.age
-        # silently. The login key above is passphrase-protected, which makes git-agecrypt prompt on
-        # every git command; this key avoids that. Its public key is a recipient in
-        # root/git-agecrypt.toml, and the git home module points git-agecrypt at this path.
+        # Dedicated PASSPHRASELESS key used ONLY by git-agecrypt to decrypt secrets/sensitive/*.age silently. The login key above is passphrase-protected, which makes git-agecrypt prompt on every git command; this key avoids that. Its public key is a recipient in root/git-agecrypt.toml, and the git home module points git-agecrypt at this path.
         age.secrets.git-agecrypt-key = {
           file = ../../secrets/git-agecrypt-key.age;
           path = env.userSettings.satie.ssh.git-agecrypt.location;
@@ -123,7 +120,7 @@ in
         home-manager.useUserPackages = true;
         home-manager.backupFileExtension = "bak";
         home-manager.extraSpecialArgs = { inherit inputs; };
-        home-manager.users.michele = { pkgs, inputs, ... }: {
+        home-manager.users.michele = { pkgs, ... }: {
           home.username = "michele";
           home.homeDirectory = "/home/michele";
 
@@ -135,6 +132,7 @@ in
             dms
             xdg
             gruvbox-wallpapers
+            zen
           ];
 
           services.udiskie = {
@@ -173,7 +171,6 @@ in
             obsidian
             vscodium
             librepods
-            inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
             vimPlugins.typst-preview-nvim
             websocat # websocket client required by TypstPreview
           ];
