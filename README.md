@@ -7,6 +7,9 @@ One **dendritic** flake for all my machines:
   agenix + git-agecrypt secrets.
 - **`satie`** — aarch64-linux Apple-Silicon (Asahi) laptop. Hyprland + DankMaterialShell
   desktop, agenix secrets.
+- **`liszt`** — *not a NixOS host.* An x86_64 CUDA + Tailscale container image built by
+  [nix2gpu] (`modules/machines/liszt.nix`) and run on rented [VastAI] GPU instances, so
+  `ssh root@liszt` is stable across ephemeral rentals. See [docs/liszt.md](docs/liszt.md).
 
 ## The dendritic pattern
 
@@ -173,5 +176,7 @@ off-host.** They're complementary, not redundant.
 
 [flake-parts]: https://flake.parts
 [import-tree]: https://github.com/vic/import-tree
+[nix2gpu]: https://github.com/fleek-sh/nix2gpu
+[VastAI]: https://vast.ai
 [sanoid]: https://github.com/jimsalterjrs/sanoid
 [borgbackup]: https://www.borgbackup.org/

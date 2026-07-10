@@ -1,0 +1,64 @@
+name: Build & push liszt (VastAI GPU image)
+
+# Builds the declarative CUDA + Tailscale container (modules/machines/liszt.nix)
+# and pushes it to GHCR as ghcr.io/demic-dev/liszt:latest, for use as a VastAI
+# template.
+#
+# WHY CI: nixpkgs CUDA is x86_64-linux only and the whole fleet (satie, bach) is
+# aarch64, so the image cannot be built on any of our machines. GitHub's x86_64
+# runners build it instead. See docs/liszt.md.
+#
+# ONE-TIME SETUP: add a repository secret `GHCR_TOKEN` = a GitHub Personal Access
+# Token (classic) with the `write:packages` scope. The default GITHUB_TOKEN does
+# NOT work here: nix2gpu's push script calls `gh api user`, which the Actions bot
+# token is not allowed to do.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ main ]
+    paths:
+      - "modules/machines/**"
+      - "flake.lock"
+      - ".github/workflows/liszt-image.yml"
+
+concurrency:
+  group: liszt-image-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      # CUDA closures are large; reclaim the space the runner wastes on toolchains
+      # we do not use so the build/push does not run out of disk.
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /opt/hostedtoolcache /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h /
+
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          # accept-flake-config trusts the substituters declared in flake.nix;
+          # we also set them explicitly so the very first eval is cached too.
+          extra-conf: |
+            accept-flake-config = true
+            extra-substituters = https://weyl-ai.cachix.org https://cuda-maintainers.cachix.org
+            extra-trusted-public-keys = weyl-ai.cachix.org-1:cR0SpSAPw7wejZ21ep4SLojE77gp5F2os260eEWqTTw= cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=
+
+      - name: Build image
+        run: nix build --accept-flake-config --print-build-logs .#packages.x86_64-linux.liszt
+
+      - name: Push to GHCR
+        env:
+          # PAT with write:packages — see ONE-TIME SETUP above. nix2gpu's
+          # copyToGithub reads it via `gh auth token` / `gh api user`.
+          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: nix run --accept-flake-config .#packages.x86_64-linux.liszt.copyToGithub
