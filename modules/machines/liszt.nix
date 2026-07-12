@@ -13,7 +13,7 @@ in
     let
       hmCfg = inputs.home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules = with hm; [
+        modules = with homeModules; [
           fish
           git
           {
