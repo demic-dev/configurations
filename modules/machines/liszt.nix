@@ -24,7 +24,10 @@ in
           }
         ];
       };
-      fish = hmCfg.config.programs.fish.package;
+      # NOTE: must not be named `fish` — let bindings shadow `with homeModules;`
+      # above, so a `fish` here would replace homeModules.fish in the modules
+      # list with this package and make hmCfg depend on itself (infinite recursion).
+      fishPkg = hmCfg.config.programs.fish.package;
 
       cudaBase = pkgs.dockerTools.pullImage {
         imageName = "nvidia/cuda";
@@ -56,7 +59,7 @@ in
         # field at our fish at runtime: build-time extraCommands cannot edit files
         # owned by the base image, and replacing Ubuntu's passwd wholesale would
         # drop its system users.
-        ${pkgs.gnused}/bin/sed -i "s|^\(root:.*:\)[^:]*$|\1${lib.getExe fish}|" /etc/passwd
+        ${pkgs.gnused}/bin/sed -i "s|^\(root:.*:\)[^:]*$|\1${lib.getExe fishPkg}|" /etc/passwd
 
         mkdir -p /var/lib/tailscale /var/run/tailscale
         # env -u: keep the authkey out of tailscaled's environment, and therefore
@@ -77,9 +80,9 @@ in
           --ssh \
           --accept-dns=false
 
+        echo "''${TAILSCALE_HOSTNAME} joined the tailnet — ssh root@''${TAILSCALE_HOSTNAME}"
         unset TAILSCALE_AUTHKEY
         unset TAILSCALE_HOSTNAME
-        echo "liszt joined the tailnet — ssh root@liszt"
         exec ${pkgs.coreutils}/bin/sleep infinity
       '';
     in

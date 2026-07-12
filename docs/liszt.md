@@ -39,7 +39,7 @@ injection and manylinux wheels (torch, vLLM, …) all work.
 
 3. Create an authkey (Settings → Keys → *Generate auth key*):
    **Reusable** ✓, **Ephemeral** ✓, **Pre-authorized** ✓, **Tags**: `tag:gpu`, expiry 90 days.
-   This is the `TS_AUTHKEY` value below. Rotate it when it expires.
+   This is the `TAILSCALE_AUTHKEY` value below. Rotate it when it expires.
 
 ### 2. GitHub
 
@@ -59,7 +59,7 @@ Create a template with:
 | Image path/tag | `ghcr.io/demic-dev/liszt:latest` |
 | Docker repository server | `ghcr.io` + your GitHub username + the `read:packages` PAT |
 | Launch mode | **Docker ENTRYPOINT** (*not* SSH or Jupyter — those override the entrypoint and the tailscale bootstrap would never run) |
-| Docker options | `-e TS_AUTHKEY=tskey-auth-…` |
+| Docker options | `-e TAILSCALE_AUTHKEY=tskey-auth-… -e TAILSCALE_HOSTNAME=liszt` |
 | Disk | ≥ 40 GB (model weights) |
 | Ports | none (tailscale is outbound-only) |
 
@@ -86,32 +86,35 @@ Create a template with:
 
 ## Updating the image
 
-- Any push to `main` touching `flake.{nix,lock}`, `env.nix`, `modules/machines/liszt.nix`,
-  the fish/git home modules or the workflow rebuilds and pushes `:latest` (plus a
-  commit-sha tag). VastAI pulls `:latest` on the next rental.
+- Any push to `main` touching `env.nix`, `modules/machines/liszt.nix` or the workflow
+  rebuilds and pushes `:latest` (plus a commit-sha tag). VastAI pulls `:latest` on the next
+  rental. Changes to other inputs of the image (the fish/git home modules, `flake.lock`)
+  don't trigger a build on their own — run the workflow manually after touching those.
 - **Re-pinning the CUDA base** (tag, digest and hash must change together in
   `modules/machines/liszt.nix`):
 
   ```sh
   nix run nixpkgs#nix-prefetch-docker -- --image-name nvidia/cuda \
-    --image-tag 12.8.1-runtime-ubuntu24.04 --os linux --arch amd64
+    --image-tag 12.8.1-devel-ubuntu24.04 --os linux --arch amd64
   ```
 
   Needs ~4 GB of temp space; if it fails locally, set the digest by hand
   (`skopeo inspect --format '{{.Digest}}' docker://nvidia/cuda:<tag>`), leave
   `hash = lib.fakeHash`, and copy the real hash from the first failing CI run
   ("hash mismatch … got: sha256-…"). That is also how the initial hash gets filled in.
-- If you ever need `nvcc` in the image (compiling llama.cpp/flash-attn from source), switch
-  the base tag from `-runtime-` to `-devel-` (~3× bigger). For occasional needs, prefer
-  `uv pip install nvidia-cuda-nvcc-cu12` inside the venv instead.
+- The base is the `-devel-` tag, so `nvcc` is available for source builds (llama.cpp,
+  flash-attn). If image size/pull time ever becomes a problem, the `-runtime-` tag is ~3×
+  smaller and still covers wheel-based workflows (`uv pip install nvidia-cuda-nvcc-cu12`
+  fills the occasional nvcc need inside a venv).
 
 ## Troubleshooting
 
 - **Node shows up as `liszt-1`** — the previous ephemeral node hasn't been reaped yet.
   Delete it in the admin console, or run `tailscale logout` on liszt before destroying the
   instance.
-- **Container exits immediately** — `TS_AUTHKEY` unset or expired; the entrypoint fails
-  loudly. Check the VastAI instance logs, and the key's expiry in the admin console.
+- **Container exits immediately** — `TAILSCALE_AUTHKEY`/`TAILSCALE_HOSTNAME` unset, or the
+  key expired; the entrypoint fails loudly. Check the VastAI instance logs, and the key's
+  expiry in the admin console.
 - **`ssh root@liszt` refused** — check the SSH ACL rule (`tag:gpu`, user `root`) and
   `tailscale status` on satie. The node must be visible and tagged.
 - **No GPU / `nvidia-smi` missing** — VastAI's nvidia runtime injection failed; check the
