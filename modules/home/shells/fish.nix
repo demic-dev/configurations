@@ -4,11 +4,14 @@ let
 in
 {
   flake.homeModules.fish =
-    { pkgs, osConfig, ... }:
+    { pkgs, lib, osConfig ? { }, ... }:
     let
-      # The host this home config is deployed on. env.nix drives networking.hostName, so looking the name back up in userSettings gives us that host's configPath for free.
-      host = osConfig.networking.hostName;
-      inherit (env.userSettings.${host}) configPath;
+      # The host this home config is deployed on. env.nix drives networking.hostName, so looking
+      # the name back up in userSettings gives us that host's configPath for free. In standalone
+      # home-manager (the liszt container) there is no osConfig at all, so the rebuild helpers
+      # that need a configPath are simply omitted.
+      host = lib.attrByPath [ "networking" "hostName" ] null osConfig;
+      hostSettings = if host != null then env.userSettings.${host} or null else null;
     in
     {
       programs.fish = {
@@ -18,12 +21,13 @@ in
           ls = "ls --color=auto";
           ll = "ls -alF --color=auto";
           la = "ls -A --color=auto";
-
+        }
+        // lib.optionalAttrs (hostSettings != null) {
           # Rebuild the current host from its flake, both discovered from env.nix.
-          update = "nixos-rebuild switch --flake ${configPath}#${host} --sudo";
+          update = "nixos-rebuild switch --flake ${hostSettings.configPath}#${host} --sudo";
         };
 
-        functions = {
+        functions = lib.optionalAttrs (hostSettings != null) {
           # Build locally and deploy to another host: `update-remote <hostname>`.
           # The flake path is this machine's; the target config + ssh host are the argument.
           update-remote = ''
@@ -31,7 +35,7 @@ in
               echo "usage: update-remote <hostname>" >&2
               return 1
             end
-            nixos-rebuild switch --flake ${configPath}#$argv[1] --target-host $argv[1] --sudo --ask-elevate-password
+            nixos-rebuild switch --flake ${hostSettings.configPath}#$argv[1] --target-host $argv[1] --sudo --ask-elevate-password
           '';
         };
 

@@ -1,0 +1,48 @@
+name: liszt image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - env.nix
+      - modules/machines/liszt.nix
+      - .github/workflows/liszt-image.yml
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The nvidia/cuda base (~3.5 GB compressed) lands in the nix store AND in
+      # docker's storage after `docker load`; the stock runner's ~14 GB free is
+      # not enough. This reclaims ~25-30 GB.
+      - uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: false
+
+      - uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Build streamed image
+        run: nix build .#liszt -L
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Load, tag, push
+        run: |
+          ./result | docker load
+          IMG=ghcr.io/${{ github.repository_owner }}/liszt
+          docker tag liszt:latest "$IMG:latest"
+          docker tag liszt:latest "$IMG:${{ github.sha }}"
+          docker push --all-tags "$IMG"
