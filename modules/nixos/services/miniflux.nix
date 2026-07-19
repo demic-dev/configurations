@@ -1,7 +1,7 @@
 { ... }:
 {
   flake.nixosModules.miniflux =
-{ config, pkgs, env, ... }:
+{ config, env, ... }:
 let
   fqdn = env.cloudSettings.internal;
   domain = "${env.cloudSettings.services.miniflux.subdomain}.${fqdn}";
@@ -13,7 +13,7 @@ in
 
     config = {
       CREATE_ADMIN = 1;
-      LISTEN_ADDR = "127.0.0.1:${builtins.toString port}";
+      LISTEN_ADDR = "127.0.0.1:${toString port}";
 
       HTTPS = 1;
     };
@@ -33,7 +33,7 @@ in
 
     locations."/" = {
       recommendedProxySettings = true;
-      proxyPass = "http://localhost:${builtins.toString port}";
+      proxyPass = "http://localhost:${toString port}";
       proxyWebsockets = true;
 
       extraConfig = ''

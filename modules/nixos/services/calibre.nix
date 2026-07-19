@@ -1,7 +1,7 @@
 { ... }:
 {
   flake.nixosModules.calibre =
-{ config, lib, pkgs, env, ... }:
+{ env, ... }:
 let
   fqdn = env.cloudSettings.fqdn;
   domain = "${env.cloudSettings.services.calibre.subdomain}.${fqdn}";
@@ -30,7 +30,7 @@ in
 
     locations."/" = {
       recommendedProxySettings = true;
-      proxyPass = "http://localhost:${builtins.toString port}";
+      proxyPass = "http://localhost:${toString port}";
 
       proxyWebsockets = true;
       extraConfig = ''
