@@ -4,13 +4,32 @@
 { pkgs, env, ... }:
 let
   fqdn = env.cloudSettings.fqdn;
-  domain = "${env.cloudSettings.services.immich.subdomain}.${env.cloudSettings.fqdn}";
+  domain = "${env.cloudSettings.services.immich.subdomain}.${fqdn}";
+
+  internalFqdn = env.cloudSettings.internal;
+  internalDomain = "${env.cloudSettings.services.immich.subdomain}.${internalFqdn}";
+
   port = env.cloudSettings.services.immich.port;
   redisPort = port + 1;
 
   mountPoint = "/var/tmp/immich-borgbase";
 
   immichPath = "/data/immich";
+
+  proxyLocation = maxBodySize: {
+    recommendedProxySettings = true;
+    proxyPass = "http://localhost:${toString port}";
+    proxyWebsockets = true;
+    extraConfig = ''
+      proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_max_temp_file_size 16384m;
+
+      client_max_body_size ${maxBodySize};
+    '';
+  };
 in
 {
   services.immich = {
@@ -89,6 +108,8 @@ in
   '');
 
   # Nginx
+  # Public vhost: only what a shared link (/share/<key>) needs is exposed.
+  # Everything else (login, timeline, full API) is tailnet-only via ${internalDomain}.
   services.nginx.virtualHosts.${domain} = {
     serverName = domain;
 
@@ -96,43 +117,34 @@ in
     useACMEHost = fqdn;
     forceSSL = true;
 
-    locations."/" = {
-      recommendedProxySettings = true;
-      proxyPass = "http://localhost:${toString port}";
-      proxyWebsockets = true;
-      extraConfig = ''
-        proxy_set_header Host $host; 
-        proxy_set_header X-Forwarded-Proto $scheme; 
-        proxy_set_header X-Real-IP $remote_addr; 
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_max_temp_file_size 16384m; 
-
-        client_max_body_size 100m;
-      '';
-    };
+    # locations = {
+    locations."/" = proxyLocation "100m";
+      # "/".return = "404";
+      #
+      # # Share pages and the frontend bundle they load
+      # "/share/" = proxyLocation "5m";
+      # "/s/" = proxyLocation "5m";
+      # "/_app/" = proxyLocation "5m";
+      # "= /favicon.ico" = proxyLocation "5m";
+      # "= /custom.css" = proxyLocation "5m";
+      #
+      # # API routes used by share pages: shared-link lookup (incl. password
+      # # unlock), album timeline buckets, thumbnails/originals/video playback,
+      # # downloads, server config. Unauthenticated requests without a valid
+      # # share key/slug are rejected by Immich itself. Body size stays at 100m
+      # # so "allow upload" shares work.
+      # "~ ^/api/(shared-links?|assets?|albums?|timeline|download|server(-info)?)(/|$)" = proxyLocation "100m";
+    # };
   };
 
-  services.nginx.virtualHosts."bach.tailcd20d8.ts.net" = {
-    serverName = "bach.tailcd20d8.ts.net";
+  services.nginx.virtualHosts.${internalDomain} = {
+    serverName = internalDomain;
 
     enableACME = false;
-    useACMEHost = fqdn;
+    useACMEHost = internalFqdn;
     forceSSL = true;
 
-    locations."/" = {
-      recommendedProxySettings = true;
-      proxyPass = "http://localhost:${toString port}";
-      proxyWebsockets = true;
-      extraConfig = ''
-        proxy_set_header Host $host; 
-        proxy_set_header X-Forwarded-Proto $scheme; 
-        proxy_set_header X-Real-IP $remote_addr; 
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_max_temp_file_size 16384m; 
-
-        client_max_body_size 100000m;
-      '';
-    };
+    locations."/" = proxyLocation "100000m";
   };
 
   services.borgbackup.jobs."immich" = {
