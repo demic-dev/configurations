@@ -1,12 +1,7 @@
 { ... }:
 {
-  # Graphical SYSTEM stack (Hyprland + DankMaterialShell greeter + keyring/portal plumbing).
-  # Host-specific bits (hostName, networking, users, secrets, timezone, packages) stay inline
-  # in the host file — this aspect is the reusable desktop base.
   flake.nixosModules.desktop = { config, lib, pkgs, env, ... }:
     let
-      # Resolve the desktop user's home from env by the host being built, so adding another
-      # desktop host only needs an env.userSettings.<host> entry — no edit here.
       homePath = env.userSettings.${config.networking.hostName}.home.path;
 
       # Vendored hyprcursor theme, installed system-wide so the greeter user (home
@@ -36,7 +31,7 @@
     {
     programs.hyprland.enable = true;
 
-    programs.dank-material-shell.greeter = {
+    programs.dms-greeter = {
       enable = true;
       compositor.name = "hyprland";
       # The greeter runs its own Hyprland instance as the greeter user. Without a
