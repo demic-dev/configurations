@@ -151,8 +151,6 @@ in
           programs.neovim.withRuby = false;
           programs.neovim.withPython3 = false;
 
-          # `update` / `update-remote` come from the shared fish home module.
-
           home.sessionVariables = {
             EDITOR = "nvim";
             XDG_CONFIG_HOME = "${env.userSettings.bach.home.path}.config";
