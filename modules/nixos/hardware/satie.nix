@@ -2,7 +2,7 @@
 {
   # satie's machine layer: Apple-Silicon (Asahi) boot + hardware scan.
   # Shared nix.settings / nix.gc live in core.nix + optimization.nix (both hosts import them).
-  flake.nixosModules.satie-hardware = { config, lib, pkgs, modulesPath, ... }: {
+  flake.nixosModules.satie-hardware = { lib, modulesPath, ... }: {
     imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
     boot.loader.systemd-boot.enable = true;

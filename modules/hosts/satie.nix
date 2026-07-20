@@ -13,7 +13,7 @@ in
       inputs.nixos-apple-silicon.nixosModules.default
       inputs.agenix.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
-      inputs.dms.nixosModules.greeter
+      inputs.dank-greeter.nixosModules.default
 
       # machine + shared + desktop aspects
       satie-hardware
@@ -26,7 +26,7 @@ in
       # services
       ssh
 
-      ({ config, pkgs, lib, ... }: {
+      ({ config, pkgs, ... }: {
         networking = {
           hostName = env.userSettings.satie.host;
           hostId = env.userSettings.satie.id;
