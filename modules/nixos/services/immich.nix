@@ -18,7 +18,7 @@ let
 
   proxyLocation = maxBodySize: {
     recommendedProxySettings = true;
-    proxyPass = "http://localhost:${toString port}";
+    proxyPass = "http://127.0.0.1:${toString port}";
     proxyWebsockets = true;
     extraConfig = ''
       proxy_set_header Host $host;
@@ -27,6 +27,10 @@ let
       proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_max_temp_file_size 16384m;
 
+      # Stream the upload straight to Immich instead of buffering the whole
+      # request body to /tmp first. The root fs is a small tmpfs (~3.9G in RAM),
+      # so buffering a 1G+ video fills it and nginx 500s mid-upload.
+      proxy_request_buffering off;
       client_max_body_size ${maxBodySize};
     '';
   };
@@ -108,8 +112,7 @@ in
   '');
 
   # Nginx
-  # Public vhost: only what a shared link (/share/<key>) needs is exposed.
-  # Everything else (login, timeline, full API) is tailnet-only via ${internalDomain}.
+  # Enabled public vhost for now until I find a solution to sharing the service with others
   services.nginx.virtualHosts.${domain} = {
     serverName = domain;
 
@@ -157,10 +160,13 @@ in
       ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist/data@immich || true
       ${pkgs.zfs}/bin/zfs snapshot rpool/safe/persist/data@immich
       ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
-      /run/wrappers/bin/mount --bind /persist/data/.zfs/snapshot/immich ${mountPoint}
+
+      # Same as ./backup.nix
+      ${pkgs.coreutils}/bin/ls /persist/data/.zfs/snapshot/immich/ > /dev/null
+      /run/wrappers/bin/mount --rbind /persist/data/.zfs/snapshot/immich ${mountPoint}
     '';
     postHook = ''
-      /run/wrappers/bin/umount ${mountPoint} || true
+      /run/wrappers/bin/umount -R ${mountPoint} || /run/wrappers/bin/umount -l ${mountPoint} || true
       ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist/data@immich || true
     '';
     encryption = {
