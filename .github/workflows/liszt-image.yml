@@ -1,0 +1,52 @@
+name: liszt image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - modules/machines/liszt.nix
+      - flake.nix
+      - .github/workflows/liszt-image.yml
+      # Home-module or flake.lock changes also shape the image but are intentionally NOT triggers
+      # (they churn often); run this workflow manually after touching those.
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # nix2gpu's CUDA image closure is large even when fetched from caches; the stock runner's
+      # ~14 GB free is not enough for the build + skopeo copy. This reclaims ~25-30 GB.
+      - uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: false
+
+      - uses: DeterminateSystems/nix-installer-action@v16
+        with:
+          # Pull CUDA / nix2gpu prebuilds from their binary caches — a from-source CUDA 13 build
+          # would blow the runner's time and disk budget.
+          extra-conf: |
+            extra-substituters = https://weyl-ai.cachix.org https://cuda-maintainers.cachix.org https://ai.cachix.org https://nix-community.cachix.org
+            extra-trusted-public-keys = weyl-ai.cachix.org-1:cR0SpSAPw7wejZ21ep4SLojE77gp5F2os260eEWqTTw= cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E= ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+
+      - name: Build image
+        run: nix build .#liszt -L
+
+      # copyToGithub authenticates through the `gh` CLI (GH_TOKEN) and pushes liszt:latest to the
+      # `registries` (ghcr.io/demic-dev/liszt) with skopeo. GHCR_TOKEN is a classic PAT with the
+      # write:packages scope.
+      - name: Push to GHCR
+        env:
+          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: nix run .#liszt.copyToGithub

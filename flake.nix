@@ -14,6 +14,10 @@
     agenix.url = "github:ryantm/agenix";
     impermanence.url = "github:nix-community/impermanence";
 
+    # liszt (VastAI GPU container) input. Builds CUDA from its own pinned nixpkgs, so it is
+    # intentionally NOT `nixpkgs.follows` — that would break its binary cache hits.
+    nix2gpu.url = "github:fleek-sh/nix2gpu/0.1.0";
+
     # satie (Apple-Silicon laptop) inputs
     nixos-apple-silicon = {
       url = "github:nix-community/nixos-apple-silicon";
@@ -74,8 +78,12 @@
       # x86_64-linux exists only for the liszt VastAI container image (modules/machines/liszt.nix).
       systems = [ "aarch64-linux" "x86_64-linux" ];
       imports =
-        # home-manager's flakeModule exposes flake.homeModules.<name> for aspects to register into.
-        [ inputs.home-manager.flakeModules.default ]
+        # home-manager's flakeModule exposes flake.homeModules.<name>; nix2gpu's adds
+        # perSystem.nix2gpu.<name> for building GPU container images (modules/machines/liszt.nix).
+        [
+          inputs.home-manager.flakeModules.default
+          inputs.nix2gpu.flakeModule
+        ]
         # Every .nix under ./modules is auto-imported as a flake-parts module.
         ++ (inputs.import-tree ./modules).imports;
     };
