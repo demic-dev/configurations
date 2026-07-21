@@ -81,12 +81,16 @@ Optional Docker options:
 
 ## Build, test, push
 
-Built with nix2gpu, so the image is addressed as the flake package `.#liszt` with helper apps:
+Built with nix2gpu, so the image is addressed as the flake package `.#liszt`. Push and local-load
+use **nix2container's** self-contained scripts (`copyTo`, `copyToDockerDaemon`) — *not* nix2gpu's
+own `copyToGithub`/`copyToContainerRuntime`, which are broken for downstream flakes in 0.1.0 (they
+resolve `self'.packages.<name>` against nix2gpu's flake, not ours, so `liszt` is "missing").
 
 ```sh
-nix build .#liszt                        # build the image (x86_64-linux only — see note)
-nix run  .#liszt.copyToContainerRuntime  # local smoke test: load into docker/podman
-nix run  .#liszt.copyToGithub            # push :latest to ghcr.io/demic-dev/liszt
+nix build .#liszt                    # build the image (x86_64-linux only — see note)
+nix run  .#liszt.copyToDockerDaemon  # local smoke test: load into docker (or .copyToPodman)
+# push (explicit destination + creds; PAT = classic token with write:packages):
+nix run  .#liszt.copyTo -- docker://ghcr.io/demic-dev/liszt:latest --dest-creds="<user>:<PAT>"
 ```
 
 > **Build host:** `.#liszt` is `x86_64-linux`; satie and bach are both aarch64, so neither can

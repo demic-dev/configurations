@@ -43,10 +43,14 @@ jobs:
       - name: Build image
         run: nix build .#liszt -L
 
-      # copyToGithub authenticates through the `gh` CLI (GH_TOKEN) and pushes liszt:latest to the
-      # `registries` (ghcr.io/demic-dev/liszt) with skopeo. GHCR_TOKEN is a classic PAT with the
-      # write:packages scope.
+      # nix2gpu 0.1.0's own `copyToGithub` is broken for downstream flakes: it resolves
+      # `self'.packages.<name>` against nix2gpu's flake, not ours, so it can't find `liszt`.
+      # Push with nix2container's self-contained `copyTo` instead, to an explicit ghcr
+      # destination. GHCR_TOKEN is a classic PAT with the write:packages scope.
       - name: Push to GHCR
         env:
-          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
-        run: nix run .#liszt.copyToGithub
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          IMG=docker://ghcr.io/demic-dev/liszt
+          nix run .#liszt.copyTo -- "$IMG:latest" --dest-creds="${{ github.actor }}:$GHCR_TOKEN"
+          nix run .#liszt.copyTo -- "$IMG:${{ github.sha }}" --dest-creds="${{ github.actor }}:$GHCR_TOKEN"
