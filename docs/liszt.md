@@ -15,8 +15,10 @@ authkey is injected at runtime by the VastAI template.
 
 nix2gpu ships CUDA (13.0), Tailscale, sshd and dev tooling; on top we bake our own home-manager
 config (fish with bobthefish + git, same as satie/bach) plus `uv`, `python3`, `tmux`, `htop`,
-`ripgrep`, `curl`. VastAI's nvidia runtime injection makes the host driver / `nvidia-smi` available;
-manylinux wheels (torch, vLLM, …) are installed per session with `uv`.
+`ripgrep`, `curl`, and `ollama` (the CUDA build, so `ollama serve`/`run` offloads to the rented
+GPU). VastAI's nvidia runtime injection makes the host driver / `nvidia-smi` available; manylinux
+wheels (torch, vLLM, …) are installed per session with `uv`. `ollama-cuda` is unfree and built from
+its own `cudaSupport` nixpkgs — the first CI build may be slow if it misses the CUDA caches.
 
 ## One-time setup
 
