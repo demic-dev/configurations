@@ -3,7 +3,7 @@ name: liszt image
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, liszt-nix2gpu]
     paths:
       - modules/machines/liszt.nix
       - flake.nix
