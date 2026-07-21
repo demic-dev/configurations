@@ -73,6 +73,11 @@ Optional Docker options:
 - `-e TAILSCALE_HOSTNAME=<name>` — override the default `liszt` node name.
 - `-e SSH_PUBLIC_KEYS="ssh-ed25519 …"` — install keys for the container's own sshd on port 22
   (a fallback to Tailscale SSH).
+- `-e GIT_EMAIL=<email>` — commit email, applied automatically at startup. agenix can't decrypt on
+  a throwaway host (no persistent recipient identity, and the image ships no secrets), so the email
+  is injected here instead; the template persists, so it's a one-time setup.
+- `-e GIT_NOREPLY_EMAIL=<id+user@users.noreply.github.com>` — used for `github.com` remotes when
+  set, mirroring the real-vs-noreply routing on satie/bach (`GIT_EMAIL` stays the default).
 
 ## Build, test, push
 
@@ -96,8 +101,9 @@ nix run  .#liszt.copyToGithub            # push :latest to ghcr.io/demic-dev/lis
 1. Rent an instance from the template (filter on the GPU you need).
 2. Watch the instance logs until the node joins the tailnet as `liszt`.
 3. From satie/bach: `ssh root@liszt`. You land in fish; auth is your tailnet identity, no keys.
-4. If you will commit: `git config --global user.email <email>` (emails are agenix secrets on real
-   hosts, so the image ships without one).
+4. Committing works out of the box if `GIT_EMAIL` (and optionally `GIT_NOREPLY_EMAIL`) is set in the
+   template — the startup hook writes `~/.gitconfig` with the same GitHub-noreply routing as
+   satie/bach. Without it, set one per session: `git config --global user.email <email>`.
 5. Python/GPU work — **always use uv-managed Python, never the nix `python3`**:
 
    ```sh

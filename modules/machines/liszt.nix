@@ -14,6 +14,20 @@
           sleep 0.5
         done
         tailscale set --hostname="$hostname" --accept-dns=false || true
+
+        # git email routing, injected at runtime (agenix can't reach a throwaway host): default to
+        # GIT_EMAIL, override with GIT_NOREPLY_EMAIL on github remotes — same routing as satie/bach.
+        # Written to ~/.gitconfig, which git reads on top of the home-manager ~/.config/git/config.
+        if [ -n "''${GIT_EMAIL:-}" ]; then
+          printf '[user]\n\temail = %s\n' "''${GIT_EMAIL}" > /root/.gitconfig
+          if [ -n "''${GIT_NOREPLY_EMAIL:-}" ]; then
+            printf '[user]\n\temail = %s\n' "''${GIT_NOREPLY_EMAIL}" > /root/.gitconfig.github
+            {
+              printf '[includeIf "hasconfig:remote.*.url:git@github.com:*/**"]\n\tpath = /root/.gitconfig.github\n'
+              printf '[includeIf "hasconfig:remote.*.url:https://github.com/**"]\n\tpath = /root/.gitconfig.github\n'
+            } >> /root/.gitconfig
+          fi
+        fi
       '';
 
       home = inputs.home-manager.lib.homeManagerConfiguration {
