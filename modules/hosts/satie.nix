@@ -1,8 +1,6 @@
 { config, inputs, self, ... }:
 let
   env = import ../../env.nix { inherit (inputs.nixpkgs) lib; };
-  # Bound here so the home-manager user module (a function taking its own `config`) can still
-  # reach the flake-level home aspects without the arg shadowing config.flake.
   hm = config.flake.homeModules;
 in
 {

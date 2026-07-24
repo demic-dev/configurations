@@ -23,13 +23,12 @@ in
           la = "ls -A --color=auto";
         }
         // lib.optionalAttrs (hostSettings != null) {
-          # Rebuild the current host from its flake, both discovered from env.nix.
+          # Rebuild the current host from its flake
           update = "nixos-rebuild switch --flake ${hostSettings.configPath}#${host} --sudo";
         };
 
         functions = lib.optionalAttrs (hostSettings != null) {
-          # Build locally and deploy to another host: `update-remote <hostname>`.
-          # The flake path is this machine's; the target config + ssh host are the argument.
+          # Build locally and deploy to another host: `update-remote <hostname>`
           update-remote = ''
             if test (count $argv) -ne 1
               echo "usage: update-remote <hostname>" >&2
@@ -44,8 +43,7 @@ in
           { name = "bobthefish"; src = pkgs.fishPlugins.bobthefish.src; }
         ];
 
-        # bobthefish right-prompt tuning: hide the date, show command duration. The color
-        # scheme is intentionally left unset so the active theme injects the palette.
+        # bobthefish tuning
         interactiveShellInit = ''
           set -g theme_display_date no
           set -g theme_display_screen yes

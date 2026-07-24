@@ -183,8 +183,7 @@
             "theme.better_find_bar.vertical_position" = "top";
           };
 
-          # UUIDs from the Zen mod store; these are the ones currently enabled.
-          # Browse/find more at https://zen-browser.app/mods
+          # https://zen-browser.app/mods
           mods = [
             "906c6915-5677-48ff-9bfc-096a02a72379" # Floating Status Bar
             "2317fd93-c3ed-4f37-b55a-304c1816819e" # Audio Indicator Enhanced
@@ -226,9 +225,6 @@
             force = true;
             default = "ddg";
             engines = {
-              # Hide the built-in "config" engines (they can't be deleted, only
-              # hidden). Keyed by engine id, not display name. ddg is kept as
-              # the default above.
               google.metaData.hidden = true;
               bing.metaData.hidden = true;
               ecosia.metaData.hidden = true;

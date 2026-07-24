@@ -60,8 +60,7 @@ in
           };
           firewall.enable = true;
         };
-        # Pins uids/gids for system accounts that NixOS would otherwise allocate dynamically.
-        # Needed because /var/lib/nixos (where those allocations are recorded) isn't persisted, so an unpinned id could shift on every reboot of this impermanence-wiped root.
+
         users.users.dhcpcd.uid = 997;
         users.groups.dhcpcd.gid = 997;
 

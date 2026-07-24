@@ -7,7 +7,6 @@
       experimental-features = [ "nix-command" "flakes" ];
     };
 
-    # execWheelOnly on all hosts.
     security.sudo = {
       enable = true;
       execWheelOnly = true;
