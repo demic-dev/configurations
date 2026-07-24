@@ -23,6 +23,7 @@ in
 
       # services
       ssh
+      print-scan
 
       ({ config, pkgs, ... }: {
         networking = {
