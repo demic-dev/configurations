@@ -272,12 +272,6 @@
           timeout = 300;
           on-timeout = "loginctl lock-session";
         }
-        # Turn off screen
-        {
-            timeout = 310;
-            on-timeout = "~/.config/hypr/scripts/lock-properly.sh off";
-            on-resume = "~/.config/hypr/scripts/lock-properly.sh on";
-        }
         # Suspend the system
         {
             timeout = 600;
