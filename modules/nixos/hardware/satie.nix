@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 {
   # satie's machine layer: Apple-Silicon (Asahi) boot + hardware scan.
   # Shared nix.settings / nix.gc live in core.nix + optimization.nix (both hosts import them).
@@ -21,6 +21,18 @@
     hardware.asahi = {
       enable = true;
       peripheralFirmwareDirectory = ./firmware;
+
+      # linux-asahi/uboot-asahi are otherwise built from the ambient (unstable)
+      # pkgs, so every nixpkgs bump mints a new kernel hash and misses the
+      # cachix cache. Upstream's CI builds them against its own pinned nixpkgs;
+      # instantiating them from that same pin is what makes them substitutable.
+      # Only these two packages read this option, so the rest of satie stays on
+      # our nixpkgs.
+      # mkForce because the upstream module always defines this to the ambient pkgs.
+      pkgs = lib.mkForce (import inputs.nixpkgs-asahi {
+        system = "aarch64-linux";
+        overlays = [ inputs.nixos-apple-silicon.overlays.default ];
+      });
     };
 
     hardware.bluetooth = {

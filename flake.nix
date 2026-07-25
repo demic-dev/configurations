@@ -15,9 +15,15 @@
     impermanence.url = "github:nix-community/impermanence";
 
     # satie (Apple-Silicon laptop) inputs
+    # linux-asahi/uboot-asahi are only substitutable from nixos-apple-silicon.cachix.org
+    # when built against the exact nixpkgs its CI used, so this is pinned to the rev in
+    # nixos-apple-silicon's own flake.lock rather than following ours. Bump both together:
+    # read the new rev out of nixos-apple-silicon's flake.lock, don't let it float.
+    # Consumed via hardware.asahi.pkgs in modules/nixos/hardware/satie.nix.
+    nixpkgs-asahi.url = "github:NixOS/nixpkgs/d407951447dcd00442e97087bf374aad70c04cea";
     nixos-apple-silicon = {
       url = "github:nix-community/nixos-apple-silicon";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-asahi";
     };
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
