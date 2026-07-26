@@ -30,6 +30,11 @@ in
       calendar
       contacts
       ;
+      eurooffice = pkgs.fetchNextcloudApp {
+        url = "https://github.com/nextcloud-releases/eurooffice/releases/download/v11.0.1/eurooffice-v11.0.1.tar.gz";
+        hash = "sha256-HXpvyCNhlxAvrxSEu6/5u0mpg7TrTsaS2gii9mf74ns=";
+        license = "agpl3Only";
+      };
     };
 
     config = {
