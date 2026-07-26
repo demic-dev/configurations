@@ -25,6 +25,25 @@ in
     micheleAtBach
   ];
 
+  # Raw JWT secret, signed with by DocumentServer.
+  "onlyoffice_jwt_secret.age".publicKeys = [
+    bachSystem
+    micheleAtBach
+  ];
+
+  # The same JWT value, as {"eurooffice":{"jwt_secret":"..."}}; merged into
+  # Nextcloud's config.php via services.nextcloud.secretFile. Keep both in sync.
+  "onlyoffice_nextcloud_jwt.age".publicKeys = [
+    bachSystem
+    micheleAtBach
+  ];
+
+  # nginx snippet, must be literally: set $secure_link_secret "<secret>";
+  "onlyoffice_nginx_nonce.age".publicKeys = [
+    bachSystem
+    micheleAtBach
+  ];
+
   "miniflux_admin_pass.age".publicKeys = [
     bachSystem
     micheleAtBach
