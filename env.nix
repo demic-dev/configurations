@@ -11,6 +11,10 @@
         maxUploadSize = "8G";
         client_max_body_size = "8000M";
       };
+      onlyoffice = {
+        subdomain = "office";
+        port = 8000;
+      };
       immich = {
         borg-repository = lib.fileContents ./secrets/sensitive/immich-borg-repository.age;
         subdomain = lib.fileContents ./secrets/sensitive/immich-subdomain.age;
