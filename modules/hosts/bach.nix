@@ -111,6 +111,10 @@ in
           ];
         };
 
+        # agenix decrypts inside the pre-switch-root initrd activation — ~6s BEFORE
+        # impermanence bind-mounts /persist/etc/ssh/ssh_host_ed25519_key onto /etc/ssh.
+        age.identityPaths = [ "/persist${env.userSettings.bach.ssh.root.location}" ];
+
         age.secrets.git-email = {
           file = ../../secrets/git-email.age;
           owner = env.userSettings.bach.user;
