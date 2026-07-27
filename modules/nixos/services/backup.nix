@@ -36,7 +36,6 @@ in
       "${mountDirectory}/var/lib/postgresql"
       "${mountDirectory}/var/lib/tailscale"
       "${mountDirectory}/etc/ssh"
-      "${mountDirectory}/home/.ssh"
     ];
     repo = env.userSettings.bach.borg-repository;
     # /persist and /persist/data are separate ZFS datasets, so snapshot recursively and
@@ -47,17 +46,14 @@ in
       ${pkgs.zfs}/bin/zfs snapshot -r rpool/safe/persist@generic
 
       ${pkgs.coreutils}/bin/mkdir -p ${mountDirectory}
-      ${pkgs.coreutils}/bin/mkdir -p ${mountDirectory}/data
 
-      ${pkgs.coreutils}/bin/ls /persist/.zfs/snapshot/generic/ > /dev/null
-
-      # ZFS only mounts a snapshot under .zfs/snapshot/<name> on first access (automount). Touch the path first so the automount happens synchronously, otherwise the bind below can capture the empty trigger directory (races on a cold cache after a reboot) and borg fails
-      /run/wrappers/bin/mount --rbind /persist/.zfs/snapshot/generic ${mountDirectory}
-      /run/wrappers/bin/mount --rbind /persist/data/.zfs/snapshot/generic ${mountDirectory}/data
+      # Mount the snapshot directly, the .zfs automount is not visible inside this unit's mount namespace.
+      ${pkgs.zfs}/bin/mount.zfs -o ro rpool/safe/persist@generic ${mountDirectory}
+      ${pkgs.zfs}/bin/mount.zfs -o ro rpool/safe/persist/data@generic ${mountDirectory}/data
     '';
     postHook = ''
-      /run/wrappers/bin/umount -R ${mountDirectory}/data || /run/wrappers/bin/umount -l ${mountDirectory}/data || true
-      /run/wrappers/bin/umount -R ${mountDirectory} || /run/wrappers/bin/umount -l ${mountDirectory} || true
+      /run/wrappers/bin/umount ${mountDirectory}/data || /run/wrappers/bin/umount -l ${mountDirectory}/data || true
+      /run/wrappers/bin/umount ${mountDirectory} || /run/wrappers/bin/umount -l ${mountDirectory} || true
       ${pkgs.zfs}/bin/zfs destroy -r rpool/safe/persist@generic || true
     '';
     encryption = {

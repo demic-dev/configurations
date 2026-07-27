@@ -162,11 +162,10 @@ in
       ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
 
       # Same as ./backup.nix
-      ${pkgs.coreutils}/bin/ls /persist/data/.zfs/snapshot/immich/ > /dev/null
-      /run/wrappers/bin/mount --rbind /persist/data/.zfs/snapshot/immich ${mountPoint}
+      ${pkgs.zfs}/bin/mount.zfs -o ro rpool/safe/persist/data@immich ${mountPoint}
     '';
     postHook = ''
-      /run/wrappers/bin/umount -R ${mountPoint} || /run/wrappers/bin/umount -l ${mountPoint} || true
+      /run/wrappers/bin/umount ${mountPoint} || /run/wrappers/bin/umount -l ${mountPoint} || true
       ${pkgs.zfs}/bin/zfs destroy rpool/safe/persist/data@immich || true
     '';
     encryption = {
