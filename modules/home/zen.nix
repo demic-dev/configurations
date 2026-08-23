@@ -192,35 +192,35 @@
             "9bbaab67-a2c8-4d79-837f-90cd72a8932a" # Big Essentials
           ];
 
-          extensions = {
-            force = true;
-            packages = with firefox-addons; [
-              ublock-origin
-              bitwarden
-              clearurls
-              leechblock-ng
-              canvasblocker
-              # youtube-recommended-videos # "Unhook — Remove YouTube Recommended & Shorts"
-            ];
-
-            # uBlock Origin filter lists
-            settings."uBlock0@raymondhill.net" = {
-              force = true;
-              settings.selectedFilterLists = [
-                "user-filters"
-                "ublock-filters"
-                "ublock-badware"
-                "ublock-privacy"
-                "ublock-quick-fixes"
-                "ublock-unbreak"
-                "easylist"
-                "easyprivacy"
-                "urlhaus-1"
-                "plowe-0"
-              ];
-            };
-          };
-
+          # extensions = {
+          #   force = true;
+          #   packages = with firefox-addons; [
+          #     ublock-origin
+          #     bitwarden
+          #     clearurls
+          #     leechblock-ng
+          #     canvasblocker
+          #     # youtube-recommended-videos # "Unhook — Remove YouTube Recommended & Shorts"
+          #   ];
+          #
+          #   # uBlock Origin filter lists
+          #   settings."uBlock0@raymondhill.net" = {
+          #     force = true;
+          #     settings.selectedFilterLists = [
+          #       "user-filters"
+          #       "ublock-filters"
+          #       "ublock-badware"
+          #       "ublock-privacy"
+          #       "ublock-quick-fixes"
+          #       "ublock-unbreak"
+          #       "easylist"
+          #       "easyprivacy"
+          #       "urlhaus-1"
+          #       "plowe-0"
+          #     ];
+          #   };
+          # };
+          #
           search = {
             force = true;
             default = "ddg";
