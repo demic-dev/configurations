@@ -13,7 +13,7 @@
     enable = true;
 
     enableSystemMonitoring = true;
-    dgop.package = inputs.dgop.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    # dgop.package = inputs.dgop.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
     enableDynamicTheming = true;       # Wallpaper-based theming (matugen)
     enableAudioWavelength = true;      # Audio visualizer (cava)
