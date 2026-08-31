@@ -11,7 +11,7 @@ in
       inputs.nixos-apple-silicon.nixosModules.default
       inputs.agenix.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
-      inputs.dank-greeter.nixosModules.default
+      inputs.noctalia-greeter.nixosModules.default
 
       # machine + shared + desktop aspects
       satie-hardware
@@ -132,8 +132,8 @@ in
             git
             ghostty
             fish
-            hyprland
-            dms
+            niri
+            noctalia
             xdg
             gruvbox-wallpapers
             zen

@@ -1,8 +1,10 @@
-{ ... }:
+{ config, ... }:
 {
   flake.homeModules.hyprland =
 { pkgs, ... }:
 {
+  imports = [ config.flake.homeModules.screenshot ];
+
   home.packages = with pkgs; [
     hypridle
     wl-clipboard
@@ -167,7 +169,7 @@
         "$mainMod,P,pseudo"
         # "$mainMod,J,togglesplit"
         "$mainMod,F,fullscreen,0"
-        "$mainMod SHIFT,W,exec,~/.config/hypr/scripts/hyprshot.sh"
+        "$mainMod SHIFT,W,exec,screenshot"
 
         # Move focus with mainMod + vim bindings
         "$mainMod SHIFT,h,movefocus,l"
@@ -279,11 +281,6 @@
         }
       ];
     };
-  };
-
-  xdg.configFile."hypr/scripts" = {
-    source = ./config/scripts;
-    recursive = true;
   };
 }
   ;

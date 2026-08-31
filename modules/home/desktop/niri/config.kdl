@@ -1,0 +1,174 @@
+environment {
+    SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/gcr/ssh"
+}
+
+input {
+    keyboard {
+        xkb {
+            layout "us"
+            options "compose:rwin"
+        }
+    }
+
+    touchpad {
+        tap
+        dwt
+        natural-scroll
+        accel-speed 0.2
+        click-method "clickfinger"
+        scroll-method "two-finger"
+        tap-button-map "left-right-middle"
+    }
+
+    focus-follows-mouse
+}
+
+output "eDP-1" {
+    mode "2560x1600"
+    scale 1.25
+}
+
+layout {
+    gaps 8
+    border {
+        width 2
+    }
+}
+
+cursor {
+    xcursor-theme "Adwaita"
+    xcursor-size 24
+}
+
+prefer-no-csd
+
+// Only the Print binds save here; Mod+Shift+W lets satty write the annotated copy.
+screenshot-path "~/Pictures/Screenshots/screenshot-%Y-%m-%d_%H-%M-%S.png"
+
+spawn-at-startup "librepods"
+spawn-at-startup "bitwarden" "--hidden"
+
+blur {
+    passes 2
+    offset 3.0
+    noise 0.03
+    saturation 1.0
+}
+
+window-rule {
+    geometry-corner-radius 4
+    clip-to-geometry true
+    opacity 0.94
+    // Without this, CSD windows get the border painted as a solid fill behind them,
+    // which is what shows through the opacity instead of the blur.
+    draw-border-with-background false
+
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
+// Ghostty alpha-blends its own background, so the window-wide opacity above would
+// only fade the text on top of it.
+window-rule {
+    match app-id="com.mitchellh.ghostty"
+    opacity 1.0
+}
+
+window-rule {
+    match app-id="dev.noctalia.Noctalia"
+    open-floating true
+}
+
+// Noctalia asks for blur over ext-background-effect; these rules only opt its
+// surfaces out of the cheap xray path so panels blur what is actually behind them.
+layer-rule {
+    match namespace="^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd|window-switcher)$"
+
+    background-effect {
+        xray false
+    }
+}
+
+layer-rule {
+    match namespace="^noctalia-backdrop"
+    place-within-backdrop true
+}
+
+binds {
+    Mod+Return { spawn "ghostty"; }
+    Mod+E { spawn "dolphin"; }
+    Mod+M { spawn "zen-beta"; }
+    Mod+S { spawn "ghostty" "--command=/home/michele/repos/spotatui/result/bin/spotatui"; }
+    Mod+Shift+M { spawn "proton-authenticator"; }
+    // Same UI, wrapped to hand the capture to satty first.
+    Mod+Shift+W { spawn "screenshot"; }
+    Print { screenshot; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+
+    Mod+L { spawn "noctalia" "msg" "session" "lock"; }
+    Mod+Space { spawn "noctalia" "msg" "panel-toggle" "launcher"; }
+    Mod+Period { show-hotkey-overlay; }
+
+    Mod+C { close-window; }
+    Mod+V { toggle-window-floating; }
+    Mod+F { fullscreen-window; }
+    Mod+O repeat=false { toggle-overview; }
+    Mod+R { switch-preset-column-width; }
+    Mod+BracketLeft { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+
+    Mod+Shift+H { focus-column-left; }
+    Mod+Shift+L { focus-column-right; }
+    Mod+Shift+K { focus-window-up; }
+    Mod+Shift+J { focus-window-down; }
+
+    Mod+Ctrl+H { move-column-left; }
+    Mod+Ctrl+L { move-column-right; }
+    Mod+Ctrl+K { move-window-up; }
+    Mod+Ctrl+J { move-window-down; }
+
+    Mod+Shift+P { set-column-width "-10%"; }
+    Mod+Shift+N { set-column-width "+10%"; }
+
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+0 { focus-workspace 10; }
+
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+    Mod+Shift+0 { move-column-to-workspace 10; }
+
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-up"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-down"; }
+    XF86AudioMute allow-when-locked=true { spawn "noctalia" "msg" "volume-mute"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "noctalia" "msg" "mic-mute"; }
+
+    XF86MonBrightnessUp allow-when-locked=true { spawn "noctalia" "msg" "brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "noctalia" "msg" "brightness-down"; }
+    Mod+XF86MonBrightnessUp allow-when-locked=true { spawn "noctalia" "msg" "keyboard-backlight-up"; }
+    Mod+XF86MonBrightnessDown allow-when-locked=true { spawn "noctalia" "msg" "keyboard-backlight-down"; }
+
+    XF86AudioNext allow-when-locked=true { spawn "noctalia" "msg" "media" "next"; }
+    XF86AudioPrev allow-when-locked=true { spawn "noctalia" "msg" "media" "previous"; }
+    XF86AudioPlay allow-when-locked=true { spawn "noctalia" "msg" "media" "toggle"; }
+    XF86AudioPause allow-when-locked=true { spawn "noctalia" "msg" "media" "toggle"; }
+
+    Mod+Shift+E { quit; }
+}

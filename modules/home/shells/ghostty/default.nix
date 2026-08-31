@@ -7,6 +7,11 @@
     enable = true;
     enableFishIntegration = true;
 
+    settings = {
+      background-opacity = 0.85;
+      theme = "noctalia";
+    };
+
     # settings = {
     #   ##### Font #####
     #   font-family = [

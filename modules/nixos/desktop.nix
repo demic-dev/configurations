@@ -2,14 +2,6 @@
 {
   flake.nixosModules.desktop = { config, lib, pkgs, env, ... }:
     let
-      homePath = env.userSettings.${config.networking.hostName}.home.path;
-
-      # Vendored hyprcursor theme, installed system-wide so the greeter user (home /var/empty) can resolve it via XDG_DATA_DIRS — the user session finds the same theme from ~/.local/share/icons, but the greeter never sees that.
-      macosCursor = pkgs.runCommandLocal "macos-cursor" { } ''
-        mkdir -p "$out/share/icons"
-        cp -r ${./assets/macOS-cursor} "$out/share/icons/macOS-cursor"
-      '';
-
       # Bitwarden is installed per-user via home-manager, so its polkit action lands in the user profile where the system polkit daemon never looks.
       bitwardenPolkitAction = pkgs.runCommandLocal "bitwarden-polkit-action" { } ''
         mkdir -p "$out/share/polkit-1/actions"
@@ -18,22 +10,33 @@
       '';
     in
     {
-    programs.hyprland.enable = true;
+    programs.niri.enable = true;
 
-    programs.dms-greeter = {
+    programs.noctalia-greeter = {
       enable = true;
-      compositor.name = "hyprland";
-      # The greeter runs its own Hyprland instance as the greeter user. Without configs, Hyprland falls back to defaults.
-      compositor.customConfig = ''
-        monitor = ,2560x1600@144,auto,1.25
-        env = HYPRCURSOR_THEME,macOS
-        env = HYPRCURSOR_SIZE,24
 
-        force_default_wallpaper = 0;
-        disable_hyprland_logo = true;
-      '';
-      configHome = lib.removeSuffix "/" homePath;
-      configFiles = [ "${homePath}.config/DankMaterialShell/settings.json" ];
+      settings = {
+        session.default = "Niri";
+        user.default = env.userSettings.${config.networking.hostName}.user;
+
+        appearance.theme_mode = "dark";
+
+        output = {
+          width = 2560;
+          height = 1600;
+          scale = 1.25;
+        };
+
+        cursor = {
+          theme = "Adwaita";
+          size = 24;
+        };
+
+        keyboard = {
+          layout = "us";
+          options = "compose:rwin";
+        };
+      };
     };
 
     security.polkit.enable = true;
@@ -86,12 +89,12 @@
     programs.nix-ld.enable = true;
     programs.nix-ld.libraries = with pkgs; [ tinymist ];
 
-    environment.systemPackages = [ macosCursor bitwardenPolkitAction ];
+    environment.systemPackages = [ bitwardenPolkitAction pkgs.adwaita-icon-theme ];
 
     environment.pathsToLink = [
       "/share/applications"
       "/share/xdg-desktop-portal"
-      # Ensure share/icons is linked into the system profile so cursors are discoverable via XDG_DATA_DIRS (greeter user has no home).
+      # Ensure share/icons is linked into the system profile so the greeter, which has no home, can resolve cursors via XDG_DATA_DIRS.
       "/share/icons"
     ];
   };
