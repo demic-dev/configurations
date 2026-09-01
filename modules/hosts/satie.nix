@@ -47,7 +47,7 @@ in
           };
         };
 
-        services.automatic-timezoned.enable = true;
+        services.tzupdate.enable = true;
 
         services.timesyncd = {
           enable = true;
