@@ -61,6 +61,7 @@
       url = "github:AvengeMedia/danksearch";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    fastpotify.url = "github:crmne/fastpotify";
     gruvbox-wallpapers = {
       url = "github:AngelJumbo/gruvbox-wallpapers";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -157,7 +157,7 @@
         "$mainMod,return,exec,$terminal"
         "$mainMod,E,exec,$fileManager"
         "$mainMod,M,exec,zen-beta"
-        "$mainMod,S,exec, $terminal --command=~/repos/spotatui/result/bin/spotatui"
+        "$mainMod,S,exec,fastpotify"
         "$mainMod SHIFT,M,exec, proton-authenticator"
 
         # Lock

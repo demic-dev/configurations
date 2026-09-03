@@ -100,7 +100,7 @@ binds {
     Mod+Return { spawn "ghostty"; }
     Mod+E { spawn "dolphin"; }
     Mod+M { spawn "zen-beta"; }
-    Mod+S { spawn "ghostty" "--command=/home/michele/repos/spotatui/result/bin/spotatui"; }
+    Mod+S { spawn "fastpotify"; }
     Mod+Shift+M { spawn "proton-authenticator"; }
     // Same UI, wrapped to hand the capture to satty first.
     Mod+Shift+W { spawn "screenshot"; }

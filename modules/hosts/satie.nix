@@ -151,6 +151,7 @@ in
 
           home.packages = with pkgs; [
             claude-code
+            inputs.fastpotify.packages.${pkgs.stdenv.hostPlatform.system}.default
             proton-authenticator
             anki
             git-agecrypt
