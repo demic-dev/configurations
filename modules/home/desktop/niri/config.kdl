@@ -98,7 +98,7 @@ layer-rule {
 
 binds {
     Mod+Return { spawn "ghostty"; }
-    Mod+E { spawn "dolphin"; }
+    Mod+E { spawn "pcmanfm"; }
     Mod+M { spawn "zen-beta"; }
     Mod+S { spawn "fastpotify"; }
     Mod+Shift+M { spawn "proton-authenticator"; }

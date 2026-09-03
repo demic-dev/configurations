@@ -134,6 +134,8 @@ in
             fish
             niri
             noctalia
+            gtk
+            pcmanfm
             xdg
             gruvbox-wallpapers
             zen
@@ -141,7 +143,7 @@ in
 
           services.udiskie = {
             enable = true;
-            settings.program_options.file_manager = "${pkgs.kdePackages.dolphin}/bin/dolphin";
+            settings.program_options.file_manager = "${pkgs.pcmanfm}/bin/pcmanfm";
           };
 
           services.gnome-keyring = {
@@ -171,8 +173,6 @@ in
             calibre
             nextcloud-client
             chromium
-            kdePackages.dolphin
-            kdePackages.kde-cli-tools
             obsidian
             vscodium
             librepods

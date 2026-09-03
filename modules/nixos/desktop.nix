@@ -82,6 +82,7 @@
     services.upower.enable = true;
     services.power-profiles-daemon.enable = true;
     services.udisks2.enable = true;
+    services.gvfs.enable = true;
     services.udev.enable = true;
 
     fonts.packages = builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts);

@@ -20,9 +20,23 @@
           theme = {
             mode = "dark";
             source = "wallpaper";
+
+            templates = {
+              builtin_ids = [ "gtk3" "gtk4" "ghostty" "niri" "qt" ];
+              community_ids = [
+                "claude-code"
+                "discord"
+                "fastfetch"
+                "lazygit"
+                "neovim"
+                "obsidian"
+                "vscode"
+                "zathura"
+                "zen-browser"
+              ];
+            };
           };
 
-          # Mirrors what hypridle did under hyprland: lock at 5 minutes, suspend at 10.
           idle.behavior = {
             lock = {
               enabled = true;
