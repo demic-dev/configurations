@@ -137,7 +137,6 @@ in
             gtk
             pcmanfm
             xdg
-            gruvbox-wallpapers
             zen
           ];
 

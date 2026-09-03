@@ -15,8 +15,6 @@
             niri_overview_type_to_launch_enabled = true;
           };
 
-          wallpaper.directory = "${config.xdg.configHome}/gruvbox-wallpapers";
-
           theme = {
             mode = "dark";
             source = "wallpaper";

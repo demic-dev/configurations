@@ -231,26 +231,6 @@
         "type": "github"
       }
     },
-    "gruvbox-wallpapers": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1784553621,
-        "narHash": "sha256-RpPMMbI/jxCxOlsf0d8SZyORR4qafod97kjE98FhId0=",
-        "owner": "AngelJumbo",
-        "repo": "gruvbox-wallpapers",
-        "rev": "64a1f5fdbc4f7e0a7700405a80f6011dbe2e00f8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "AngelJumbo",
-        "repo": "gruvbox-wallpapers",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -513,7 +493,6 @@
         "fastpotify": "fastpotify",
         "firefox-addons": "firefox-addons",
         "flake-parts": "flake-parts",
-        "gruvbox-wallpapers": "gruvbox-wallpapers",
         "home-manager": "home-manager_2",
         "impermanence": "impermanence",
         "import-tree": "import-tree",

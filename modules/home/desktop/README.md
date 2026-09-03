@@ -11,6 +11,5 @@ graphical **system** stack (greeter, polkit, keyring, portals, fonts) lives in
 | `dms`                | DankMaterialShell + danksearch; declarative `settings.json`; zen-browser userChrome link. |
 | `xdg`                | XDG portals (gtk + hyprland), MIME defaults (zen, zathura), Dolphin menu fix. |
 | `kdeconnect`         | KDE Connect. |
-| `gruvbox-wallpapers` | Gruvbox wallpaper pack into `~/.config`. |
 
 Toggle any of these by commenting its name out of satie's home imports list.
