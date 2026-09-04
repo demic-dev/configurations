@@ -53,7 +53,7 @@
 
       id = "3e042fee";
 
-      configPath = "/home/michele/nixos/";
+      configPath = "/home/michele/repos/nixos/";
 
       user = "michele";
       host = "satie";

@@ -7,6 +7,8 @@
       uid = 1000;
       shell = pkgs.fish;
       extraGroups = [ "wheel" "networkmanager" ];
+
+      homeMode = "711";
     };
   };
 }

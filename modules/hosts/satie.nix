@@ -20,6 +20,7 @@ in
       
       # users
       michele
+      claude
 
       # services
       ssh
@@ -112,12 +113,14 @@ in
         age.secrets.git-email = {
           file = ../../secrets/git-email.age;
           owner = "michele";
-          group = "users";
+          group = "repos";
+          mode = "0440";
         };
         age.secrets.noreply-github-email = {
           file = ../../secrets/noreply-github-email.age;
           owner = "michele";
-          group = "users";
+          group = "repos";
+          mode = "0440";
         };
 
         home-manager.useGlobalPkgs = true;
@@ -152,11 +155,9 @@ in
           };
 
           home.packages = with pkgs; [
-            claude-code
             inputs.fastpotify.packages.${pkgs.stdenv.hostPlatform.system}.default
             proton-authenticator
             anki
-            git-agecrypt
             zip
             p7zip
             sc-im
@@ -207,6 +208,21 @@ in
 
           home.stateVersion = "26.05";
           programs.home-manager.enable = true;
+        };
+
+        home-manager.users.claude = { ... }: {
+          home.username = "claude";
+          home.homeDirectory = "/home/claude";
+
+          imports = with hm; [ git ];
+
+          programs.direnv = {
+            enable = true;
+            enableBashIntegration = true;
+            nix-direnv.enable = true;
+          };
+
+          home.stateVersion = "26.05";
         };
       })
     ];
