@@ -483,6 +483,26 @@
         "type": "github"
       }
     },
+    "nvim": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786630276,
+        "narHash": "sha256-cAqRn1t/D11ych2wByaqlTD6xd+Zl1D+5gTR45aBTb0=",
+        "owner": "demic-dev",
+        "repo": "nvim",
+        "rev": "4eb5423d37c6da73f0df4b08c12072c19e1a83ef",
+        "type": "github"
+      },
+      "original": {
+        "owner": "demic-dev",
+        "repo": "nvim",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -501,6 +521,7 @@
         "nixpkgs-asahi": "nixpkgs-asahi",
         "noctalia": "noctalia",
         "noctalia-greeter": "noctalia-greeter",
+        "nvim": "nvim",
         "zen-browser": "zen-browser"
       }
     },

@@ -62,6 +62,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     fastpotify.url = "github:crmne/fastpotify";
+    nvim = {
+      url = "github:demic-dev/nvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = rec {

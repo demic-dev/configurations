@@ -134,6 +134,7 @@ in
             fish
             niri
             noctalia
+            nvim
             gtk
             pcmanfm
             xdg
@@ -166,7 +167,6 @@ in
             xdg-utils
             bitwarden-desktop
             signal-desktop
-            neovim
             vesktop
             zathura
             calibre
