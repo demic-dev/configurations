@@ -13,6 +13,8 @@
       '';
     in
     {
+      home.packages = [ pkgs.git-agecrypt ];
+
       programs.git = {
         enable = true;
 

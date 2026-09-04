@@ -8,6 +8,10 @@ grep -q 'filter=git-agecrypt' "$root/.gitattributes" || exit 0
 command -v git-agecrypt >/dev/null 2>&1 || exit 0
 
 git config --get filter.git-agecrypt.smudge >/dev/null 2>&1 || git-agecrypt init
+# `git-agecrypt init` writes an absolute /nix/store path that dies at the next GC.
+git config filter.git-agecrypt.clean 'git-agecrypt clean -f %f'
+git config filter.git-agecrypt.smudge 'git-agecrypt smudge -f %f'
+git config diff.git-agecrypt.textconv 'git-agecrypt textconv'
 if [ -f "$HOME/.ssh/git-agecrypt_ed25519" ]; then
     git config git-agecrypt.config.identity "$HOME/.ssh/git-agecrypt_ed25519"
 elif [ -f "$HOME/.ssh/id_ed25519" ]; then
