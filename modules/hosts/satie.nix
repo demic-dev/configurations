@@ -25,6 +25,7 @@ in
       # services
       ssh
       print-scan
+      llama-cpp
 
       ({ config, pkgs, ... }: {
         networking = {
@@ -135,6 +136,7 @@ in
             git
             ghostty
             fish
+            hister
             niri
             noctalia
             nvim

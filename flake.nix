@@ -62,6 +62,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     fastpotify.url = "github:crmne/fastpotify";
+    hister = {
+      url = "github:asciimoo/hister";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nvim = {
       url = "github:demic-dev/nvim";
       inputs.nixpkgs.follows = "nixpkgs";
