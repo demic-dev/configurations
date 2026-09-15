@@ -38,6 +38,9 @@
         };
       };
     };
+    
+    # enable compose key on gtk's apps
+    environment.sessionVariables.GTK_IM_MODULE = "simple";
 
     security.polkit.enable = true;
     # Silently approve Bitwarden's keyring-unlock for the active local session so the desktop app opens already unlocked (no master password / polkit prompt).
