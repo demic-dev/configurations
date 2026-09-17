@@ -32,7 +32,7 @@
             detect_languages = true;
             keep_stopwords = false;
             directories = [ ];
-            max_file_size_mb = 10;
+            max_file_size_mb = 20;
           };
 
           crawler = {
