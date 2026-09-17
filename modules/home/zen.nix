@@ -3,7 +3,6 @@
   flake.homeModules.zen =
     { pkgs, inputs, ... }:
     let
-      firefox-addons = inputs.firefox-addons.packages.${pkgs.stdenv.hostPlatform.system};
     in
     {
       imports = [ inputs.zen-browser.homeModules.beta ];
@@ -40,85 +39,6 @@
           # Includes mod settings (mod.*/psu.*/theme.*/zen.mods.*).
           settings = {
             "browser.ctrlTab.sortByRecentlyUsed" = false;
-
-            # Toolbar disposition (which widgets live in which area and their
-            # order), i.e. the "Customize toolbar" layout. Written as a Nix
-            # attrset via builtins.toJSON so it stays editable. Because this is
-            # pinned in user.js, UI-side rearranging won't persist across a
-            # rebuild — edit here instead. Widget IDs for extensions not in
-            # extensions.packages are simply ignored by Zen.
-            "browser.uiCustomization.state" = builtins.toJSON {
-              placements = {
-                "widget-overflow-fixed-list" = [ ];
-                "unified-extensions-area" = [
-                  "canvasblocker_kkapsner_de-browser-action"
-                  "jid1-zadieub7xozojw_jetpack-browser-action"
-                  "_74145f27-f039-47ce-a470-a662b129930a_-browser-action"
-                  "myallychou_gmail_com-browser-action"
-                  "_4f391a9e-8717-4ba6-a5b1-488a34931fcb_-browser-action"
-                  "leechblockng_proginosko_com-browser-action"
-                ];
-                "nav-bar" = [
-                  "back-button"
-                  "forward-button"
-                  "stop-reload-button"
-                  "customizableui-special-spring1"
-                  "developer-button"
-                  "find-button"
-                  "vertical-spacer"
-                  "urlbar-container"
-                  "ublock0_raymondhill_net-browser-action"
-                  "_446900e4-71c2-419f-a6a7-df9c091e268b_-browser-action"
-                  "customizableui-special-spring2"
-                  "unified-extensions-button"
-                  "reset-pbm-toolbar-button"
-                ];
-                "toolbar-menubar" = [
-                  "menubar-items"
-                ];
-                TabsToolbar = [
-                  "tabbrowser-tabs"
-                ];
-                "vertical-tabs" = [ ];
-                PersonalToolbar = [
-                  "import-button"
-                  "personal-bookmarks"
-                ];
-                "zen-sidebar-top-buttons" = [
-                  "zen-toggle-compact-mode"
-                ];
-                "zen-sidebar-foot-buttons" = [
-                  "downloads-button"
-                  "zen-workspaces-button"
-                  "zen-create-new-button"
-                ];
-              };
-              seen = [
-                "developer-button"
-                "screenshot-button"
-                "_446900e4-71c2-419f-a6a7-df9c091e268b_-browser-action"
-                "jid1-zadieub7xozojw_jetpack-browser-action"
-                "ublock0_raymondhill_net-browser-action"
-                "_74145f27-f039-47ce-a470-a662b129930a_-browser-action"
-                "myallychou_gmail_com-browser-action"
-                "_4f391a9e-8717-4ba6-a5b1-488a34931fcb_-browser-action"
-                "canvasblocker_kkapsner_de-browser-action"
-                "leechblockng_proginosko_com-browser-action"
-                "papis_connector_wavefrontshaping_net-browser-action"
-              ];
-              dirtyAreaCache = [
-                "nav-bar"
-                "vertical-tabs"
-                "zen-sidebar-foot-buttons"
-                "PersonalToolbar"
-                "unified-extensions-area"
-                "toolbar-menubar"
-                "TabsToolbar"
-                "zen-sidebar-top-buttons"
-              ];
-              currentVersion = 24;
-              newElementCount = 9;
-            };
 
             "browser.urlbar.showSearchSuggestionsFirst" = false;
             "browser.urlbar.suggest.engines" = true;
@@ -187,7 +107,6 @@
           mods = [
             "906c6915-5677-48ff-9bfc-096a02a72379" # Floating Status Bar
             "2317fd93-c3ed-4f37-b55a-304c1816819e" # Audio Indicator Enhanced
-            "a6335949-4465-4b71-926c-4a52d34bc9c0" # Better Find Bar
             "f7c71d9a-bce2-420f-ae44-a64bd92975ab" # Better Unloaded Tabs
             "9bbaab67-a2c8-4d79-837f-90cd72a8932a" # Big Essentials
           ];
@@ -223,7 +142,7 @@
           #
           search = {
             force = true;
-            default = "ddg";
+            default = "hist";
             engines = {
               google.metaData.hidden = true;
               bing.metaData.hidden = true;
@@ -231,6 +150,16 @@
               perplexity.metaData.hidden = true;
               qwant.metaData.hidden = true;
               wikipedia.metaData.hidden = true; # built-in "Wikipedia (en)"
+
+              "Hister" = {
+                name = "Hister";
+                urls = [
+                  {
+                    template = "http://localhost:4433/?q={searchTerms}";
+                  }
+                ];
+                definedAliases = [ "@hist" ];
+              };
 
               "Wikipedia" = {
                 name = "Wikipedia";
@@ -266,20 +195,6 @@
                 icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
                 definedAliases = [ "@no" ];
               };
-            };
-          };
-
-          # ---- Spaces (MOCK) --------------------------------------------------
-          # Placeholder only — replace `spaces` with your real ones, then flip
-          # spacesForce to true to make the declared set authoritative (it deletes
-          # spaces not listed here). Left false for now so nothing is destroyed.
-          # ⚠ Close Zen before `home-manager switch` once spacesForce is enabled.
-          spacesForce = false;
-          spaces = {
-            "Personal" = {
-              id = "00000000-0000-0000-0000-000000000001";
-              position = 1000;
-              icon = "🏠";
             };
           };
         };
