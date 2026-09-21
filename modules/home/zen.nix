@@ -142,7 +142,7 @@
           #
           search = {
             force = true;
-            default = "hist";
+            default = "Hister";
             engines = {
               google.metaData.hidden = true;
               bing.metaData.hidden = true;
