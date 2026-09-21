@@ -15,6 +15,7 @@ in
             url = bekkoEmbeddingUrl;
             hash = "sha256-CwIUIUKH6Q/7mP+0fhBx5bGT+0INHZmy7IqrDrtQf8A=";
           };
+          threads = 4;
           embeddings = true;
         };
       };
