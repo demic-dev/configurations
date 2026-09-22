@@ -67,17 +67,6 @@
       };
     };
 
-    liszt = {
-      # Ephemeral VastAI GPU container (see docs/liszt.md). No configPath: the repo is not
-      # baked into the image. No ssh keys: Tailscale SSH authenticates via tailnet identity.
-      user = "root";
-      host = "liszt";
-
-      home = {
-        path = "/root/";
-      };
-    };
-
     bach = {
       ssh = {
         michele = {
@@ -120,6 +109,23 @@
         gateway = lib.fileContents ./secrets/sensitive/bach-gateway.age;
         subnetMask = "255.255.252.0";
         nameservers = [ "1.1.1.1" ];
+      };
+    };
+
+    brendel = {
+      ssh = {
+
+      };
+
+      id = "";
+
+      configPath = "/home/.../nixos/";
+
+      user = "michele";
+      host = "brendel";
+
+      network = {
+
       };
     };
   };
