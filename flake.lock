@@ -532,11 +532,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786630276,
-        "narHash": "sha256-cAqRn1t/D11ych2wByaqlTD6xd+Zl1D+5gTR45aBTb0=",
+        "lastModified": 1790125199,
+        "narHash": "sha256-2xSPqZRIdFOFt8+MYq3yOO1Ag78SdUXtUlzb/8wsh9E=",
         "owner": "demic-dev",
         "repo": "nvim",
-        "rev": "4eb5423d37c6da73f0df4b08c12072c19e1a83ef",
+        "rev": "95750d7f84f5fbacaff00802fca0a4da750e1f34",
         "type": "github"
       },
       "original": {
