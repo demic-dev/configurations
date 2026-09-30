@@ -171,7 +171,6 @@ in
             bitwarden-desktop
             signal-desktop
             vesktop
-            zathura
             calibre
             nextcloud-client
             chromium
@@ -198,6 +197,15 @@ in
                 IdentityFile = "~/.ssh/id_ed25519";
                 AddKeysToAgent = "yes";
               };
+            };
+
+            zathura = {
+              enable = true;
+              options = {
+                selection-clipboard = "clipboard";
+                recolor = true;
+              };
+              extraConfig = "include noctaliarc";
             };
 
             bash.enable = true;
