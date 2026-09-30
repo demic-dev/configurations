@@ -60,7 +60,7 @@
     security.pam.services.greetd.enableGnomeKeyring = true;
     services.gnome.gnome-keyring.enable = true;
     # gcr provides the gcr-ssh-agent / pkcs11 D-Bus services the keyring relies on.
-    services.dbus.packages = [ pkgs.gcr ];
+    services.dbus.packages = [ pkgs.gcr_3 ];
 
     # Bluetooth audio: headphones connect but WirePlumber leaves the card in the "off"/headset profile on reconnect, so no output sink appears. Prefer AAC and force A2DP as the default profile
     services.pipewire.wireplumber.extraConfig."10-bluez" = {

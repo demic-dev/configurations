@@ -164,7 +164,7 @@ in
             p7zip
             sc-im
             loupe
-            gcr
+            gcr_3
             seahorse
             libsecret
             xdg-utils
