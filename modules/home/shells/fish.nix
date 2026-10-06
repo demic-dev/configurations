@@ -32,6 +32,21 @@ in
             end
             nixos-rebuild switch --flake ${configPath}#$argv[1] --target-host $argv[1] --sudo --ask-elevate-password
           '';
+
+          # Give the claude user rw access to a folder (default: cwd), including files created later: `claude-allow [--no-more] [path]`
+          claude-allow = ''
+            argparse no-more -- $argv
+            or return 1
+            set -l dir (realpath (string length -q -- $argv[1]; and echo $argv[1]; or echo .))
+            or return 1
+            if set -q _flag_no_more
+              setfacl -R -x g:repos,d:g:repos $dir
+              and echo "claude can no longer access $dir"
+            else
+              setfacl -R -m g:repos:rwX,d:g:repos:rwX $dir
+              and echo "claude can now access $dir"
+            end
+          '';
         };
 
         plugins = [
