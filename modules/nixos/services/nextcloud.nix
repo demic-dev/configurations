@@ -4,7 +4,11 @@
 { self, config, pkgs, env, ... }:
 let
   fqdn = env.cloudSettings.fqdn;
-  domain = "${env.cloudSettings.services.nextcloud.subdomain}.${env.cloudSettings.fqdn}";
+  # PHP2Shell (CVE-2026-109618/109619) mitigation: Nextcloud is tailnet-only until PHP is patched.
+  # Revert once `services.nextcloud.phpPackage.version` is >= 8.4.27: point `nextcloudFqdn` back
+  # to `fqdn` and drop the allow/deny `extraConfig` on the Nextcloud vhost below.
+  nextcloudFqdn = env.cloudSettings.internal;
+  domain = "${env.cloudSettings.services.nextcloud.subdomain}.${nextcloudFqdn}";
   port = env.cloudSettings.services.nextcloud.port;
   redisPort = port + 1;
   maxUploadSize = env.cloudSettings.services.nextcloud.maxUploadSize;
@@ -192,8 +196,17 @@ in
     serverName = domain;
 
     enableACME = false;
-    useACMEHost = fqdn;
+    useACMEHost = nextcloudFqdn;
     forceSSL = true;
+
+    # nginx listens publicly on 443, so DNS alone doesn't keep this internal (any Host header works).
+    extraConfig = ''
+      allow 100.64.0.0/10;          # Tailscale IPv4
+      allow fd7a:115c:a1e0::/48;    # Tailscale IPv6
+      allow 127.0.0.1;
+      allow ::1;
+      deny all;
+    '';
 
     locations."/$request_uri" = {
       recommendedProxySettings = true;
