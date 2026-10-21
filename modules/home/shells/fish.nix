@@ -21,6 +21,9 @@ in
 
           # Rebuild the current host from its flake
           update = "nixos-rebuild switch --flake ${configPath}#${host} --sudo";
+
+          # Unlock bach's ZFS pool from its initrd SSH (see disko/remoteZFSDecrypt.nix)
+          unlock-bach = "ssh root@${env.userSettings.bach.network.ip.v4} -p 2222";
         };
 
         functions = {
