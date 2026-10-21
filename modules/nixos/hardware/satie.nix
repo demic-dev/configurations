@@ -2,7 +2,7 @@
 {
   # satie's machine layer: Apple-Silicon (Asahi) boot + hardware scan.
   # Shared nix.settings / nix.gc live in core.nix + optimization.nix (both hosts import them).
-  flake.nixosModules.satie-hardware = { lib, modulesPath, ... }: {
+  flake.nixosModules.satie-hardware = { lib, modulesPath, env, ... }: {
     imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
     boot.loader.systemd-boot.enable = true;
@@ -34,6 +34,12 @@
         overlays = [ inputs.nixos-apple-silicon.overlays.default ];
       });
     };
+
+    # After resume the speaker PCM / asahi-audio convolver nodes come back in an error state (EIO/EPERM) and PipeWire
+    # never retries them, so no output sink is offered until the session's audio stack is restarted.
+    powerManagement.resumeCommands = ''
+      systemctl --user -M ${env.userSettings.satie.user}@ restart pipewire pipewire-pulse wireplumber || true
+    '';
 
     hardware.bluetooth = {
       enable = true;
