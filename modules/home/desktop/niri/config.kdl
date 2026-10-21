@@ -93,13 +93,13 @@ layer-rule {
 }
 
 binds {
-    Mod+Return { spawn "ghostty"; }
-    Mod+E { spawn "pcmanfm"; }
-    Mod+M { spawn "zen-beta"; }
-    Mod+S { spawn "fastpotify"; }
-    Mod+Shift+M { spawn "proton-authenticator"; }
+    Mod+Return repeat=false { spawn "ghostty"; }
+    Mod+E repeat=false { spawn "pcmanfm"; }
+    Mod+M repeat=false { spawn "zen-beta"; }
+    Mod+S repeat=false { spawn "fastpotify"; }
+    Mod+Shift+M repeat=false { spawn "proton-authenticator"; }
     // Same UI, wrapped to hand the capture to satty first.
-    Mod+Shift+W { spawn "screenshot"; }
+    Mod+Shift+W repeat=false { spawn "screenshot"; }
     Print { screenshot; }
     Ctrl+Print { screenshot-screen; }
     Alt+Print { screenshot-window; }

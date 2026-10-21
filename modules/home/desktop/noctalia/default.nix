@@ -49,5 +49,12 @@
           };
         };
       };
+
+      # noctalia exits when kicked off the system bus (dbus-broker per-UID quota); the default start limit gives up
+      # after a few instant failures, leaving niri locked with no lock surface (solid red screen). Keep retrying.
+      systemd.user.services.noctalia = {
+        Unit.StartLimitIntervalSec = 0;
+        Service.RestartSec = 3;
+      };
     };
 }
