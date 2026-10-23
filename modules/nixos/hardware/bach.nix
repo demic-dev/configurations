@@ -68,9 +68,8 @@
 
     boot.tmp.cleanOnBoot = true;
 
-    swapDevices = [
-      { device = "/dev/zvol/rpool/tempswap"; }
-    ];
+    # Swap on a zvol needs memory to write out, exactly when there's none left.
+    zramSwap.enable = true;
 
     nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
   };
