@@ -61,6 +61,8 @@
       options = [ "fmask=0022" "dmask=0022" ];
     };
 
+    zramSwap.enable = true;
+
     swapDevices = [{
       device = "/var/lib/swapfile";
       size = 10 * 1024;
