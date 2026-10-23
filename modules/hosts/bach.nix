@@ -31,7 +31,6 @@ in
       calibre
       miniflux
       hugo
-      ghost
       static-files
 
       ({ pkgs, ... }: {
@@ -76,10 +75,6 @@ in
         users.groups.resolvconf.gid = 983;
         users.groups.systemd-coredump.gid = 984;
 
-        virtualisation.docker.enable = true;
-        virtualisation.oci-containers.backend = "docker";
-        environment.persistence."/persist".directories = [ "/var/lib/docker" ];
-
         time.timeZone = "Europe/Madrid";
 
         programs.fish.enable = true;
@@ -105,7 +100,6 @@ in
         users.users.root.initialHashedPassword = "$6$9joJdfYW9u7849iq$5jFEhesBUwM6yvSA8g8iMiog15pFTOIOEF28zzmgB2P1evUludMC0vboBsCFDylCvQWw6WFu8tc7VkhMjYKzr.";
 
         users.users.michele = {
-          extraGroups = [ "docker" ];
           initialHashedPassword = "$6$DptngetaTDY6G.qa$tEWVAEGlpkvzUltZXYaZpQz4c40KOQG3eQXhwhcQn33oM02NyemgBFSa/G6Mzb9iKbTroI7uKd7AWgBfKuUGF.";
           openssh.authorizedKeys.keys = [
             env.userSettings.satie.ssh.michele.value

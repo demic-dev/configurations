@@ -13,6 +13,10 @@ let
   port = 41921;
 in
 {
+  virtualisation.docker.enable = true;
+  virtualisation.oci-containers.backend = "docker";
+  users.users.michele.extraGroups = [ "docker" ];
+
   systemd.tmpfiles.rules = [
     "d /var/lib/${serviceName} 0755 root root -"
     "d /var/lib/${serviceDb} 0755 root root -"
@@ -47,7 +51,8 @@ in
 
       ${serviceName} = {
         image = "ghost:latest";
-        ports = [ "${toString port}:2368" ];
+        # Docker's own NAT rules bypass the NixOS firewall, so publish on loopback only.
+        ports = [ "127.0.0.1:${toString port}:2368" ];
         
         environmentFiles = [ config.age.secrets.ghost-storiedisilicio-env.path ];
         environment = {
@@ -92,6 +97,7 @@ in
 
   # Persistence
   environment.persistence."/persist".directories = [
+    "/var/lib/docker"
     {
       directory = "/var/lib/${serviceName}";
       user = "root";
