@@ -11,6 +11,12 @@
     recommendedProxySettings = true;
     recommendedTlsSettings = true;
 
+    # Otherwise nginx answers unknown hosts with the first vhost alphabetically.
+    virtualHosts."_" = {
+      default = true;
+      rejectSSL = true;
+      locations."/".return = "444";
+    };
   };
   
   networking.firewall.allowedTCPPorts = [ 80 443 ];
