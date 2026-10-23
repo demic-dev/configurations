@@ -83,17 +83,12 @@ in
           inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
           tailscale
           btop
-          gcc
           git-agecrypt
           vim
           git
           fd
           ripgrep
           git-crypt
-          zathura
-          texliveFull
-          pandoc
-          go
           hugo
         ];
         users.mutableUsers = false;
