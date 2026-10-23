@@ -9,6 +9,8 @@ in
     {
       services.llama-cpp = {
         enable = true;
+        # ponytail: nodejs_latest (26) isn't cached on aarch64 and fails its tests; drop once Hydra has it.
+        package = pkgs.llama-cpp.override { nodejs_latest = pkgs.nodejs_24; };
 
         settings = {
           model = pkgs.fetchurl {
