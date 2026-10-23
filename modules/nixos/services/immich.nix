@@ -177,11 +177,18 @@ in
     };
 
     environment.BORG_RSH = "ssh -i ${env.userSettings.bach.ssh.root.location} -o IdentitiesOnly=yes";
+    environment.BORG_CACHE_DIR = "/var/cache/borg";
     compression = "auto,lzma";
     startAt = "*-*-* 02:00:00";
 
     user = "root";
     group = "root";
+  };
+
+  # The module's ProtectSystem=strict only lets borg write ~/.cache/borg; 0700 because the files cache lists every backed-up path.
+  systemd.services.borgbackup-job-immich.serviceConfig = {
+    CacheDirectory = "borg";
+    CacheDirectoryMode = "0700";
   };
 
   # Agenix
