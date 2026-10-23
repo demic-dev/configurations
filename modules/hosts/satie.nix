@@ -171,7 +171,7 @@ in
             bitwarden-desktop
             signal-desktop
             vesktop
-            calibre
+            # calibre
             nextcloud-client
             chromium
             librepods
