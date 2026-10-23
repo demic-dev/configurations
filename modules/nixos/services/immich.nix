@@ -21,17 +21,12 @@ let
     proxyPass = "http://127.0.0.1:${toString port}";
     proxyWebsockets = true;
     extraConfig = ''
-      proxy_set_header Host $host;
-      proxy_set_header X-Forwarded-Proto $scheme;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      proxy_max_temp_file_size 16384m;
-
-      # Stream the upload straight to Immich instead of buffering the whole
-      # request body to /tmp first. The root fs is a small tmpfs (~3.9G in RAM),
-      # so buffering a 1G+ video fills it and nginx 500s mid-upload.
       proxy_request_buffering off;
+      client_body_buffer_size 1024k;
       client_max_body_size ${maxBodySize};
+      proxy_read_timeout 600s;
+      proxy_send_timeout 600s;
+      send_timeout 600s;
     '';
   };
 in
