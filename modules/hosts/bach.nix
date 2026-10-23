@@ -79,6 +79,14 @@ in
 
         systemd.coredump.settings.Coredump.Storage = "none";
 
+        # bach builds for both hosts; keep builds from pushing the services out of RAM.
+        nix.daemonCPUSchedPolicy = "batch";
+        nix.daemonIOSchedClass = "idle";
+        systemd.services.nix-daemon.serviceConfig = {
+          MemoryHigh = "2G";
+          MemoryMax = "3G";
+        };
+
         programs.fish.enable = true;
 
         environment.systemPackages = with pkgs; [
