@@ -77,6 +77,8 @@ in
 
         time.timeZone = "Europe/Madrid";
 
+        systemd.coredump.settings.Coredump.Storage = "none";
+
         programs.fish.enable = true;
 
         environment.systemPackages = with pkgs; [
