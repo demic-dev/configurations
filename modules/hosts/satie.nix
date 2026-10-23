@@ -174,8 +174,6 @@ in
             calibre
             nextcloud-client
             chromium
-            obsidian
-            vscodium
             librepods
             vimPlugins.typst-preview-nvim
             websocat # websocket client required by TypstPreview

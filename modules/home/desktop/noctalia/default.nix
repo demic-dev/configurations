@@ -27,8 +27,6 @@
                 "fastfetch"
                 "lazygit"
                 "neovim"
-                "obsidian"
-                "vscode"
                 "zathura"
                 "zen-browser"
               ];
