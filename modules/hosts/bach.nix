@@ -85,6 +85,8 @@ in
         systemd.services.nix-daemon.serviceConfig = {
           MemoryHigh = "2G";
           MemoryMax = "3G";
+          # zram is swap in RAM: without this, builds overflow MemoryMax into it unbounded.
+          MemorySwapMax = "512M";
         };
 
         programs.fish.enable = true;
