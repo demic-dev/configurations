@@ -53,6 +53,21 @@
       neededForBoot = true;
     };
 
+    # nofail drops the ordering before local-fs.target; put it back so nothing writes into the tmpfs underneath.
+    fileSystems."/tmp" = {
+      device = "rpool/local/tmp";
+      fsType = "zfs";
+      options = [ "nofail" "x-systemd.before=local-fs.target" ];
+    };
+
+    fileSystems."/var/cache" = {
+      device = "rpool/local/cache";
+      fsType = "zfs";
+      options = [ "nofail" "x-systemd.before=local-fs.target" ];
+    };
+
+    boot.tmp.cleanOnBoot = true;
+
     swapDevices = [
       { device = "/dev/zvol/rpool/tempswap"; }
     ];
