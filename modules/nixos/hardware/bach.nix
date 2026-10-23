@@ -16,6 +16,7 @@
     boot.extraModulePackages = [ ];
 
     boot.zfs.devNodes = "/dev/disk/by-uuid";
+    boot.kernelParams = [ "zfs.zfs_arc_max=1073741824" ];
     # Single dedicated VM, no shared storage another host could import this pool from,
     # so the double-import risk forceImportRoot=false guards against doesn't apply here.
     # Keeping it true so an OOM-triggered hard reboot recovers on its own instead of
