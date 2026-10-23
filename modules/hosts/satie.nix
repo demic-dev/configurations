@@ -210,7 +210,7 @@ in
 
             bash.enable = true;
 
-            # `update` / `update-remote` come from the shared fish home module.
+            # `update` comes from the shared fish home module.
             fish.enable = true;
           };
 

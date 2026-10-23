@@ -19,21 +19,33 @@ in
           ll = "ls -alF --color=auto";
           la = "ls -A --color=auto";
 
-          # Rebuild the current host from its flake
-          update = "nixos-rebuild switch --flake ${configPath}#${host} --sudo";
-
           # Unlock bach's ZFS pool from its initrd SSH (see disko/remoteZFSDecrypt.nix)
           unlock-bach = "ssh root@${env.userSettings.bach.network.ip.v4} -p 2222";
         };
 
         functions = {
-          # Build locally and deploy to another host: `update-remote <hostname>`
-          update-remote = ''
-            if test (count $argv) -ne 1
-              echo "usage: update-remote <hostname>" >&2
-              return 1
+          # `update [--build host] [--deploy host] [--mode switch|boot|test|…] [nixos-rebuild args]`; defaults: this host, switch.
+          update = ''
+            argparse -i 'b/build=' 'd/deploy=' 'm/mode=' -- $argv
+            or return 1
+            set -l deploy ${host}
+            set -q _flag_deploy; and set deploy $_flag_deploy
+            set -l mode switch
+            set -q _flag_mode; and set mode $_flag_mode
+
+            set -l args $mode --flake ${configPath}#$deploy
+            if set -q _flag_build; and test $_flag_build != ${host}
+              set -a args --build-host $_flag_build
             end
-            nixos-rebuild switch --flake ${configPath}#$argv[1] --target-host $argv[1] --sudo --ask-elevate-password
+            if test $deploy = ${host}
+              set -a args --sudo
+            else
+              # sudo on the target has no terminal to prompt on, so the password is asked here and piped over ssh.
+              set -a args --target-host $deploy --ask-sudo-password
+            end
+            contains -- --build-host $args; or contains -- --target-host $args; and set -a args --use-substitutes
+
+            nixos-rebuild $args $argv
           '';
 
           # Give the claude user rw access to a folder (default: cwd), including files created later: `claude-allow [--no-more] [path]`
