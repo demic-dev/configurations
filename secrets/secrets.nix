@@ -92,4 +92,6 @@ in
   # Deployed to satie's ~/.ssh/git-agecrypt_ed25519; its public key is a recipient in
   # ../git-agecrypt.toml. Encrypted to satie's host key so agenix can decrypt it at boot.
   "git-agecrypt-key.age".publicKeys = [ micheleAtSatie satieSystem ];
+
+  "eduroam.age".publicKeys = [ micheleAtSatie satieSystem ];
 }
