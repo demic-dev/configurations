@@ -39,6 +39,8 @@
           # Includes mod settings (mod.*/psu.*/theme.*/zen.mods.*).
           settings = {
             "browser.ctrlTab.sortByRecentlyUsed" = false;
+            # Zen's own zen.tab-unloader.* is dead code since 1.23; this is Firefox's low-memory unloader.
+            "browser.tabs.unloadOnLowMemory" = true;
 
             "browser.urlbar.showSearchSuggestionsFirst" = false;
             "browser.urlbar.suggest.engines" = true;
