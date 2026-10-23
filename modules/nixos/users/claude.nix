@@ -40,9 +40,11 @@
       ];
 
       systemd.tmpfiles.rules = [
-        "d /home/michele/repos 2755 michele repos -"
+        "d /home/michele/repos 2750 michele repos -"
         "a+ /home/michele/repos - - - - g:repos:rwX,d:g:repos:rwX"
         "L+ /home/michele/nixos - - - - /home/michele/repos/nixos"
+        # Only "other" is touched, so the repos entries claude-allow adds stay effective.
+        "a+ /home/michele/Nextcloud - - - - other::---,default:other::---"
       ];
     };
 }

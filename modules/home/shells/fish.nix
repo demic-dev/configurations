@@ -60,6 +60,13 @@ in
             else
               setfacl -R -m g:repos:rwX,d:g:repos:rwX $dir
               and echo "claude can now access $dir"
+              # Traverse-only on the parents (never downgrading an existing entry), so claude reaches $dir without listing them.
+              set -l p (dirname $dir)
+              while string match -q "$HOME/*" $p
+                getfacl -cp $p | string match -q 'group:repos:*'
+                or setfacl -m g:repos:x $p
+                set p (dirname $p)
+              end
             end
           '';
         };
