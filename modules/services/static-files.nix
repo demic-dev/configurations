@@ -42,6 +42,7 @@ in
 
     extraConfig = ''
       allow all;
+      ssl_verify_client on;
     '';
 
     root = filesRoot;

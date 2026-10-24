@@ -52,6 +52,7 @@ in
 
       extraConfig = ''
         allow all;
+        ssl_verify_client on;
       '';
 
       root = webRoot;
@@ -67,6 +68,7 @@ in
 
       extraConfig = ''
         allow all;
+        ssl_verify_client on;
       '';
 
       root = webRoot;

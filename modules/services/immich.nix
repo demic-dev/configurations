@@ -102,6 +102,7 @@ in
     # Share pages only read, plus POST for password unlock, downloads and "allow upload" shares.
     extraConfig = ''
       allow all;
+      ssl_verify_client on;
       if ($request_method !~ ^(GET|HEAD|POST)$) { return 405; }
     '';
 
