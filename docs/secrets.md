@@ -62,7 +62,7 @@ A plain `agenix --rekey` fails on any secret the current key can't decrypt. The 
 
 ## git-agecrypt
 
-`env.nix` reads some values with `lib.fileContents ./secrets/sensitive/<name>.age`. On GitHub those files are ciphertext. In satie's working tree, git-agecrypt's smudge filter has decrypted them, so evaluation reads the plain value. When a file is committed, the clean filter encrypts it again.
+`env.nix` reads some values with `lib.fileContents ./secrets/sensitive/<name>.age`, through [git-agecrypt]'s clean and smudge filters. On GitHub those files are ciphertext. In satie's working tree, git-agecrypt's smudge filter has decrypted them, so evaluation reads the plain value. When a file is committed, the clean filter encrypts it again.
 
 This has consequences:
 
@@ -79,6 +79,8 @@ agenix decrypts at activation, on the host. These values are needed earlier, whi
 </details>
 
 ### Add a sensitive value
+
+`./scripts/add-sensitive.fish` asks for the name, the value and the recipients, then does the three steps below. By hand:
 
 ```sh
 printf 'the-value' > secrets/sensitive/NAME.age
@@ -122,7 +124,7 @@ The `reset --soft` folds the two temporary commits into one, so only the re-encr
 
 ### Give another host access
 
-Every host that should decrypt uses the same git-agecrypt key, so no re-encryption is needed. Deploy the key to the new host with an `age.secrets.git-agecrypt-key` block like satie's (`modules/hosts/satie/users.nix`) and a rule in `secrets/secrets.nix`, then clone.
+Every host that should decrypt uses the same git-agecrypt key, so no re-encryption is needed. Deploy the key to the new host with an `age.secrets.git-agecrypt-key` block like satie's (`modules/hosts/satie/users.nix`) and a rule in `secrets/secrets.nix`, then clone. Only a host that should decrypt with a key of its own needs to become a recipient, followed by the re-encryption above.
 
 ### If git keeps asking for a passphrase
 
@@ -134,3 +136,5 @@ git config --remove-section diff.git-agecrypt
 ```
 
 Don't use `git-agecrypt deinit`: it targets a misspelled section (`fiter.git-agecrypt`) and leaves the filter in place.
+
+[git-agecrypt]: https://github.com/vlaci/git-agecrypt

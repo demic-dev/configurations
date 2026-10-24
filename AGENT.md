@@ -43,7 +43,7 @@ modules/base/          every host: core, michele, ssh, tailscale, impermanence
 modules/desktop/       niri, noctalia, gtk, xdg, zen, ghostty, …
 modules/dev/           git, fish (incl. `update`), nvim, claude
 modules/services/      one file per service, plus tailnet-server
-secrets/               agenix + git-agecrypt (see secrets/README.md)
+secrets/               agenix + git-agecrypt (see docs/secrets.md)
 docs/                  the documentation (mdBook, served on the tailnet)
 ```
 
