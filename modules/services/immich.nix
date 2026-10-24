@@ -107,7 +107,7 @@ in
   '');
 
   # Nginx
-  # Enabled public vhost for now until I find a solution to sharing the service with others
+  # Public: share links only; the apps use the internal domain.
   services.nginx.virtualHosts.${domain} = {
     serverName = domain;
 
@@ -115,24 +115,25 @@ in
     useACMEHost = fqdn;
     forceSSL = true;
 
-    # locations = {
-    locations."/" = proxyLocation "100m";
-      # "/".return = "404";
-      #
-      # # Share pages and the frontend bundle they load
-      # "/share/" = proxyLocation "5m";
-      # "/s/" = proxyLocation "5m";
-      # "/_app/" = proxyLocation "5m";
-      # "= /favicon.ico" = proxyLocation "5m";
-      # "= /custom.css" = proxyLocation "5m";
-      #
-      # # API routes used by share pages: shared-link lookup (incl. password
-      # # unlock), album timeline buckets, thumbnails/originals/video playback,
-      # # downloads, server config. Unauthenticated requests without a valid
-      # # share key/slug are rejected by Immich itself. Body size stays at 100m
-      # # so "allow upload" shares work.
-      # "~ ^/api/(shared-links?|assets?|albums?|timeline|download|server(-info)?)(/|$)" = proxyLocation "100m";
-    # };
+    # Share pages only read, plus POST for password unlock, downloads and "allow upload" shares.
+    extraConfig = ''
+      allow all;
+      if ($request_method !~ ^(GET|HEAD|POST)$) { return 405; }
+    '';
+
+    locations = {
+      "/".return = "404";
+
+      "/share/" = proxyLocation "5m";
+      "/s/" = proxyLocation "5m";
+      "/_app/" = proxyLocation "5m";
+      # favicons, custom.css, manifest.json, timeline skeletons
+      "~ ^/[\\w.-]+\\.(ico|png|css|json)$" = proxyLocation "5m";
+
+      # Upstream's shared-link routes (server/src/controllers/index.spec.ts) plus the public server/* the
+      # web app loads. No {n} quantifiers: nixpkgs' config formatter splits them into blocks.
+      "~ ^/api/(shared-links/(me|login)|albums/[0-9a-f-]+(/map-markers)?|assets(/[0-9a-f-]+(/(original|thumbnail|video/playback|video/stream/.+))?)?|timeline/buckets?|download/(info|archive)|search/metadata|server/(config|features|media-types|version|ping))$" = proxyLocation "100m";
+    };
   };
 
   services.nginx.virtualHosts.${internalDomain} = {
