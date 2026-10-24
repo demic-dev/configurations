@@ -2,87 +2,87 @@
 
 One **dendritic** flake for all my machines:
 
-- **`bach`** — aarch64-linux VPS. ~12 self-hosted services (Nextcloud, Immich, Ghost,
-  Miniflux, Calibre-Web, a Hugo site…), ZFS + impermanence with remote LUKS/ZFS unlock,
-  agenix + git-agecrypt secrets.
-- **`satie`** — aarch64-linux Apple-Silicon (Asahi) laptop. Hyprland + DankMaterialShell
-  desktop, agenix secrets.
+- **`bach`** — aarch64-linux VPS. Self-hosted services (Nextcloud + OnlyOffice, Immich,
+  Miniflux, Calibre-Web, a Hugo site, static files; Ghost is configured but off). Encrypted ZFS
+  unlocked over SSH in the initrd, tmpfs root with impermanence. Public on 80/443 only; everything
+  else, SSH included (Tailscale SSH), goes through the tailnet.
+- **`satie`** — aarch64-linux Apple-Silicon (Asahi) laptop. niri + noctalia desktop.
 
 ## The dendritic pattern
 
 The flake is built with [flake-parts] + [import-tree]. **Every `.nix` file under `./modules`
-is auto-imported** as a flake-parts module — there is no central list of imports to maintain.
+is auto-imported** as a flake-parts module, so there is no list of imports to maintain. Other files
+(`config.kdl`, firmware, CA certificates) are ignored and sit next to the module that uses them.
 
 A file under `modules/` does one of two things:
 
-1. **Registers an aspect** — a reusable, self-contained piece of config:
+1. **Registers an aspect**: a self-contained piece of config, one file per *thing*. When a
+   feature has a system half and a home half, both live in the same file:
    ```nix
-   # modules/nixos/services/immich.nix
-   { ... }: {
-     flake.nixosModules.immich = { config, pkgs, env, ... }: {
-       services.immich.enable = true;
-       # …everything Immich needs: nginx vhost, postgres, redis, backup, fail2ban…
-     };
+   # modules/desktop/niri/default.nix
+   { config, ... }: {
+     flake.nixosModules.niri = { programs.niri.enable = true; };
+     flake.homeModules.niri = { pkgs, ... }: { xdg.configFile."niri/config.kdl".source = ./config.kdl; };
    }
    ```
-   NixOS aspects register under `flake.nixosModules.<name>`; home-manager aspects under
-   `flake.homeModules.<name>`. **Registering an aspect does nothing on its own** — it just
-   makes it available.
-
-2. **Assembles a host** — `modules/hosts/<host>.nix` lists the aspects that machine runs.
-   This is the single **toggle surface**:
-   ```nix
-   # modules/hosts/bach.nix (excerpt)
-   modules = with config.flake.nixosModules; [
-     bach-hardware core networking optimization users sudo
-     ssh tailscale nginx acme postgresql fail2ban backup
-     nextcloud immich calibre miniflux hugo ghost
-   ];
-   ```
-
-### Recipes
-
-- **Add a service / app** → create a file in `modules/nixos/services/` (or
-  `modules/home/…`) that registers `flake.nixosModules.<x>` / `flake.homeModules.<x>`,
-  then add `<x>` to the host's module list.
-- **Add a host** → create `modules/hosts/<host>.nix` with a `flake.nixosConfigurations.<host>`
-  that lists the aspects it wants.
-- **Toggle a service on a host** → comment/uncomment its name in that host's module list.
-  (No `enable` flags — the import *is* the switch.)
+   **Registering does nothing on its own.**
+2. **Assembles a host**: `modules/hosts/<host>/default.nix` lists the aspects that machine runs.
+   The import is the switch; there are no `enable` flags.
 
 ### Layout
 
 ```
-flake.nix                     # flake-parts entry: home-manager flakeModule + import-tree ./modules
-env.nix                       # shared settings hub, imported per host, passed via specialArgs
+flake.nix            flake-parts entry: home-manager flakeModule + import-tree ./modules
+env.nix              shared settings, passed to every module as `env`
 modules/
-  hosts/{bach,satie}.nix     # per-machine assembly + toggle surface
-  nixos/                      # flake.nixosModules.<x>
-    core.nix networking.nix optimization.nix sudo.nix users.nix desktop.nix
-    hardware/{bach,asahi}.nix
-    services/*.nix
-  home/                       # flake.homeModules.<x>
-    git.nix  shells/*.nix  desktop/*.nix
-disko/                        # bach ZFS + impermanence (imported by nixos/hardware/bach.nix)
-secrets/                      # see secrets/README.md
+  hosts/<host>/      default.nix: nixosConfigurations.<host>, its aspect list, host basics
+                     hardware.nix (+ zfs.nix on bach) → <host>-hardware
+                     network.nix, users.nix (+ persistence.nix, eduroam.nix) → the <host> aspect
+  base/              core, michele, ssh, tailscale, impermanence
+  desktop/           desktop, niri, noctalia, gtk, xdg, zen, ghostty, screenshot, pcmanfm
+  dev/               git, fish, nvim, claude
+  services/          nginx, acme, backup, nextcloud, immich, miniflux, …, tailnet-server
+secrets/             agenix + git-agecrypt (see secrets/README.md)
+docs/RECOVERY.md     disaster recovery
 ```
+
+### Recipes
+
+- **Add a service or app**: a new file in the right folder registering
+  `flake.nixosModules.<x>` and/or `flake.homeModules.<x>`, then add `<x>` to the host's NixOS list
+  (`hosts/<host>/default.nix`) or home list (`hosts/<host>/users.nix`).
+- **Toggle one**: comment or uncomment its name in that list.
+- **Add a host**: a new `modules/hosts/<host>/` folder.
+- **Persistence** lines stay with the service they belong to (`environment.persistence."/persist"`).
+  A host without `/persist` imports `impermanence` and sets `environment.persistence."/persist".enable = false`,
+  which makes those lines inert (that's satie).
 
 > **`env.nix` note:** shared values (`env.cloudSettings`, `env.userSettings`) are threaded
 > through modules via `specialArgs`/`extraSpecialArgs` rather than flake-parts options. This
 > is a deliberate, pragmatic exception to strict dendritic purity that keeps every module
 > body plain NixOS/home-manager config.
 
-## Build / switch
+## Build and deploy
+
+`update` is a fish function on every host:
 
 ```bash
-nixos-rebuild switch --flake .#bach     # on bach
-nixos-rebuild switch --flake .#satie   # on satie
-nix flake check                         # evaluate both configurations
+update                          # build here, switch this host
+update -b bach                  # build on bach, switch this host
+update -b bach -d bach          # build on bach, switch bach
+update -d bach -m boot          # build here, make it bach's next boot
+update -b bach -m test --show-trace   # any other flag goes to nixos-rebuild
+unlock-bach                     # type the ZFS passphrase into bach's initrd after a reboot
+nix flake check                 # evaluate both configurations
 ```
 
-Secrets decrypt at activation, not evaluation. Note that `env.cloudSettings.*` reads
-git-agecrypt files under `secrets/sensitive/`; a full local `nix eval` of `bach` only
-produces real values where that smudge filter is active.
+Evaluate on satie: git-agecrypt only decrypts `secrets/sensitive/` in that checkout, so a
+configuration evaluated anywhere else gets ciphertext for bach's IP, domains and email. agenix
+secrets (`secrets/*.age`) decrypt at activation, never at evaluation.
+
+Builds on bach run in nix-daemon's cgroup, capped at 3 GB RAM + 512 MB swap so they can't push the
+services out. Packages that compile from source and need more (spotifast, calibre's Python chain)
+are better built on satie.
 
 ## Backups & restore
 
@@ -93,7 +93,8 @@ impermanence wipes the rest on boot):
   Fast, on-host, free. Your first line of defence for "undo the last few hours/days".
 - **[borgbackup]** — encrypted **offsite** copies at BorgBase, in two jobs:
   - `generic` (`borgbackup-job-generic.service`, ~01:00) → `/home`, Nextcloud, static files,
-    Postgres, ACME, Calibre, Ghost, Tailscale, logs, machine-id.
+    Postgres, ACME, Calibre, Tailscale, logs, machine-id, the ssh host keys (and Ghost's data while
+    Ghost is enabled).
   - `immich` (`borgbackup-job-immich.service`, ~02:00) → the Immich media library.
 
 Each borg job takes its **own** throwaway ZFS snapshot (`@generic` / `@immich`), bind-mounts it,
