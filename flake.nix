@@ -45,7 +45,11 @@
       url = "github:noctalia-dev/noctalia-greeter";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    fastpotify.url = "github:crmne/fastpotify";
+    fastpotify = {
+      url = "github:crmne/fastpotify";
+      # Otherwise it links an older glibc than the system's Mesa needs, and EGL fails to load.
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     hister = {
       url = "github:asciimoo/hister";
       inputs.nixpkgs.follows = "nixpkgs";
