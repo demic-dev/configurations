@@ -21,6 +21,7 @@ in
       # services
       ssh
       tailscale
+      tailnet-server
       nginx
       acme
       postgresql
