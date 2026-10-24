@@ -94,7 +94,7 @@ window-rule {
 }
 
 window-rule {
-    match app-id="^(spotifast|fastpotify)$"
+    match app-id="^spotifast$"
     open-on-workspace "spotify"
 }
 
