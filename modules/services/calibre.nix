@@ -5,6 +5,10 @@
 let
   fqdn = env.cloudSettings.fqdn;
   domain = "${env.cloudSettings.services.calibre.subdomain}.${fqdn}";
+
+  internalFqdn = env.cloudSettings.internal;
+  internalDomain = "${env.cloudSettings.services.calibre.subdomain}.${internalFqdn}";
+
   port = env.cloudSettings.services.calibre.port;
   calibreLibrary = "/data/nextcloud/data/micheledecillis/files/calibre";
 in
@@ -21,6 +25,7 @@ in
   };
 
   # Nginx
+  # Only the OPDS feed is public, for KOReader on the Kindle.
   services.nginx.virtualHosts.${domain} = {
     serverName = domain;
 
@@ -28,9 +33,27 @@ in
     useACMEHost = fqdn;
     forceSSL = true;
 
+    extraConfig = ''
+      allow all;
+    '';
+
+    locations."/".return = "404";
+    locations."/opds" = {
+      recommendedProxySettings = true;
+      proxyPass = "http://[::1]:${toString port}";
+    };
+  };
+
+  services.nginx.virtualHosts.${internalDomain} = {
+    serverName = internalDomain;
+
+    enableACME = false;
+    useACMEHost = internalFqdn;
+    forceSSL = true;
+
     locations."/" = {
       recommendedProxySettings = true;
-      proxyPass = "http://localhost:${toString port}";
+      proxyPass = "http://[::1]:${toString port}";
 
       proxyWebsockets = true;
       extraConfig = ''
