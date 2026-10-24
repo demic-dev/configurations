@@ -1,209 +1,127 @@
 # Disaster recovery
 
-> The point of this file is that at 2 a.m., with both machines gone, you are not
-> reconstructing the trust model from memory. Read the model once, then follow the
-> runbook for your scenario.
+How to get both machines back after losing one or both. The point of this page is that at 2 a.m., with the machines gone, the trust model doesn't have to be rebuilt from memory. Read the model once, then follow the runbook for the situation.
 
-**First fact:** the configuration itself lives on GitHub
-(`git@github.com:demic-dev/configurations.git`) and is fully pushed. A total
-hardware loss does **not** lose the config — only the *keys* and *data* are at
-risk, and those are what this document is about.
+The configuration itself is on GitHub (`git@github.com:demic-dev/configurations.git`) and fully pushed. Losing all the hardware doesn't lose the config. What's at risk is keys and data, and that's what this page is about.
 
----
+## Trust model
 
-## 1. The trust model (why the steps are what they are)
-
-Every secret is encrypted to one or more **public** keys; recovering it needs the
-matching **private** key. The private keys and who they belong to:
+Every secret is encrypted to one or more public keys, and recovering it needs the matching private key. The private keys:
 
 | Key | Private half lives at | Public name in `env.nix` |
-|-----|-----------------------|--------------------------|
-| bach host key | `/etc/ssh/ssh_host_ed25519_key` (bind-mounted from `/persist`) | `bachSystem` (`bach.ssh.root`) |
+|---|---|---|
+| bach host key | `/persist/etc/ssh/ssh_host_ed25519_key`, bind-mounted to `/etc/ssh/` | `bachSystem` (`bach.ssh.root`) |
 | satie host key | `/etc/ssh/ssh_host_ed25519_key` | `satieSystem` (`satie.ssh.root`) |
 | michele@bach | `/home/michele/.ssh/id_ed25519` on bach | `micheleAtBach` |
 | michele@satie | `/home/michele/.ssh/id_ed25519` on satie | `micheleAtSatie` |
-| git-agecrypt (passphraseless) | `/home/michele/.ssh/git-agecrypt_ed25519` on satie | `satie.ssh.git-agecrypt` |
-| bach initrd/boot key | `/persist/etc/secrets/initrd/ssh_host_ed25519_key` | `bach.ssh.boot` |
+| git-agecrypt, passphraseless | `/home/michele/.ssh/git-agecrypt_ed25519` on satie | `satie.ssh.git-agecrypt` |
+| bach initrd host key | `/persist/etc/secrets/initrd/ssh_host_ed25519_key` | `bach.ssh.boot` |
 
-Two independent encryption systems are in play:
+Two encryption systems are involved (details in [Secrets](secrets.md)):
 
-- **agenix** (`secrets/*.age`) — decrypted at boot using the host's **own** host
-  key as identity (`age.identityPaths` = `services.openssh.hostKeys`). A host can
-  only decrypt what it is a recipient of.
-- **git-agecrypt** (`secrets/sensitive/*.age`) — decrypted in the working tree by
-  a git filter, recipients `micheleAtBach` + the git-agecrypt key. These are read
-  **at flake-eval time** via `lib.fileContents` in `env.nix` (bach's IP, gateway,
-  subdomains, borg repo URLs, …), so **bach cannot even be built without them
-  decrypted.**
+- agenix (`secrets/*.age`) decrypts at boot, with the host's own host key as identity. A host can only decrypt what it's a recipient of.
+- git-agecrypt (`secrets/sensitive/*.age`) decrypts in the working tree through a git filter, with michele@bach's key or the git-agecrypt key, its two recipients. `env.nix` reads these files at evaluation time (bach's IP, gateway, subdomains, borg repository URLs), so bach can't even be built without them decrypted.
 
-agenix recipient groups (`secrets/secrets.nix`):
+### Recovery files
 
-- `systems = [ bachSystem, satieSystem ]`
-- `micheles = [ micheleAtBach, micheleAtSatie ]`
-- bach-only secrets (`backup_passphrase`, `immich-backup_passphrase`,
-  `nextcloud_root_pass`, `cloudflare_dns_challenge`, `miniflux_admin_pass`,
-  `ghost-*`) → `[ bachSystem, micheleAtBach ]`
-- satie-only secrets (`michele-password`, `git-agecrypt-key`) → `[ micheleAtSatie, satieSystem ]`
-- `git-email`, `noreply-github-email` → `micheles ++ systems`
+Two kinds of agenix file exist only for recovery, each encrypted to exactly the key that needs it:
 
-### Recovery blobs (the cross-host safety net)
+- `root-at-bach` is encrypted to `satieSystem`, and `root-at-satie` to `bachSystem`. A host never decrypts its own root key. The other host does, and hands it back during recovery. These files aren't deployed anywhere.
+- `michele-at-bach` is encrypted to `bachSystem`, and `michele-at-satie` to `satieSystem`. These are deployed at boot. Once a host's root key is back, the host redeploys its own michele key at the next boot, with no extra step.
 
-Each recovery blob is encrypted to exactly the key that needs it:
+That's what makes losing one host recoverable without the off-machine kit: the survivor decrypts the dead host's `root-at-*` file and hands over its key.
 
-- **`root-at-bach` → `satieSystem`**, **`root-at-satie` → `bachSystem`** — a host
-  never decrypts its *own* (undeployed) root key, so each is encrypted only to the
-  *other* host, which is the one that hands it back during recovery.
-- **`michele-at-bach` → `bachSystem`**, **`michele-at-satie` → `satieSystem`** —
-  these *are* deployed at boot, so each is encrypted to its own host's system key.
-  They are recovered **for free**: restoring a host's root key lets that host
-  redeploy its own michele key on the next boot — no separate step.
+If both hosts are gone, nothing can decrypt the `root-at-*` files. That's the total-loss case, and the reason the kit exists.
 
-This is what makes **single-host** recovery possible without the off-machine kit:
-the survivor decrypts the dead host's `root-at-*` blob and hands you its key.
+> [!WARNING]
+> Never add an `age.secrets.root-at-*` entry with its `path` set to the host key. That points agenix at its own identity, and the host decrypts nothing after the next reboot.
 
-Two things to remember about them:
+## Off-machine kit
 
-- **`root-at-*` are NOT deployed to disk.** They are recovery material only. Do
-  **not** add an `age.secrets.root-at-*` with `path = …ssh_host_ed25519_key` — that
-  points agenix at its own identity and bricks the host on the next reboot.
-- They are encrypted to `systems` (both **host** keys). If **both** hosts are gone,
-  nothing on either machine can decrypt them. That is the total-loss case, and it
-  is why the off-machine kit below exists.
+These live outside both machines: in Bitwarden, plus one offline copy (paper or an encrypted USB stick). Check now and then that the list is complete. For total loss, it's the single point of failure.
 
----
+- [ ] The `root@bach` private key (bach's host key). BorgBase authorises it, so it's the way into the backups, and it's bach's identity for agenix. The `generic` archive does contain it, but that archive can only be opened with this key, so the kit is the copy that counts.
+- [ ] The borg passphrase of the `generic` repository.
+- [ ] The borg passphrase of the `immich` repository.
+- [ ] Both borg repository URLs, in plain text. They're in `secrets/sensitive/`, so without a copy here the repositories can't be addressed.
+- [ ] bach's ZFS pool passphrase, typed over ssh on port 2222 at boot. Needed to unlock the existing pool. A rebuild from scratch can set a new one.
+- [ ] Recommended: the git-agecrypt private key. It decrypts `secrets/sensitive/` directly. Without it, the only other recipient is michele@bach's key, which has to be decrypted from `secrets/michele-at-bach.age` with the `root@bach` key first. The backup doesn't contain either key.
 
-## 2. The off-machine recovery kit
+`root@satie` and the michele keys don't need to be in the kit. They come back from bach through `root-at-satie` and `michele-at-*`.
 
-These must live **outside both machines** (Bitwarden + one offline copy — paper /
-encrypted USB). Verify this list is complete periodically; it is the single point
-of failure for total loss.
+## Rules
 
-- [ ] **`root@bach` private key** — authorized at BorgBase; this is your entry into
-      the backups *and* bach's identity for agenix. (Not in the backup — `/etc/ssh`
-      is not a backed-up path — so it can only come from here.)
-- [ ] **borg passphrase (generic repo)** — decrypts the main backup.
-- [ ] **borg passphrase (immich repo)** — decrypts the immich backup.
-- [ ] **both borg repo URLs** — they live in `secrets/sensitive/*.age`, so record
-      them here in plaintext too, or you can't address the repos.
-- [ ] **bach ZFS pool passphrase** — entered at boot over SSH on port 2222 to
-      unlock `rpool`. Needed to unlock the existing pool on any reboot; for a
-      from-scratch rebuild you may set a new one.
-- [ ] *(recommended)* **git-agecrypt private key** (passphraseless) — lets you
-      decrypt `secrets/sensitive/*` and build bach *without* first extracting
-      `/home` from the backup. Removes one ordering dependency in total loss.
+1. A host key is a machine's root of trust. It's restored by hand, never by agenix onto its own path.
+2. Restore a host's key before the first `nixos-rebuild` on it. Otherwise its new random key matches no recipient, and agenix decrypts nothing.
+3. Before building bach, decrypt `secrets/sensitive/`: with the kit's git-agecrypt key, or with michele@bach's key decrypted from `secrets/michele-at-bach.age`.
+4. satie is recovered through bach: bach decrypts satie's host key, then satie decrypts its own secrets. bach's key never decrypts satie's secrets directly.
+5. The backup holds data, not the OS: reinstall from the flake, then restore data.
 
-`root@satie` and the michele keys are **not** required in the kit — they are
-recoverable from bach via the `root-at-satie` / `michele-at-*` blobs.
-
----
-
-## 3. Golden rules
-
-1. A host key is a machine's root of trust. It is restored **out-of-band**, never
-   by agenix onto its own path.
-2. **Restore a host's key BEFORE `nixos-rebuild`** on that host — otherwise its
-   fresh random key matches no recipient and agenix decrypts nothing.
-3. **Extract `/home` (or use the kit's git-agecrypt key) before building bach** —
-   `env.nix` reads `sensitive/*` at eval time.
-4. satie is recovered *through* bach: **bach decrypts satie's key; then satie
-   decrypts satie's own secrets.** bach's key never decrypts satie directly.
-5. The backup holds **data, not the OS**: reinstall from the flake, then restore
-   data. `/etc/ssh` host keys are **not** in the backup.
-
----
-
-## 4. Runbook A — one host lost, the other alive
+## One host lost, the other alive
 
 ### bach died, satie alive
 
-1. Rebuild bach hardware/VM. On satie, decrypt bach's old **root** key — satie is the
-   sole recipient of `root-at-bach` via its host key `satieSystem`:
+1. Get a new VM. On satie, decrypt bach's old host key. satie is the only recipient of `root-at-bach`:
    ```sh
    cd ~/nixos/secrets
    sudo age -d -i /etc/ssh/ssh_host_ed25519_key root-at-bach.age > ssh_host_ed25519_key
    ```
-   (You do **not** decrypt `michele-at-bach` here — it's encrypted only to `bachSystem`,
-   so the rebuilt bach redeploys michele's key itself once its root key is restored.)
-2. Reinstall NixOS on bach from the flake (recreate `rpool` with ZFS encryption,
-   unlock via port 2222). Decrypt `sensitive/*` first — the git-agecrypt key is in
-   satie's `~/.ssh/git-agecrypt_ed25519`, so build/eval from satie or copy the key.
-3. Place the restored `ssh_host_ed25519_key` at `/etc/ssh/ssh_host_ed25519_key`
-   (mode 600, root) on bach **before** the first real rebuild.
-4. `nixos-rebuild switch --flake .#bach`. bach's identity is now `bachSystem`; all
-   bach secrets decrypt.
-5. Restore data from borg (see Runbook B, steps on restore).
+   `michele-at-bach` doesn't need decrypting here. bach redeploys it on its own once its host key is back.
+2. Install NixOS on bach from the flake: recreate `rpool` with ZFS encryption and the datasets listed in step 3 of total loss below, unlocked through port 2222, and create a new initrd host key as in that step. Build from satie, where `secrets/sensitive/` is decrypted, or copy satie's `~/.ssh/git-agecrypt_ed25519` to where you build.
+3. Before the first real rebuild, put the restored key at `/persist/etc/ssh/ssh_host_ed25519_key` on bach (mode 600, owner root). agenix reads it from `/persist`, before impermanence mounts it on `/etc/ssh`.
+4. Run `nixos-rebuild switch --flake .#bach`. bach's identity is `bachSystem` again, and all its secrets decrypt.
+5. Restore the data from borg (see [Backups](bach/backups.md)).
 
 ### satie died, bach alive
 
-1. On bach, decrypt satie's old host key (bach is a recipient via `bachSystem`):
+1. On bach, decrypt satie's old host key. bach is the only recipient of `root-at-satie`:
    ```sh
    cd /path/to/nixos/secrets
    sudo age -d -i /etc/ssh/ssh_host_ed25519_key root-at-satie.age > satie_host_key
    ```
-2. Install NixOS on the new satie from the flake, then place `satie_host_key` at
-   `/etc/ssh/ssh_host_ed25519_key` (mode 600, root) **before** rebuilding.
-3. `nixos-rebuild switch --flake .#satie`. satie's identity is now `satieSystem`,
-   so it decrypts its own `michele-password`, `git-agecrypt-key`, `michele-at-satie`
-   on its own. (bach could not decrypt those two — it only handed satie its key.)
+2. Install NixOS on the new satie from the flake. Before rebuilding, put `satie_host_key` at `/etc/ssh/ssh_host_ed25519_key` (mode 600, owner root).
+3. Run `nixos-rebuild switch --flake .#satie`. satie's identity is `satieSystem` again, so it decrypts `michele-password`, `git-agecrypt-key` and `michele-at-satie` itself. bach couldn't have decrypted those; it only handed satie its key.
 
----
+## Total loss
 
-## 5. Runbook B — total loss (both hosts gone)
+Both host keys are gone, so the recovery files are useless. Everything starts from the kit.
 
-The cross-host blobs are useless here (both host keys are gone). Recover from the
-off-machine kit.
-
-1. From the kit: `root@bach` private key, borg passphrases, repo URLs, ZFS
-   passphrase.
-2. On any machine with `borg`, restore the backups — no NixOS build needed:
+1. From the kit, take the `root@bach` key, both borg passphrases, both repository URLs and the ZFS passphrase.
+2. On any machine with `borg`, restore the backups. No NixOS build needed:
    ```sh
    export BORG_RSH="ssh -i /path/to/root_at_bach_key -o IdentitiesOnly=yes"
-   export BORG_PASSPHRASE="…generic repo passphrase…"
-   borg list   'ssh://…generic-repo-url…'
-   borg extract 'ssh://…generic-repo-url…::<archive>'
-   # repeat with the immich repo URL + its passphrase
+   export BORG_PASSPHRASE="…generic passphrase…"
+   borg list 'ssh://…generic repository URL…'
+   borg extract 'ssh://…generic repository URL…::<archive>'
+   # then the same with the immich URL and passphrase
    ```
-   This gives you `/home` back — including `~/.ssh/git-agecrypt_ed25519` and
-   michele's keys.
-3. **Rebuild bach:**
-   - Reinstall NixOS, recreate `rpool` (ZFS native encryption; set/enter the
-     passphrase; unlock path is port 2222 per `modules/hosts/bach/zfs.nix`) with its
-     datasets: `rpool/local/nix`, `rpool/safe/persist`, `rpool/safe/persist/data`, and
-     `rpool/local/{tmp,cache}` created with `-o mountpoint=legacy` (`/tmp`, `/var/cache`).
-   - Configure git-agecrypt with the key (from the kit or the restored `/home`) so
-     `secrets/sensitive/*` decrypt in the working tree — otherwise bach builds with
-     a garbage IP and never comes up.
-   - Place `root@bach` private key at `/persist/etc/ssh/ssh_host_ed25519_key` (600, root):
-     agenix reads it from `/persist` before impermanence mounts it on `/etc/ssh`.
-   - `nixos-rebuild switch --flake .#bach`. bach can now decrypt everything under
-     `bachSystem`/`systems`.
-   - Restore the extracted data into place (Nextcloud, Postgres, immich, etc.).
-4. **Rebuild satie** — now that bach is alive, follow **Runbook A → "satie died,
-   bach alive."** bach decrypts `root-at-satie.age`; you install it on the new
-   satie; satie decrypts the rest itself.
+   This brings back bach's data, but no key for `secrets/sensitive/`: bach never had the git-agecrypt key, and `~/.ssh/id_ed25519` in the archive is only a symlink into `/run/agenix`. Unless the kit has the git-agecrypt key, decrypt michele@bach's key from a clone of the repository:
+   ```sh
+   age -d -i /path/to/root_at_bach_key secrets/michele-at-bach.age > michele_at_bach_key
+   ```
+3. Rebuild bach:
+   - Install NixOS and recreate `rpool` with ZFS native encryption (set the passphrase; it's typed on port 2222 at every boot, see `modules/hosts/bach/zfs.nix`) and its datasets: `rpool/local/nix`, `rpool/safe/persist`, `rpool/safe/persist/data`, and `rpool/local/tmp` and `rpool/local/cache` created with `-o mountpoint=legacy`. See [Disk and boot](bach/disk.md).
+   - The initrd host key isn't in the backup. Create a new one before installing: installing the bootloader copies it into the initrd as an initrd secret, and fails if the file is missing. From the installer, with the new pool mounted at `/mnt`:
+     ```sh
+     mkdir -p /mnt/persist/etc/secrets/initrd
+     ssh-keygen -t ed25519 -N "" -f /mnt/persist/etc/secrets/initrd/ssh_host_ed25519_key
+     ```
+     Put its public half in `bach.ssh.boot.value` in `env.nix`.
+   - Set up git-agecrypt with the kit's git-agecrypt key or michele@bach's key from step 2 (`git config git-agecrypt.config.identity <key>`, see [Secrets](secrets.md)), so `secrets/sensitive/` decrypts. Otherwise bach builds with a garbage IP and never comes up.
+   - Put the `root@bach` key at `/persist/etc/ssh/ssh_host_ed25519_key` (mode 600, owner root).
+   - Run `nixos-rebuild switch --flake .#bach`. bach can now decrypt everything encrypted to `bachSystem`.
+   - Put the extracted data in place (see [Backups](bach/backups.md)).
+4. Rebuild satie with "satie died, bach alive" above.
 
----
+## After any rebuild
 
-## 6. After any rebuild — housekeeping
-
-- `agenix -r` — re-encrypt every secret to the current recipient set (run after any
-  change to `secrets/secrets.nix` or a rekeyed identity).
-- Confirm the restored host key matches its recorded public half, e.g. on satie:
+- After any change to `secrets/secrets.nix` or to an identity, re-encrypt the secrets to their current recipients with `./scripts/rekey.fish`. It rekeys only the secrets the given key can decrypt (see [Secrets](secrets.md)).
+- Check that a restored host key matches its public half, for example on satie:
   ```sh
-  ssh-keygen -y -f /etc/ssh/ssh_host_ed25519_key
-  # must equal satie.ssh.root.value in env.nix
+  ssh-keygen -y -f /etc/ssh/ssh_host_ed25519_key    # must equal satie.ssh.root.value in env.nix
   ```
-- Re-authorize the relevant host key at BorgBase if you generated a new one instead
-  of restoring the old.
-- Backups are `startAt` 01:00 (generic) / 02:00 (immich); confirm the next run
-  succeeds (`systemctl status borgbackup-job-generic`).
+- If a host got a new key instead of the old one, authorise it at BorgBase.
+- After a new initrd key, satie's `known_hosts` entry for bach on port 2222 no longer matches. Remove it with `ssh-keygen -R '[<bach's IP>]:2222'`.
+- The backups start at 01:00 (`generic`) and 02:00 (`immich`). Check that the next run succeeds: `systemctl status borgbackup-job-generic`.
 
----
-
-## 7. What's in the backup (for reference)
-
-Generic job (`modules/services/backup.nix`), paths: `/home`,
-`/persist/data/nextcloud`, `/persist/data/static-files`, `/etc/machine-id`, `/etc/ssh`
-(host keys), `/var/log`, `/var/lib/{acme,calibre-web,postgresql,tailscale}`. Immich has
-its own job/repo (`modules/services/immich.nix`). **Not** backed up: the nix store / OS
-(rebuilt from the flake), `/var/cache` (borg's and Immich's caches, rebuilt on their own).
+What each backup contains, and what it leaves out, is in [Backups](bach/backups.md).

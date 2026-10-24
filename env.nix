@@ -24,6 +24,7 @@
         subdomain = "rss";
         port = 5401;
       };
+      docs.subdomain = "docs";
       calibre = {
         subdomain = "calibre";
         port = 10291;

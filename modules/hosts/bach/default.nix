@@ -31,6 +31,7 @@ in
       miniflux
       hugo
       static-files
+      docs
 
       bach
       ({ pkgs, inputs, ... }: {
