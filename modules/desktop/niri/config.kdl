@@ -47,7 +47,7 @@ workspace "browser"
 workspace "spotify"
 
 // Started together with the session, Ghostty exits without a word; two seconds later it doesn't.
-// The plain one has no window rule: it lands on the workspace focused at login, term.
+// The plain one lands on the workspace focused at login, term.
 spawn-sh-at-startup "sleep 2; exec ghostty --class=dev.michele.notes -e nvim ~/notes 2>>$XDG_RUNTIME_DIR/ghostty-login.log"
 spawn-sh-at-startup "sleep 2; exec ghostty --gtk-single-instance=false 2>>$XDG_RUNTIME_DIR/ghostty-login.log"
 
@@ -87,6 +87,13 @@ window-rule {
 window-rule {
     match app-id="^dev\\.michele\\.notes$"
     open-on-workspace "notes"
+    open-fullscreen true
+}
+
+// Only the term window opened at login: terminals opened later are not fullscreen.
+window-rule {
+    match app-id="^com\\.mitchellh\\.ghostty$" at-startup=true
+    open-fullscreen true
 }
 
 window-rule {
