@@ -39,3 +39,7 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjDuFgmRgyjZ/Ye/QiFetZ6r+W9SGB4ufJcxzCF0ALP bach",
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILybbzqNCmNotFldfobNebniei51OEG/EW8obXzODK1k satie",
 ]
+"secrets/sensitive/tailscale-policy.hujson.age" = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMjDuFgmRgyjZ/Ye/QiFetZ6r+W9SGB4ufJcxzCF0ALP bach",
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILybbzqNCmNotFldfobNebniei51OEG/EW8obXzODK1k satie",
+]
