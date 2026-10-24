@@ -7,7 +7,6 @@
     in
     {
       environment.persistence."/persist" = {
-        hideMounts = true;
         files = [
           "/etc/machine-id"
           rootSSH

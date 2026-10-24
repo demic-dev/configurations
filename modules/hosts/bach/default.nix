@@ -7,7 +7,7 @@ in
     system = "aarch64-linux";
     specialArgs = { inherit inputs self env; };
     modules = with config.flake.nixosModules; [
-      inputs.impermanence.nixosModules.impermanence
+      impermanence
       inputs.agenix.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
 
