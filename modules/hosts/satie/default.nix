@@ -15,6 +15,8 @@ in
       # machine + shared + desktop aspects
       satie-hardware
       core
+      impermanence
+      tailscale
       desktop
       niri
       noctalia
@@ -67,7 +69,8 @@ in
           inputs.agenix.packages.${pkgs.stdenv.hostPlatform.system}.default
         ];
 
-        services.tailscale.enable = true;
+        # No /persist here: this keeps the persistence lines of shared aspects inert.
+        environment.persistence."/persist".enable = false;
       })
     ];
   };
