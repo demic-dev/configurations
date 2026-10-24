@@ -1,14 +1,9 @@
 { ... }:
 {
-  # bach's machine layer: nixos-generate-config hardware scan + the ZFS/impermanence
-  # wiring it depends on (remote unlock in initrd + the /persist bind mounts).
+  # bach's machine layer, with zfs.nix (remote unlock) and persistence.nix (/persist).
   flake.nixosModules.bach-hardware = { config, lib, pkgs, modulesPath, ... }: {
     imports = [
       (modulesPath + "/profiles/qemu-guest.nix")
-      # disko/ lives at the repo root (outside ./modules so import-tree ignores it);
-      # pulled in here so the aspect carries bach's whole machine layer.
-      ../../../disko/remoteZFSDecrypt.nix
-      ../../../disko/persistence.nix
     ];
 
     boot.initrd.availableKernelModules = [ "xhci_pci" "virtio_scsi" "sr_mod" ];
