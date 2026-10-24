@@ -52,6 +52,8 @@ in
 
     settings = {
       overwriteprotocol = "https";
+      # occ and cron build absolute URLs from this; the installer left http://localhost.
+      "overwrite.cli.url" = "https://${domain}";
       default_phone_region = "IT";
 
       mail_smtpmode = "sendmail";
