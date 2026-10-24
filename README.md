@@ -4,8 +4,10 @@ One **dendritic** flake for all my machines:
 
 - **`bach`** — aarch64-linux VPS. Self-hosted services (Nextcloud + OnlyOffice, Immich,
   Miniflux, Calibre-Web, a Hugo site, static files; Ghost is configured but off). Encrypted ZFS
-  unlocked over SSH in the initrd, tmpfs root with impermanence. Public on 80/443 only; everything
-  else, SSH included (Tailscale SSH), goes through the tailnet.
+  unlocked over SSH in the initrd (port 2222), tmpfs root with impermanence. Public, through Cloudflare
+  only: the website, static files, Immich share links and calibre's OPDS feed. nginx denies everything
+  else unless it comes from the tailnet, SSH included (Tailscale SSH). The Tailscale policy is
+  `secrets/sensitive/tailscale-policy.hujson.age`, pasted into the admin console by hand.
 - **`satie`** — aarch64-linux Apple-Silicon (Asahi) laptop. niri + noctalia desktop.
 
 ## The dendritic pattern
