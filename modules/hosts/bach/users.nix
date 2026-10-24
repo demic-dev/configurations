@@ -23,9 +23,6 @@
 
       users.users.michele = {
         initialHashedPassword = "$6$DptngetaTDY6G.qa$tEWVAEGlpkvzUltZXYaZpQz4c40KOQG3eQXhwhcQn33oM02NyemgBFSa/G6Mzb9iKbTroI7uKd7AWgBfKuUGF.";
-        openssh.authorizedKeys.keys = [
-          env.userSettings.satie.ssh.michele.value
-        ];
       };
 
       # agenix decrypts inside the pre-switch-root initrd activation — ~6s BEFORE

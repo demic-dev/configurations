@@ -19,7 +19,6 @@ in
       michele
 
       # services
-      ssh
       tailscale
       tailnet-server
       nginx
