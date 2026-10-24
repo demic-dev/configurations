@@ -55,7 +55,7 @@ in
   # Agenix
   age.secrets = {
     miniflux_admin_pass = {
-      file = ../../../secrets/miniflux_admin_pass.age;
+      file = ../../secrets/miniflux_admin_pass.age;
     };
   };
 }

@@ -113,10 +113,10 @@ in
   # Agenix
   age.secrets = {
     ghost-storiedisilicio-db-env = {
-      file = ../../../secrets/ghost-storiedisilicio-db-env.age;
+      file = ../../secrets/ghost-storiedisilicio-db-env.age;
     };
     ghost-storiedisilicio-env = {
-      file = ../../../secrets/ghost-storiedisilicio-env.age;
+      file = ../../secrets/ghost-storiedisilicio-env.age;
     };
   };
 }

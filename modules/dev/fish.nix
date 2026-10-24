@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  env = import ../../../env.nix { inherit (inputs.nixpkgs) lib; };
+  env = import ../../env.nix { inherit (inputs.nixpkgs) lib; };
 in
 {
   flake.homeModules.fish =
@@ -19,7 +19,7 @@ in
           ll = "ls -alF --color=auto";
           la = "ls -A --color=auto";
 
-          # Unlock bach's ZFS pool from its initrd SSH (see disko/remoteZFSDecrypt.nix)
+          # Unlock bach's ZFS pool from its initrd SSH (see hosts/bach/zfs.nix)
           unlock-bach = "ssh root@${env.userSettings.bach.network.ip.v4} -p 2222";
         };
 

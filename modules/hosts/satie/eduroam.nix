@@ -3,7 +3,7 @@
   flake.nixosModules.eduroam =
     { config, ... }:
     {
-      age.secrets.eduroam.file = ../../secrets/eduroam.age;
+      age.secrets.eduroam.file = ../../../secrets/eduroam.age;
 
       networking.networkmanager.ensureProfiles = {
         environmentFiles = [ config.age.secrets.eduroam.path ];

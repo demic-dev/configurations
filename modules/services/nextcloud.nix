@@ -121,27 +121,27 @@ in
   # Agenix
   age.secrets = {
     nextcloud_root_pass = {
-      file = ../../../secrets/nextcloud_root_pass.age;
+      file = ../../secrets/nextcloud_root_pass.age;
       owner = "nextcloud";
       group = "nextcloud";
     };
 
     onlyoffice_jwt_secret = {
-      file = ../../../secrets/onlyoffice_jwt_secret.age;
+      file = ../../secrets/onlyoffice_jwt_secret.age;
       owner = "onlyoffice";
       group = "onlyoffice";
       mode = "0440";
     };
 
     onlyoffice_nextcloud_jwt = {
-      file = ../../../secrets/onlyoffice_nextcloud_jwt.age;
+      file = ../../secrets/onlyoffice_nextcloud_jwt.age;
       owner = "nextcloud";
       group = "nextcloud";
       mode = "0440";
     };
 
     onlyoffice_nginx_nonce = {
-      file = ../../../secrets/onlyoffice_nginx_nonce.age;
+      file = ../../secrets/onlyoffice_nginx_nonce.age;
       owner = "onlyoffice";
       group = "onlyoffice";
       mode = "0440";

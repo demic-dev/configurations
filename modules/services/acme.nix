@@ -53,7 +53,7 @@ in
 
   # Agenix
   age.secrets.cloudflare_dns_challenge = {
-    file = ../../../secrets/cloudflare_dns_challenge.age;
+    file = ../../secrets/cloudflare_dns_challenge.age;
     owner = "acme";
     group = "acme";
     mode = "0400";

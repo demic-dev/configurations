@@ -84,7 +84,7 @@ in
   # Agenix
   age.secrets = {
     backup_passphrase = {
-      file = ../../../secrets/backup_passphrase.age;
+      file = ../../secrets/backup_passphrase.age;
     };
   };
 }
