@@ -23,7 +23,7 @@ A file under `modules/` does one of two things:
 1. **Registers an aspect** — `flake.nixosModules.<name>` and/or `flake.homeModules.<name>`: a
    self-contained piece of config, one file per *thing*. If a feature has a system half and a home
    half, both are in that file (e.g. `modules/desktop/niri/default.nix`). `modules/services/immich.nix`
-   carries everything Immich needs (nginx vhost, postgres, redis, backup, fail2ban, persistence).
+   carries everything Immich needs (nginx vhost, postgres, redis, backup, persistence).
    Registering does nothing on its own.
 2. **Assembles a host** — `modules/hosts/<host>/default.nix` lists the aspects that machine runs.
    This is the only toggle surface: the import *is* the switch, there are no `enable` flags.

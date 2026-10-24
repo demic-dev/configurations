@@ -90,22 +90,6 @@ in
     }
   ];
 
-  # Fail2Ban Jail
-   services.fail2ban.jails.immich.settings = {
-    filter = "immich";
-    backend = "systemd";
-    findtime = 86400;
-    bantime  = 43200;
-    maxretry = 5;
-    chain = "FORWARD";
-  };
-
-  environment.etc."fail2ban/filter.d/immich.local".text = pkgs.lib.mkDefault( pkgs.lib.mkAfter ''
-    [Definition]
-    failregex = immich-server.*Failed login attempt for user.+from ip address\s?<ADDR>
-    journalmatch = CONTAINER_TAG=immich-server
-  '');
-
   # Nginx
   # Public: share links only; the apps use the internal domain.
   services.nginx.virtualHosts.${domain} = {

@@ -24,7 +24,6 @@ in
       nginx
       acme
       postgresql
-      fail2ban
       backup
       nextcloud
       immich
