@@ -167,11 +167,14 @@ off-machine kit.
    michele's keys.
 3. **Rebuild bach:**
    - Reinstall NixOS, recreate `rpool` (ZFS native encryption; set/enter the
-     passphrase; unlock path is port 2222 per `disko/remoteZFSDecrypt.nix`).
+     passphrase; unlock path is port 2222 per `modules/hosts/bach/zfs.nix`) with its
+     datasets: `rpool/local/nix`, `rpool/safe/persist`, `rpool/safe/persist/data`, and
+     `rpool/local/{tmp,cache}` created with `-o mountpoint=legacy` (`/tmp`, `/var/cache`).
    - Configure git-agecrypt with the key (from the kit or the restored `/home`) so
      `secrets/sensitive/*` decrypt in the working tree — otherwise bach builds with
      a garbage IP and never comes up.
-   - Place `root@bach` private key at `/etc/ssh/ssh_host_ed25519_key` (600, root).
+   - Place `root@bach` private key at `/persist/etc/ssh/ssh_host_ed25519_key` (600, root):
+     agenix reads it from `/persist` before impermanence mounts it on `/etc/ssh`.
    - `nixos-rebuild switch --flake .#bach`. bach can now decrypt everything under
      `bachSystem`/`systems`.
    - Restore the extracted data into place (Nextcloud, Postgres, immich, etc.).
@@ -199,8 +202,8 @@ off-machine kit.
 
 ## 7. What's in the backup (for reference)
 
-Generic job (`modules/nixos/services/backup.nix`), paths: `/home`,
-`/persist/data/nextcloud`, `/persist/data/static-files`, `/etc/machine-id`,
-`/var/log`, `/var/lib/{acme,calibre-web,postgresql,tailscale}`. Immich has its own
-job/repo (`modules/nixos/services/immich.nix`). **Not** backed up: `/etc/ssh` host
-keys, the nix store / OS (rebuilt from the flake).
+Generic job (`modules/services/backup.nix`), paths: `/home`,
+`/persist/data/nextcloud`, `/persist/data/static-files`, `/etc/machine-id`, `/etc/ssh`
+(host keys), `/var/log`, `/var/lib/{acme,calibre-web,postgresql,tailscale}`. Immich has
+its own job/repo (`modules/services/immich.nix`). **Not** backed up: the nix store / OS
+(rebuilt from the flake), `/var/cache` (borg's and Immich's caches, rebuilt on their own).

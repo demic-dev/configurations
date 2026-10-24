@@ -16,7 +16,7 @@ filter provided by [git-agecrypt](https://github.com/vlaci/git-agecrypt).
 - git-agecrypt only re-encrypts a file when its **plaintext changes**. Changing the recipient
   list alone does **not** re-encrypt existing files (see "rotate recipients" below).
 
-The home-manager git module (`../../modules/home/git.nix`) ships an `init.templateDir`
+The home-manager git module (`../../modules/dev/git/default.nix`) ships an `init.templateDir`
 `post-checkout` hook that auto-runs `git-agecrypt init`, sets the identity, and decrypts — so a
 fresh clone Just Works, provided the identity key is present.
 
