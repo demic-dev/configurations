@@ -55,7 +55,7 @@ in
           git
           ghostty
           fish
-          # hister
+          hister
           niri
           noctalia
           nvim
@@ -76,8 +76,8 @@ in
         };
 
         home.packages = with pkgs; [
-          # Its tests recompile the whole crate with thin LTO and one codegen unit, which OOMs under bach's build cap.
-          # (inputs.fastpotify.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs { doCheck = false; })
+          # Its tests recompile the whole crate with thin LTO and one codegen unit: twice the build for nothing.
+          (inputs.fastpotify.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs { doCheck = false; })
           proton-authenticator
           anki
           zip
