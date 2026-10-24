@@ -1,8 +1,8 @@
 #!/usr/bin/env fish
 #
 # Add a new git-agecrypt "sensitive" value: a value committed encrypted but read as cleartext
-# from the working tree at eval time (see ../../env.nix). The script registers the file and its
-# recipients in ../../git-agecrypt.toml via `git-agecrypt config add`, writes the cleartext, and
+# from the working tree at eval time (see env.nix). The script registers the file and its
+# recipients in git-agecrypt.toml via `git-agecrypt config add`, writes the cleartext, and
 # stages it so git-agecrypt's clean filter encrypts what actually gets committed.
 #
 # Just run it and answer the prompts.
@@ -20,7 +20,7 @@ if test -z "$name"
     exit 1
 end
 
-set -l rel "../secrets/sensitive/$name.age"
+set -l rel "secrets/sensitive/$name.age"
 if test -e "$rel"
     echo "Warning: $rel already exists." >&2
 else
