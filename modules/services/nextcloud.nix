@@ -195,15 +195,6 @@ in
     useACMEHost = internal;
     forceSSL = true;
 
-    # nginx listens publicly on 443, so DNS alone doesn't keep this internal (any Host header works).
-    extraConfig = ''
-      allow 100.64.0.0/10;          # Tailscale IPv4
-      allow fd7a:115c:a1e0::/48;    # Tailscale IPv6
-      allow 127.0.0.1;
-      allow ::1;
-      deny all;
-    '';
-
     locations."/$request_uri" = {
       recommendedProxySettings = true;
       proxyPass = "http://localhost:${builtins.toString port}";

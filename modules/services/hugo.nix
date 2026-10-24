@@ -50,6 +50,10 @@ in
       useACMEHost = fqdn;
       forceSSL = true;
 
+      extraConfig = ''
+        allow all;
+      '';
+
       root = webRoot;
 
       locations = staticFilesLocations;
@@ -60,6 +64,10 @@ in
       enableACME = false;
       useACMEHost = fqdn;
       forceSSL = true;
+
+      extraConfig = ''
+        allow all;
+      '';
 
       root = webRoot;
 

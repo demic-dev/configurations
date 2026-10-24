@@ -40,6 +40,10 @@ in
     useACMEHost = fqdn;
     forceSSL = true;
 
+    extraConfig = ''
+      allow all;
+    '';
+
     root = filesRoot;
 
     # Dotfiles (.htaccess, .git, ...).
