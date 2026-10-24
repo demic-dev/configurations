@@ -9,10 +9,6 @@
       xdgOpenUsePortal = false;
       config = {
         common.default = [ "gtk" ];
-        hyprland.default = [
-          "gtk"
-          "hyprland"
-        ];
         # This user config shadows the system one that programs.niri writes, so niri's
         # screencast portal has to be repeated here or it falls back to plain gtk.
         niri.default = [
