@@ -1,5 +1,36 @@
 { ... }:
 {
+  flake.nixosModules.noctalia =
+    { config, env, ... }:
+    {
+      services.displayManager.noctalia-greeter = {
+        enable = true;
+
+        settings = {
+          session.default = "Niri";
+          user.default = env.userSettings.${config.networking.hostName}.user;
+
+          appearance.theme_mode = "dark";
+
+          output = {
+            width = 2560;
+            height = 1600;
+            scale = 1.25;
+          };
+
+          cursor = {
+            theme = "Adwaita";
+            size = 24;
+          };
+
+          keyboard = {
+            layout = "us";
+            options = "compose:rwin";
+          };
+        };
+      };
+    };
+
   flake.homeModules.noctalia =
     { inputs, config, ... }:
     {

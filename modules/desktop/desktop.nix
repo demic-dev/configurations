@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.nixosModules.desktop = { config, lib, pkgs, env, ... }:
+  flake.nixosModules.desktop = { lib, pkgs, ... }:
     let
       # Bitwarden is installed per-user via home-manager, so its polkit action lands in the user profile where the system polkit daemon never looks.
       bitwardenPolkitAction = pkgs.runCommandLocal "bitwarden-polkit-action" { } ''
@@ -10,35 +10,6 @@
       '';
     in
     {
-    programs.niri.enable = true;
-
-    services.displayManager.noctalia-greeter = {
-      enable = true;
-
-      settings = {
-        session.default = "Niri";
-        user.default = env.userSettings.${config.networking.hostName}.user;
-
-        appearance.theme_mode = "dark";
-
-        output = {
-          width = 2560;
-          height = 1600;
-          scale = 1.25;
-        };
-
-        cursor = {
-          theme = "Adwaita";
-          size = 24;
-        };
-
-        keyboard = {
-          layout = "us";
-          options = "compose:rwin";
-        };
-      };
-    };
-    
     # enable compose key on gtk's apps
     environment.sessionVariables.GTK_IM_MODULE = "simple";
 

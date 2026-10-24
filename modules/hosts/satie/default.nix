@@ -16,6 +16,8 @@ in
       satie-hardware
       core
       desktop
+      niri
+      noctalia
       
       # users
       michele

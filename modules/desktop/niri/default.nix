@@ -1,5 +1,9 @@
 { config, ... }:
 {
+  flake.nixosModules.niri = {
+    programs.niri.enable = true;
+  };
+
   flake.homeModules.niri =
     { pkgs, ... }:
     {
