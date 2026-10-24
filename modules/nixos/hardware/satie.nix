@@ -1,7 +1,6 @@
 { inputs, ... }:
 {
   # satie's machine layer: Apple-Silicon (Asahi) boot + hardware scan.
-  # Shared nix.settings / nix.gc live in core.nix + optimization.nix (both hosts import them).
   flake.nixosModules.satie-hardware = { lib, modulesPath, env, ... }: {
     imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 

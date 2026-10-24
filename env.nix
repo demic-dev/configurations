@@ -67,17 +67,6 @@
       };
     };
 
-    liszt = {
-      # Ephemeral VastAI GPU container (see docs/liszt.md). No configPath: the repo is not
-      # baked into the image. No ssh keys: Tailscale SSH authenticates via tailnet identity.
-      user = "root";
-      host = "liszt";
-
-      home = {
-        path = "/root/";
-      };
-    };
-
     bach = {
       ssh = {
         michele = {
