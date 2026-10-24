@@ -26,6 +26,7 @@ in
       ssh
       print-scan
       # llama-cpp
+      eduroam
 
       ({ config, pkgs, ... }: {
         networking = {
