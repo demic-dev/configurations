@@ -3,7 +3,6 @@
   flake.nixosModules.nextcloud =
 { self, config, pkgs, env, ... }:
 let
-  fqdn = env.cloudSettings.fqdn;
   internal = env.cloudSettings.internal;
   domain = "${env.cloudSettings.services.nextcloud.subdomain}.${internal}";
   port = env.cloudSettings.services.nextcloud.port;
@@ -11,7 +10,7 @@ let
   maxUploadSize = env.cloudSettings.services.nextcloud.maxUploadSize;
   client_max_body_size = env.cloudSettings.services.nextcloud.client_max_body_size;
 
-  officeDomain = "${env.cloudSettings.services.onlyoffice.subdomain}.${fqdn}";
+  officeDomain = "${env.cloudSettings.services.onlyoffice.subdomain}.${internal}";
   officePort = env.cloudSettings.services.onlyoffice.port;
 in
 {
@@ -224,7 +223,7 @@ in
     serverName = officeDomain;
 
     enableACME = false;
-    useACMEHost = fqdn;
+    useACMEHost = internal;
     forceSSL = true;
   };
 
