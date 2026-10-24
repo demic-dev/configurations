@@ -45,7 +45,7 @@ These live outside both machines: in Bitwarden, plus one offline copy (paper or 
 - [ ] The borg passphrase of the `immich` repository.
 - [ ] Both borg repository URLs, in plain text. They're in `secrets/sensitive/`, so without a copy here the repositories can't be addressed.
 - [ ] bach's ZFS pool passphrase, typed over ssh on port 2222 at boot. Needed to unlock the existing pool. A rebuild from scratch can set a new one.
-- [ ] Recommended: the git-agecrypt private key. It decrypts `secrets/sensitive/` directly. Without it, the only other recipient is michele@bach's key, which has to be decrypted from `secrets/michele-at-bach.age` with the `root@bach` key first. The backup doesn't contain either key.
+- [ ] Recommended: the git-agecrypt private key. It decrypts `secrets/sensitive/` directly and saves a step. Without it, use the other recipient, michele@bach's key (no passphrase), decrypted from `secrets/michele-at-bach.age` with the `root@bach` key. The backup doesn't contain either key.
 
 `root@satie` and the michele keys don't need to be in the kit. They come back from bach through `root-at-satie` and `michele-at-*`.
 
