@@ -46,9 +46,10 @@ workspace "notes"
 workspace "browser"
 workspace "spotify"
 
-spawn-at-startup "librepods"
-spawn-at-startup "ghostty" "--class=dev.michele.notes" "-e" "nvim" "/home/michele/notes"
-spawn-at-startup "bitwarden" "--hidden"
+// Started together with the session, Ghostty exits without a word; two seconds later it doesn't.
+// The plain one has no window rule: it lands on the workspace focused at login, term.
+spawn-sh-at-startup "sleep 2; exec ghostty --class=dev.michele.notes -e nvim ~/notes 2>>$XDG_RUNTIME_DIR/ghostty-login.log"
+spawn-sh-at-startup "sleep 2; exec ghostty --gtk-single-instance=false 2>>$XDG_RUNTIME_DIR/ghostty-login.log"
 
 blur {
     passes 2
@@ -117,7 +118,7 @@ binds {
     Mod+Return repeat=false { spawn "ghostty"; }
     Mod+E repeat=false { spawn "pcmanfm"; }
     Mod+M repeat=false { spawn "zen-beta"; }
-    Mod+S repeat=false { spawn "fastpotify"; }
+    Mod+S repeat=false { spawn "spotifast"; }
     Mod+Shift+M repeat=false { spawn "proton-authenticator"; }
     // Same UI, wrapped to hand the capture to satty first.
     Mod+Shift+W repeat=false { spawn "screenshot"; }
