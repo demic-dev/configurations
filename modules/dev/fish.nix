@@ -77,28 +77,27 @@ in
             set -l root /data/static-files
             set -l url https://${env.cloudSettings.services.static-files.subdomain}.${env.cloudSettings.fqdn}
             if set -q _flag_list
-              ssh bach "find $root -mindepth 2 -maxdepth 2 -type f -regextype posix-extended -regex '$root/[0-9a-f]{32}/.*' -printf '%TY-%Tm-%Td\t%s\t%P\n'" | sort | while read -l -d \t date size path
-                set -l f (string split -m1 / -- $path)
-                printf '%s\t%s\t%s\t%s\t%s\n' $f[1] $f[2] (numfmt --to=iec $size) $date $url/(string escape --style=url -- $path)
+              ssh bach "find $root -maxdepth 1 -type f -regextype posix-extended -regex '$root/[a-z0-9]{8}(\.[a-z0-9]{1,10})?' -printf '%TY-%Tm-%Td\t%s\t%f\n'" | sort | while read -l -d \t date size name
+                printf '%s\t%s\t%s\t%s\n' (string sub -l 8 -- $name) (numfmt --to=iec $size) $date $url/$name
               end | column -t -s \t
             else if set -q _flag_delete
-              if not string match -qr '^[0-9a-f]{32}$' -- $_flag_delete
+              if not string match -qr '^[a-z0-9]{8}$' -- $_flag_delete
                 echo "share: not an id: $_flag_delete" >&2
                 return 1
               end
-              ssh bach "rm -r $root/$_flag_delete"
+              ssh bach "find $root -maxdepth 1 -type f -regextype posix-extended -regex '$root/$_flag_delete(\.[a-z0-9]{1,10})?' -print -delete | string length -q"
             else
-              # nginx refuses any path with a dotfile in it.
-              if test (count $argv) -ne 1; or not test -f $argv[1]; or string match -q '.*' -- (path basename -- $argv[1])
-                echo "usage: share <file> | --list | --delete <id> (no dotfiles)" >&2
+              if test (count $argv) -ne 1; or not test -f $argv[1]
+                echo "usage: share <file> | --list | --delete <id>" >&2
                 return 1
               end
-              set -l name (path basename -- $argv[1])
-              set -l id (od -An -N16 -tx1 /dev/urandom | string replace -a ' ' "")
-              # The remote shell is fish; umask 027 leaves the directory and the file readable by nginx's group.
-              ssh bach "umask 027; mkdir $root/$id && cat > $root/$id/"(string escape -- $name) <$argv[1]
+              set -l ext (path extension -- $argv[1] | string lower)
+              string match -qr '^\.[a-z0-9]{1,10}$' -- $ext; or set ext ""
+              set -l id (tr -dc a-z0-9 </dev/urandom | head -c8)
+              # The remote shell is fish: umask 027 leaves the file readable by nginx's group, >? never overwrites.
+              ssh bach "umask 027; cat >?$root/$id$ext" <$argv[1]
               or return 1
-              set -l link $url/$id/(string escape --style=url -- $name)
+              set -l link $url/$id$ext
               echo $link
               command -q wl-copy; and wl-copy $link
             end

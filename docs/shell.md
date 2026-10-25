@@ -67,16 +67,17 @@ share -l | --list
 share -d | --delete id
 ```
 
-Publishes `file` on bach's public static files server at `/<id>/<file name>`, prints the URL, and copies it with `wl-copy` when that's on the `PATH`.
+Publishes `file` on bach's public static files server at `/<id><ext>`, prints the URL, and copies it with `wl-copy` when that's on the `PATH`.
+The id is 8 characters of `a-z0-9`, and `<ext>` is the file's last extension in lower case, for example `/k3x9q2ma.pdf`.
+The original file name is not kept.
 Anyone with the URL can download the file.
-`--list` prints the id, file name, size, date and URL of each file published this way.
-`--delete` removes one, and accepts only an id (32 hex characters).
-Dotfiles are refused.
+`--list` prints the id, size, date and URL of each file published this way.
+`--delete` removes one, and accepts only an id.
 It runs everything through `ssh bach`.
 
 ```sh
 share ~/Documents/report.pdf
-share --delete 0123456789abcdef0123456789abcdef
+share --delete k3x9q2ma
 ```
 
 ### ls, ll, la
