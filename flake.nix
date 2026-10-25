@@ -58,6 +58,10 @@
       url = "github:demic-dev/nvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    poco = {
+      url = "github:demic-dev/poco";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = rec {

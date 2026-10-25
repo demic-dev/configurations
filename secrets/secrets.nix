@@ -44,6 +44,12 @@ in
     micheleAtBach
   ];
 
+  # Nextcloud app password the poco applier writes the notes with.
+  "poco_app_pass.age".publicKeys = [
+    bachSystem
+    micheleAtBach
+  ];
+
   "miniflux_admin_pass.age".publicKeys = [
     bachSystem
     micheleAtBach

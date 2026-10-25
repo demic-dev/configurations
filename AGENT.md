@@ -28,6 +28,8 @@ A file under `modules/` does one of two things:
    Registering does nothing on its own.
 2. **Assembles a host**: `modules/hosts/<host>/default.nix` lists the aspects that machine runs.
    This is the only toggle surface: the import *is* the switch, there are no `enable` flags.
+   One exception: modules from other flakes keep their own `enable` option, as
+   `modules/services/poco.nix` does with poco's `services.poco.enable`.
 
 `env.nix` holds shared settings (`cloudSettings`, `userSettings.<host>`) and is threaded into
 modules via `specialArgs`/`extraSpecialArgs` as `env`. Values under `secrets/sensitive/*.age`

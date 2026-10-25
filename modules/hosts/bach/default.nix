@@ -26,6 +26,7 @@ in
       postgresql
       backup
       nextcloud
+      poco
       immich
       calibre
       miniflux
