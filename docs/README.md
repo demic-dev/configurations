@@ -19,7 +19,7 @@ Both are aarch64-linux, so either can build for the other without emulation. sat
 | Static files                             | internet |
 | Immich | share links from the internet, the app on the tailnet |
 | calibre-web | the OPDS feed from the internet, the web UI on the tailnet |
-| Nextcloud, with OnlyOffice for documents | tailnet |
+| Nextcloud, with OnlyOffice for documents | share links from the internet, the rest on the tailnet |
 | Miniflux | tailnet |
 | These docs | tailnet |
 

@@ -45,11 +45,27 @@ That's how it used to be, and it fails open: a vhost without the block is public
 | Website and `www` | everything | `modules/services/hugo.nix` |
 | Static files | regular files only: no listing, no dotfiles, no symlinks | `modules/services/static-files.nix` |
 | Immich (public domain) | share links and the API routes they use | `modules/services/immich.nix` |
+| Nextcloud (public domain) | share links and the routes their page uses | `modules/services/nextcloud.nix` |
 | calibre-web (public domain) | `/opds` only | `modules/services/calibre.nix` |
 
-Immich and calibre-web each have a second vhost on the internal domain, with the full app.
+Immich, Nextcloud and calibre-web each have a second vhost on the internal domain, with the full app.
 
 Immich's public vhost answers `/` with 404 and proxies only `/share/`, `/s/`, `/_app/`, a few static files, and an API regex built from the shared-link routes in Immich's source. It accepts only GET, HEAD and POST. `server.externalDomain` stays the public domain, so links created in the app point there. The apps on phones use the internal domain.
+
+Nextcloud's public vhost has the same subdomain as the internal one. It answers `/` with 404 and passes on only what a share page needs, for a single file, a folder, a password-protected share and a file drop: `/s/<token>` (the page, the password form, downloads), `/public.php/dav/files/<token>` and `/public.php/dav/uploads/<token>` (listing, downloads, file drop uploads), previews, the CSRF token, theming, and the public routes of the text editor and the PDF viewer. JS, CSS, images and fonts under `/core`, `/dist` and the shipped apps' asset folders come straight from Nextcloud's webroot, matched by file extension. Everything else is 404, including `/login`, `/remote.php`, `/ocs`, avatars and "Add to your Nextcloud". A URI with a `.` or `..` segment is refused too: nginx forwards the raw URI, and Nextcloud's router doesn't resolve them, so `/ocm/../s/<token>` would pass the check here and reach `/ocm/` there. The DAV routes accept the WebDAV methods uploads need; the rest only GET, HEAD, POST and PUT.
+
+The vhost proxies to the internal one through `127.0.0.1`, with `X-Forwarded-Host` set to the public name. Nextcloud trusts that header only from `127.0.0.1` (`trusted_proxies`), so it builds the page's links with the public domain, which is in `trusted_domains`. The visitor's address comes from Cloudflare's `CF-Connecting-IP` header, trusted from any address in this vhost only, since nothing but Cloudflare gets past `ssl_verify_client`. Nextcloud receives it as `X-Forwarded-For` and throttles wrong share passwords per visitor, not for everyone at once.
+
+Office files from a public link are download-only: the eurooffice app's scripts aren't served on the public domain, and the document server stays internal. Uploads go in 50 MiB chunks (`files.chunked_upload.max_size`), below the 100 MB Cloudflare accepts per request.
+
+Nextcloud's "Copy link" button takes the host from the browser's address bar, so a link copied on the tailnet carries the internal domain. Replace it with the public domain before sending the link.
+
+<details>
+<summary>Why not make all of Nextcloud public?</summary>
+
+It would put the login page, WebDAV and every app's API on the internet, for the sake of share links. The allow list keeps the public part to the share routes, and the clients keep using the tailnet.
+
+</details>
 
 calibre-web's public vhost proxies only `/opds`, the catalogue KOReader reads. OPDS uses HTTP basic auth, which makes it the only public login on bach. It's used only by dedicated calibre-web users with download permission and nothing else, so a leaked password exposes the books, not an admin account.
 
@@ -89,7 +105,7 @@ cloudflared hands every request to nginx from `127.0.0.1`, which the allow list 
 <details>
 <summary>Why not fail2ban?</summary>
 
-Behind Cloudflare, nginx and the apps see Cloudflare's addresses, so a ban hits a Cloudflare edge and everyone behind it, or nothing. Every login except OPDS is behind the tailnet anyway.
+Behind Cloudflare, nginx and the apps see Cloudflare's addresses, so a ban hits a Cloudflare edge and everyone behind it, or nothing. Every login except OPDS and Nextcloud's share passwords is behind the tailnet anyway, and Nextcloud throttles share passwords itself, per visitor.
 
 </details>
 
@@ -136,4 +152,4 @@ curl --resolve <public name>:443:<bach's public IP> https://<public name>/      
 
 The second test matters most: the Host header is free, so every internal name has to refuse a request that arrives at the public IP.
 
-From a phone on mobile data with Tailscale off: the website works, an Immich share link opens and plays videos, the Immich public domain's `/` gives 404, and calibre's `/opds` asks for credentials.
+From a phone on mobile data with Tailscale off: the website works, an Immich share link opens and plays videos, the Immich public domain's `/` gives 404, a Nextcloud share link opens (with the domain swapped) while `/`, `/login` and `/remote.php/dav` on the same host give 404, and calibre's `/opds` asks for credentials.
