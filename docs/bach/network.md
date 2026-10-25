@@ -53,6 +53,12 @@ Immich's public vhost answers `/` with 404 and proxies only `/share/`, `/s/`, `/
 
 calibre-web's public vhost proxies only `/opds`, the catalogue KOReader reads. OPDS uses HTTP basic auth, which makes it the only public login on bach. It's used only by dedicated calibre-web users with download permission and nothing else, so a leaked password exposes the books, not an admin account.
 
+## Shared files
+
+The fish function `share` (`modules/dev/fish.nix`) publishes a file through the static files vhost at `/<id>/<file name>`, lists what it published (`--list`), and deletes an entry by id (`--delete`). The id is 32 hex characters, 128 bits read from `/dev/urandom`. The URL is the only access control: anyone who has it can download the file.
+
+The content goes over `ssh bach` on stdin, and the file name is quoted with fish's `string escape`, since michele's shell on bach is fish. The file lands in `/data/static-files/<id>/` with mode 0640, in a directory with mode 2750, both in the `static-files` group that nginx reads through. `--list` and `--delete` only see directories whose name is an id, so `resume.pdf`, `resume-ATS.pdf` (published by the `cv-resume` service in `modules/services/static-files.nix`) and anything else at the top level are out of their reach. Dotfiles are refused, because nginx never serves them.
+
 ## Cloudflare only
 
 Public vhosts accept only requests that come through Cloudflare. They carry `ssl_verify_client on;`, and nginx checks the client certificate against Cloudflare's origin-pull CA (`modules/services/cloudflare-origin-pull-ca.pem`). This is Cloudflare's Authenticated Origin Pulls, enabled in the dashboard, with SSL mode set to Full (strict). In Flexible mode Cloudflare talks plain HTTP to bach, and the certificate check never happens.

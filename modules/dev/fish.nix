@@ -69,6 +69,40 @@ in
               end
             end
           '';
+
+          # Publish a file on bach's static files under a random id: `share <file>`, `share --list`, `share --delete <id>`
+          share = ''
+            argparse l/list 'd/delete=' -- $argv
+            or return 1
+            set -l root /data/static-files
+            set -l url https://${env.cloudSettings.services.static-files.subdomain}.${env.cloudSettings.fqdn}
+            if set -q _flag_list
+              ssh bach "find $root -mindepth 2 -maxdepth 2 -type f -regextype posix-extended -regex '$root/[0-9a-f]{32}/.*' -printf '%TY-%Tm-%Td\t%s\t%P\n'" | sort | while read -l -d \t date size path
+                set -l f (string split -m1 / -- $path)
+                printf '%s\t%s\t%s\t%s\t%s\n' $f[1] $f[2] (numfmt --to=iec $size) $date $url/(string escape --style=url -- $path)
+              end | column -t -s \t
+            else if set -q _flag_delete
+              if not string match -qr '^[0-9a-f]{32}$' -- $_flag_delete
+                echo "share: not an id: $_flag_delete" >&2
+                return 1
+              end
+              ssh bach "rm -r $root/$_flag_delete"
+            else
+              # nginx refuses any path with a dotfile in it.
+              if test (count $argv) -ne 1; or not test -f $argv[1]; or string match -q '.*' -- (path basename -- $argv[1])
+                echo "usage: share <file> | --list | --delete <id> (no dotfiles)" >&2
+                return 1
+              end
+              set -l name (path basename -- $argv[1])
+              set -l id (od -An -N16 -tx1 /dev/urandom | string replace -a ' ' "")
+              # The remote shell is fish; umask 027 leaves the directory and the file readable by nginx's group.
+              ssh bach "umask 027; mkdir $root/$id && cat > $root/$id/"(string escape -- $name) <$argv[1]
+              or return 1
+              set -l link $url/$id/(string escape --style=url -- $name)
+              echo $link
+              command -q wl-copy; and wl-copy $link
+            end
+          '';
         };
 
         plugins = [
