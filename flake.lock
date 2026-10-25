@@ -371,6 +371,26 @@
         "type": "github"
       }
     },
+    "poco": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792966994,
+        "narHash": "sha256-cphkNFWlVBxZBYcUQ3HK5O0gvNP/2MyeoXFI7nGRiyg=",
+        "owner": "demic-dev",
+        "repo": "poco",
+        "rev": "58dd4525a593abf071e2a2b0be889d3392407ca8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "demic-dev",
+        "repo": "poco",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -387,6 +407,7 @@
         "noctalia": "noctalia",
         "noctalia-greeter": "noctalia-greeter",
         "nvim": "nvim",
+        "poco": "poco",
         "zen-browser": "zen-browser"
       }
     },
