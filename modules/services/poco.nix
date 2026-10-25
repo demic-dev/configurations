@@ -19,10 +19,11 @@ in
   # Agenix
   age.secrets.poco_app_pass.file = ../../secrets/poco_app_pass.age;
 
-  # Persistence
+  # Persistence: the whole of /var/lib/private, since systemd refuses a dynamic user's
+  # state under it unless it is 0700, and impermanence creates parents 0755.
   environment.persistence."/persist".directories = [
     {
-      directory = "/var/lib/private/poco";
+      directory = "/var/lib/private";
       mode = "0700";
     }
   ];

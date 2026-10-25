@@ -16,7 +16,7 @@ It authenticates with a Nextcloud app password, the agenix secret `secrets/poco_
 
 ## State
 
-The service runs as a dynamic user. `/var/lib/private/poco/state.json` keeps the ids of events applied in the last 30 days, so an event the phone uploads twice is applied once, and how far the current event got, so a crash in the middle resumes there. The folder is persisted.
+The service runs as a dynamic user. `/var/lib/private/poco/state.json` keeps the ids of events applied in the last 30 days, so an event the phone uploads twice is applied once, and how far the current event got, so a crash in the middle resumes there. `/var/lib/private` is persisted as a whole, with mode 0700: systemd refuses to set up a dynamic user's state directory under it with looser permissions.
 
 ## Check it
 
