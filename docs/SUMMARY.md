@@ -8,6 +8,7 @@
 - [Add a service or a host](add-a-service.md)
 - [Build and deploy](deploy.md)
 - [Secrets](secrets.md)
+- [Shell reference](shell.md)
 
 # bach
 

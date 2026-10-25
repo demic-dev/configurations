@@ -117,5 +117,19 @@ in
           set -g theme_display_cmd_duration yes
         '';
       };
+
+      home.packages = [ inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.configurations-man ];
+    };
+
+  # configurations(7), from the same file as the docs page. The fixed date, as in nixpkgs' own man pages, keeps the page dependent on its source only.
+  perSystem =
+    { pkgs, ... }:
+    {
+      packages.configurations-man = pkgs.runCommand "configurations-man" { nativeBuildInputs = [ pkgs.lowdown ]; } ''
+        mkdir -p $out/share/man/man7
+        { printf '# NAME\n\nconfigurations - shell reference for this NixOS configuration\n\n# DESCRIPTION\n'; tail -n +2 ${../../docs/shell.md}; } \
+          | lowdown -s -tmdoc --roff-manpage --parse-no-metadata -M title=configurations -M section=7 -M shiftheadinglevelby=-1 -M date=1980-01-01 \
+            -o $out/share/man/man7/configurations.7
+      '';
     };
 }

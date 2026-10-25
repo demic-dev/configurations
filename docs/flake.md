@@ -92,7 +92,7 @@ nix eval --raw .#nixosConfigurations.bach.config.system.build.toplevel.drvPath
 nix eval --raw .#nixosConfigurations.satie.config.system.build.toplevel.drvPath
 ```
 
-Identical paths mean nothing changed. Two things break this without changing behaviour: moving a list definition to a different module depth (see Hosts above), and renaming an asset file, since file names are part of store paths. A commit that touches `docs/` changes bach's path too, so keep docs edits out of refactor commits.
+Identical paths mean nothing changed. Two things break this without changing behaviour: moving a list definition to a different module depth (see Hosts above), and renaming an asset file, since file names are part of store paths. A commit that touches `docs/` changes bach's path too, and one that touches `docs/shell.md` (also the man page, see [Shell reference](shell.md)) changes satie's, so keep docs edits out of refactor commits.
 
 [flake-parts]: https://flake.parts
 [import-tree]: https://github.com/vic/import-tree

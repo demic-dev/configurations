@@ -55,7 +55,7 @@ calibre-web's public vhost proxies only `/opds`, the catalogue KOReader reads. O
 
 ## Shared files
 
-The fish function `share` (`modules/dev/fish.nix`) publishes a file through the static files vhost at `/<id>/<file name>`, lists what it published (`--list`), and deletes an entry by id (`--delete`). The id is 32 hex characters, 128 bits read from `/dev/urandom`. The URL is the only access control: anyone who has it can download the file.
+The fish function `share` (`modules/dev/fish.nix`) publishes a file through the static files vhost at `/<id>/<file name>`, lists what it published (`--list`), and deletes an entry by id (`--delete`). The id is 32 hex characters, 128 bits read from `/dev/urandom`. The URL is the only access control: anyone who has it can download the file. The commands are in [Shell reference](../shell.md).
 
 The content goes over `ssh bach` on stdin, and the file name is quoted with fish's `string escape`, since michele's shell on bach is fish. The file lands in `/data/static-files/<id>/` with mode 0640, in a directory with mode 2750, both in the `static-files` group that nginx reads through. `--list` and `--delete` only see directories whose name is an id, so `resume.pdf`, `resume-ATS.pdf` (published by the `cv-resume` service in `modules/services/static-files.nix`) and anything else at the top level are out of their reach. Dotfiles are refused, because nginx never serves them.
 

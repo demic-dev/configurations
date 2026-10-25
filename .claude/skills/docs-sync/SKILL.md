@@ -18,7 +18,14 @@ The rules for writing in `docs/` are in `AGENT.md`, section "Docs". Read them fi
    ```sh
    git diff --name-only "$base"..HEAD -- . ':!docs' | while read f; do rg -l -F "$f" docs/; done | sort -u
    ```
+   A commit that adds, removes or changes an alias or function in `modules/dev/fish.nix`, or a script in `scripts/`, always needs `docs/shell.md`, which is also the man page `configurations(7)`. Check its walkthroughs against the changed commands too.
    A change that no page covers yet may need a new page or section. Ask Michele before adding a page, and add it to `docs/SUMMARY.md`.
 4. Edit the pages so they describe the configuration as it is now. Add a "Why not" block only if the change was a real design decision (a serious alternative weighed and rejected, see `AGENT.md`) and its reason is known from the commit, the code comments or Michele. Never for implementation details. Don't invent reasons.
 5. Build the site to catch broken links: `nix run nixpkgs#mdbook -- build docs -d /tmp/docs-check`.
+   If `docs/shell.md` changed, keep it at one sentence per line, then build the man page and lint it (no output means clean):
+   ```sh
+   man=$(nix build --no-link --print-out-paths .#configurations-man)/share/man/man7/configurations.7
+   man -l "$man"
+   nix run nixpkgs#mandoc -- -T lint -W warning "$man"
+   ```
 6. Show Michele the diff. Commit only when asked, as a docs-only commit, never mixed with a refactor.

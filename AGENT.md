@@ -81,7 +81,9 @@ Common tasks:
 
 `docs/` is the documentation for humans, built with mdBook by `modules/services/docs.nix` and served on the tailnet. `SUMMARY.md` lists the pages in order; a page that isn't listed there isn't rendered.
 
-**A commit that changes behaviour updates the docs in the same commit.** Pages cite the files they describe as plain paths, so `rg 'modules/services/immich.nix' docs/` finds every page to check. Keep docs edits out of refactor commits: they change bach's drvPath. To catch up on commits that skipped this, use the `docs-sync` skill.
+**A commit that changes behaviour updates the docs in the same commit.** Pages cite the files they describe as plain paths, so `rg 'modules/services/immich.nix' docs/` finds every page to check. Keep docs edits out of refactor commits: they change bach's drvPath, and edits to `docs/shell.md` change satie's too. To catch up on commits that skipped this, use the `docs-sync` skill.
+
+`docs/shell.md` is also the man page `configurations(7)` on both hosts, built by `modules/dev/fish.nix`. A commit that adds, removes or changes an alias or function in that file, or a script in `scripts/`, updates `docs/shell.md` too, and so does one that changes a command a walkthrough there uses. That page has one sentence per line, which mdoc requires. Build and lint the man page as in step 5 of the `docs-sync` skill.
 
 Writing rules for `docs/`:
 
