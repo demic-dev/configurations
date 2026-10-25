@@ -208,19 +208,6 @@ in
     enableACME = false;
     useACMEHost = internal;
     forceSSL = true;
-
-    locations."/$request_uri" = {
-      recommendedProxySettings = true;
-      proxyPass = "http://localhost:${builtins.toString port}";
-      proxyWebsockets = true;
-
-      extraConfig = ''
-      	client_max_body_size ${client_max_body_size};
-        proxy_read_timeout   600s;
-        proxy_send_timeout   600s;
-        send_timeout         600s;
-      '';
-    };
   };
 
   # Public: share links only; office files stay download-only, the document server is internal.
