@@ -48,7 +48,7 @@ workspace "spotify"
 
 // Started together with the session, Ghostty exits without a word; two seconds later it doesn't.
 // The plain one lands on the workspace focused at login, term.
-spawn-sh-at-startup "sleep 2; exec ghostty --class=dev.michele.notes -e nvim ~/notes 2>>$XDG_RUNTIME_DIR/ghostty-login.log"
+spawn-sh-at-startup "sleep 2; exec ghostty --class=dev.michele.notes --working-directory=$HOME/notes -e nvim . 2>>$XDG_RUNTIME_DIR/ghostty-login.log"
 spawn-sh-at-startup "sleep 2; exec ghostty --gtk-single-instance=false 2>>$XDG_RUNTIME_DIR/ghostty-login.log"
 
 blur {
