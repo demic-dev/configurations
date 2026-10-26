@@ -10,10 +10,7 @@
 
     boot.kernel.sysctl."vm.mmap_rnd_bits" = 31;
 
-    boot.kernelParams = [
-      "brcmfmac.feature_disable=0x82000"
-      "brcmfmac.roamoff=1"
-    ];
+    boot.kernelParams = [ "brcmfmac.roamoff=1" ];
 
     boot.initrd.availableKernelModules = [ "usb_storage" ];
 
