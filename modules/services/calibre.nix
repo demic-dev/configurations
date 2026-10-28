@@ -16,6 +16,11 @@ in
   services.calibre-web = {
     enable = true;
     listen.port = port;
+    # The library lives in Nextcloud's data dir, where the nextcloud group
+    # only reads: uploads need the owner. Writes stay confined to the library
+    # by the unit's ReadWritePaths.
+    user = "nextcloud";
+    group = "nextcloud";
 
     options = {
       # Using NextCloud library!
@@ -70,18 +75,10 @@ in
   environment.persistence."/persist".directories = [
     {
       directory = "/var/lib/calibre-web";
-      user = "calibre-web";
-      group = "calibre-web";
+      user = "nextcloud";
+      group = "nextcloud";
     }
     # calibreLibrary already persisted under /data/nextcloud
-  ];
-
-  users.users.calibre-web.uid = 991;
-  users.groups.calibre-web.gid = 989;
-
-  users.groups.nextcloud.members = [
-    "nextcloud"
-    "calibre-web"
   ];
 }
   ;
