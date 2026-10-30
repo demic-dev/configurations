@@ -166,7 +166,8 @@ in
         };
 
         # The repos belong to michele, so git and Nix refuse them as "dubious ownership" otherwise.
-        programs.git.settings.safe.directory = "/home/michele/repos/*";
+        # "*" and not "/home/michele/repos/*": Nix's libgit2 ignores the path wildcard.
+        programs.git.settings.safe.directory = "*";
 
         home.stateVersion = "26.05";
       };

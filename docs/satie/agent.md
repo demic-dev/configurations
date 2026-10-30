@@ -45,7 +45,7 @@ The rule for `~/Nextcloud` only touches "other", so the `repos` entries that `cl
 
 All users get the same git aspect, so the commit identity matches. The email files are agenix secrets owned by michele with group `repos` and mode 0440, which lets the agents read them (`modules/hosts/satie/users.nix`).
 
-The repositories belong to michele, so git and Nix refuse to work in them as another user ("dubious ownership"). `ai-agent`'s git config marks `/home/michele/repos/*` as safe (`modules/hosts/satie/users.nix`).
+The repositories belong to michele, so git and Nix refuse to work in them as another user ("dubious ownership"). `ai-agent`'s git config marks every directory as safe, `*` (`modules/hosts/satie/users.nix`). The narrower `/home/michele/repos/*` works for git but not for Nix, whose libgit2 doesn't support the wildcard. `ai-agent` reaches only what the `repos` group is given, so the wider rule opens nothing more.
 
 ## opencode
 
