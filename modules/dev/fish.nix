@@ -48,7 +48,7 @@ in
             nixos-rebuild $args $argv
           '';
 
-          # Give the claude user rw access to a folder (default: cwd), including files created later: `claude-allow [--no-more] [path]`
+          # Give the agents (repos group) rw access to a folder (default: cwd), including files created later: `claude-allow [--no-more] [path]`
           claude-allow = ''
             argparse no-more -- $argv
             or return 1
@@ -56,11 +56,11 @@ in
             or return 1
             if set -q _flag_no_more
               setfacl -R -x g:repos,d:g:repos $dir
-              and echo "claude can no longer access $dir"
+              and echo "agents can no longer access $dir"
             else
               setfacl -R -m g:repos:rwX,d:g:repos:rwX $dir
-              and echo "claude can now access $dir"
-              # Traverse-only on the parents (never downgrading an existing entry), so claude reaches $dir without listing them.
+              and echo "agents can now access $dir"
+              # Traverse-only on the parents (never downgrading an existing entry), so agents reach $dir without listing them.
               set -l p (dirname $dir)
               while string match -q "$HOME/*" $p
                 getfacl -cp $p | string match -q 'group:repos:*'

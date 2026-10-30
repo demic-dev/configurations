@@ -152,5 +152,23 @@ in
 
         home.stateVersion = "26.05";
       };
+
+      home-manager.users.ai-agent = { ... }: {
+        home.username = "ai-agent";
+        home.homeDirectory = "/home/ai-agent";
+
+        imports = with hm; [ git opencode ];
+
+        programs.direnv = {
+          enable = true;
+          enableBashIntegration = true;
+          nix-direnv.enable = true;
+        };
+
+        # The repos belong to michele, so git and Nix refuse them as "dubious ownership" otherwise.
+        programs.git.settings.safe.directory = "/home/michele/repos/*";
+
+        home.stateVersion = "26.05";
+      };
     };
 }

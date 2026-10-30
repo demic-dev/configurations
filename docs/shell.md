@@ -49,7 +49,7 @@ After the passphrase it closes and boot continues.
 claude-allow [--no-more] [path]
 ```
 
-Gives the `claude` user read and write access to `path` (default: the current directory) through ACLs for the `repos` group, including files created later.
+Gives the agent users (`claude` and `ai-agent`) read and write access to `path` (default: the current directory) through ACLs for the `repos` group, including files created later.
 Each parent up to the home folder gets traverse-only access, unless it already has a wider entry.
 `--no-more` removes the access to `path` and leaves the parents alone.
 It works on satie only, where `modules/dev/claude.nix` creates the `repos` group.
@@ -160,7 +160,7 @@ git add secrets/sensitive/fqdn.age
 
 See `docs/secrets.md`.
 
-### Give the agent access to a folder
+### Give the agents access to a folder
 
 ```sh
 claude-allow ~/Nextcloud/notes

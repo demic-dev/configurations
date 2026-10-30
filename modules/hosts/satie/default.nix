@@ -24,6 +24,7 @@ in
       # users
       michele
       claude
+      opencode
 
       # services
       ssh
