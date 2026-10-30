@@ -1,4 +1,4 @@
-# AGENT.md
+# AGENTS.md
 
 Mandatory instructions. Read before every task in this repository.
 

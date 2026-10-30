@@ -5,7 +5,7 @@ description: Bring docs/ up to date with the commits that changed the configurat
 
 # Sync the docs
 
-The rules for writing in `docs/` are in `AGENT.md`, section "Docs". Read them first.
+The rules for writing in `docs/` are in `AGENTS.md`, section "Docs". Read them first.
 
 1. Find the commits since `docs/` last changed:
    ```sh
@@ -20,7 +20,7 @@ The rules for writing in `docs/` are in `AGENT.md`, section "Docs". Read them fi
    ```
    A commit that adds, removes or changes an alias or function in `modules/dev/fish.nix`, or a script in `scripts/`, always needs `docs/shell.md`, which is also the man page `configurations(7)`. Check its walkthroughs against the changed commands too.
    A change that no page covers yet may need a new page or section. Ask Michele before adding a page, and add it to `docs/SUMMARY.md`.
-4. Edit the pages so they describe the configuration as it is now. Add a "Why not" block only if the change was a real design decision (a serious alternative weighed and rejected, see `AGENT.md`) and its reason is known from the commit, the code comments or Michele. Never for implementation details. Don't invent reasons.
+4. Edit the pages so they describe the configuration as it is now. Add a "Why not" block only if the change was a real design decision (a serious alternative weighed and rejected, see `AGENTS.md`) and its reason is known from the commit, the code comments or Michele. Never for implementation details. Don't invent reasons.
 5. Build the site to catch broken links: `nix run nixpkgs#mdbook -- build docs -d /tmp/docs-check`.
    If `docs/shell.md` changed, keep it at one sentence per line, then build the man page and lint it (no output means clean):
    ```sh
