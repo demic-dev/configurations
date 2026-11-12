@@ -111,7 +111,7 @@ It works from any directory.
 
 ## Greeting
 
-Every new interactive fish shell, on both hosts, prints a few lines about the host through `fish_greeting` in `modules/dev/fish.nix`.
+Every new interactive fish shell, on both hosts, prints a few lines about the host next to a small NixOS logo, through `fish_greeting` in `modules/dev/fish.nix`.
 Everything known at build time is written into the function by Nix; the rest is read when the shell starts and takes about 15 ms.
 
 | Line | Shows | Printed |

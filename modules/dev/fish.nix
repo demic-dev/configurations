@@ -28,29 +28,36 @@ in
 
         functions = {
           fish_greeting = ''
-            echo "nixpkgs   ${inputs.nixpkgs.shortRev} (${nixpkgsDate})"
-            set -l gen (readlink /nix/var/nix/profiles/system 2>/dev/null | string match -rg 'system-(\d+)-link')
-            and set -l built (stat -c %Y /nix/var/nix/profiles/system 2>/dev/null)
-            and echo "rebuilt   generation $gen, "(date -d @$built '+%F %R')
-            echo "packages  ${toString (lib.length osConfig.environment.systemPackages + lib.length config.home.packages)}"
-            set -l up (uptime -p 2>/dev/null | string replace 'up ' "")
-            and echo "uptime    $up"
-            ${if osConfig.boot.zfs.enabled then ''
-              zpool list -H -o name,health,capacity 2>/dev/null | while read -l name health cap
-                echo "pool      $name $health, $cap full"
+            set -l lines (begin
+              echo "nixpkgs   ${inputs.nixpkgs.shortRev} (${nixpkgsDate})"
+              set -l gen (readlink /nix/var/nix/profiles/system 2>/dev/null | string match -rg 'system-(\d+)-link')
+              and set -l built (stat -c %Y /nix/var/nix/profiles/system 2>/dev/null)
+              and echo "rebuilt   generation $gen, "(date -d @$built '+%F %R')
+              echo "packages  ${toString (lib.length osConfig.environment.systemPackages + lib.length config.home.packages)}"
+              set -l up (uptime -p 2>/dev/null | string replace 'up ' "")
+              and echo "uptime    $up"
+              ${if osConfig.boot.zfs.enabled then ''
+                zpool list -H -o name,health,capacity 2>/dev/null | while read -l name health cap
+                  echo "pool      $name $health, $cap full"
+                end
+              '' else ''
+                set -l disk (df -h --output=used,size,pcent / 2>/dev/null)[2]
+                and echo "disk      / "(string trim -- $disk | string replace -r '(\S+)\s+(\S+)\s+(\S+)' '$1 of $2 ($3)')
+              ''}
+              set -l failed (systemctl list-units --failed --plain --no-legend 2>/dev/null; systemctl --user list-units --failed --plain --no-legend 2>/dev/null)
+              set -q failed[1]; and echo "failed    "(string split -f1 ' ' -- $failed | string join ', ')
+              set -l changed
+              for f in kernel initrd kernel-modules
+                test (path resolve /run/booted-system/$f) = (path resolve /run/current-system/$f); or set -a changed $f
               end
-            '' else ''
-              set -l disk (df -h --output=used,size,pcent / 2>/dev/null)[2]
-              and echo "disk      / "(string trim -- $disk | string replace -r '(\S+)\s+(\S+)\s+(\S+)' '$1 of $2 ($3)')
-            ''}
-            set -l failed (systemctl list-units --failed --plain --no-legend 2>/dev/null; systemctl --user list-units --failed --plain --no-legend 2>/dev/null)
-            set -q failed[1]; and echo "failed    "(string split -f1 ' ' -- $failed | string join ', ')
-            set -l changed
-            for f in kernel initrd kernel-modules
-              test (path resolve /run/booted-system/$f) = (path resolve /run/current-system/$f); or set -a changed $f
+              set -q changed[1]; and echo "reboot    pending, "(string join ', ' $changed)" changed"
+              echo "commands  ${lib.concatStringsSep ", " commands} (man configurations)"
+            end)
+            set -l logo '  \\\\  \\\\ //' ' ==\\\\__\\\\/ //' '   //   \\\\//' '==//     //==' ' //\\\\___//' '// /\\\\  \\\\==' '  // \\\\  \\\\'
+            for i in (seq (math max (count $logo), (count $lines)))
+              set_color blue; printf '%-14s' $logo[$i]; set_color normal
+              echo $lines[$i]
             end
-            set -q changed[1]; and echo "reboot    pending, "(string join ', ' $changed)" changed"
-            echo "commands  ${lib.concatStringsSep ", " commands} (man configurations)"
           '';
 
           motd = {
