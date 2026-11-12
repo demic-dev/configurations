@@ -109,6 +109,49 @@ Re-encrypts the agenix secrets whose recipients in `secrets/secrets.nix` include
 The others are skipped, since a plain `agenix --rekey` fails on them.
 It works from any directory.
 
+## Greeting
+
+Every new interactive fish shell, on both hosts, prints a few lines about the host through `fish_greeting` in `modules/dev/fish.nix`.
+Everything known at build time is written into the function by Nix; the rest is read when the shell starts and takes about 15 ms.
+
+| Line | Shows | Printed |
+|---|---|---|
+| `nixpkgs` | the commit of the flake's `nixpkgs` input and its date | always |
+| `rebuilt` | the generation `/nix/var/nix/profiles/system` points to, and when it was created | always |
+| `packages` | the number of entries in `environment.systemPackages` plus the user's `home.packages`, counted at build time | always |
+| `uptime` | the output of `uptime -p` | always |
+| `disk` | used space, size and use of `/` (satie) | always |
+| `pool` | health and capacity of each ZFS pool (bach, where `/` is a tmpfs) | always |
+| `failed` | the failed system and user units | when there are some |
+| `reboot` | which of `kernel`, `initrd` and `kernel-modules` differ between `/run/booted-system` and `/run/current-system` | when one differs |
+| `commands` | the headings under "Commands" on this page that name a single command (not `ls, ll, la` or the scripts), read at build time | always |
+
+A check that fails prints nothing for its line.
+
+## Dev shell MOTD
+
+A project's dev shell can list its commands each time direnv loads it.
+The project sets `MOTD` on `mkShell`:
+
+```nix
+pkgs.mkShell {
+  packages = [ pkgs.typst build ];
+  MOTD = ''
+    build   compile every PDF into uploads/
+  '';
+}
+```
+
+`mkShell` attributes become environment variables, which direnv exports into fish, with `use flake` and `use nix` alike.
+The fish function `motd` in `modules/dev/fish.nix` runs whenever `MOTD` changes and prints the name of the directory holding the `.envrc`, then the value.
+That happens on every `cd` into the project, on a move from one project straight into another, and in every new terminal opened inside it.
+Leaving a project, or loading one without `MOTD`, prints nothing.
+`nix develop` and `nix-shell` start bash, which has no such hook.
+
+This repository has its own dev shell in `shell.nix`, loaded by `.envrc` with `use nix`, which `flake.nix` also exposes as `devShells.default`.
+Its `MOTD` lists the scripts in `scripts/`.
+Run `direnv allow` once in the checkout to enable it.
+
 ## Walkthroughs
 
 Each one is a handful of commands.

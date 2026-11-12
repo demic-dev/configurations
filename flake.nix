@@ -85,5 +85,8 @@
         [ inputs.home-manager.flakeModules.default ]
         # Every .nix under ./modules is auto-imported as a flake-parts module.
         ++ (inputs.import-tree ./modules).imports;
+      perSystem = { pkgs, ... }: {
+        devShells.default = import ./shell.nix { inherit pkgs; };
+      };
     };
 }

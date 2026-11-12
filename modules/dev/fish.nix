@@ -4,11 +4,14 @@ let
 in
 {
   flake.homeModules.fish =
-    { pkgs, osConfig, ... }:
+    { config, pkgs, lib, osConfig, ... }:
     let
       # The host this home config is deployed on. env.nix drives networking.hostName, so looking the name back up in userSettings gives us that host's configPath for free.
       host = osConfig.networking.hostName;
       inherit (env.userSettings.${host}) configPath;
+      commandsSection = lib.head (lib.splitString "\n## " (lib.elemAt (lib.splitString "\n## Commands\n" (builtins.readFile ../../docs/shell.md)) 1));
+      commands = lib.filter (h: builtins.match "[a-z-]+" h != null) (map (lib.removePrefix "### ") (lib.filter (lib.hasPrefix "### ") (lib.splitString "\n" commandsSection)));
+      nixpkgsDate = with inputs.nixpkgs; "${builtins.substring 0 4 lastModifiedDate}-${builtins.substring 4 2 lastModifiedDate}-${builtins.substring 6 2 lastModifiedDate}";
     in
     {
       programs.fish = {
@@ -24,6 +27,46 @@ in
         };
 
         functions = {
+          fish_greeting = ''
+            echo "nixpkgs   ${inputs.nixpkgs.shortRev} (${nixpkgsDate})"
+            set -l gen (readlink /nix/var/nix/profiles/system 2>/dev/null | string match -rg 'system-(\d+)-link')
+            and set -l built (stat -c %Y /nix/var/nix/profiles/system 2>/dev/null)
+            and echo "rebuilt   generation $gen, "(date -d @$built '+%F %R')
+            echo "packages  ${toString (lib.length osConfig.environment.systemPackages + lib.length config.home.packages)}"
+            set -l up (uptime -p 2>/dev/null | string replace 'up ' "")
+            and echo "uptime    $up"
+            ${if osConfig.boot.zfs.enabled then ''
+              zpool list -H -o name,health,capacity 2>/dev/null | while read -l name health cap
+                echo "pool      $name $health, $cap full"
+              end
+            '' else ''
+              set -l disk (df -h --output=used,size,pcent / 2>/dev/null)[2]
+              and echo "disk      / "(string trim -- $disk | string replace -r '(\S+)\s+(\S+)\s+(\S+)' '$1 of $2 ($3)')
+            ''}
+            set -l failed (systemctl list-units --failed --plain --no-legend 2>/dev/null; systemctl --user list-units --failed --plain --no-legend 2>/dev/null)
+            set -q failed[1]; and echo "failed    "(string split -f1 ' ' -- $failed | string join ', ')
+            set -l changed
+            for f in kernel initrd kernel-modules
+              test (path resolve /run/booted-system/$f) = (path resolve /run/current-system/$f); or set -a changed $f
+            end
+            set -q changed[1]; and echo "reboot    pending, "(string join ', ' $changed)" changed"
+            echo "commands  ${lib.concatStringsSep ", " commands} (man configurations)"
+          '';
+
+          motd = {
+            onVariable = "MOTD";
+            body = ''
+              set -q MOTD; and test -n "$MOTD"; or return
+              # direnv exports in no fixed order, so DIRENV_DIR may still be the old project's here.
+              set -l dir $PWD
+              while not test -e $dir/.envrc; and test $dir != /
+                set dir (path dirname $dir)
+              end
+              path basename $dir
+              string trim -r -- $MOTD
+            '';
+          };
+
           # `update [--build host] [--deploy host] [--mode switch|boot|test|…] [nixos-rebuild args]`; defaults: this host, switch.
           update = ''
             argparse -i 'b/build=' 'd/deploy=' 'm/mode=' -- $argv
