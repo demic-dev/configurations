@@ -124,6 +124,8 @@ layer-rule {
 
 binds {
     Mod+Return repeat=false { spawn "ghostty"; }
+    // niri can't spawn into the focused column, so pull the new column into it once it maps.
+    Mod+Shift+Return repeat=false { spawn-sh "ghostty & sleep 0.4 && niri msg action consume-or-expel-window-left"; }
     Mod+E repeat=false { spawn "pcmanfm"; }
     Mod+M repeat=false { spawn "zen-beta"; }
     Mod+S repeat=false { spawn "spotifast"; }
