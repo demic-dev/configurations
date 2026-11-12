@@ -69,8 +69,12 @@ in
               while not test -e $dir/.envrc; and test $dir != /
                 set dir (path dirname $dir)
               end
-              path basename $dir
-              string trim -r -- $MOTD
+              set -l lines (path basename $dir) (string trim -r -- $MOTD | string split \n)
+              set -l logo ' \\' '  \\' '  /\\' ' /  \\'
+              for i in (seq (math max (count $logo), (count $lines)))
+                set_color blue; printf '%-7s' $logo[$i]; set_color normal
+                echo $lines[$i]
+              end
             '';
           };
 

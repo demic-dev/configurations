@@ -159,7 +159,7 @@ pkgs.mkShell {
 ```
 
 `mkShell` attributes become environment variables, which direnv exports into fish, with `use flake` and `use nix` alike.
-The fish function `motd` in `modules/dev/fish.nix` runs whenever `MOTD` changes and prints the name of the directory holding the `.envrc`, then the value.
+The fish function `motd` in `modules/dev/fish.nix` runs whenever `MOTD` changes and prints the name of the directory holding the `.envrc`, then the value, next to a small λ.
 That happens on every `cd` into the project, on a move from one project straight into another, and in every new terminal opened inside it.
 Leaving a project, or loading one without `MOTD`, prints nothing.
 `nix develop` and `nix-shell` start bash, which has no such hook.
