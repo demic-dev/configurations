@@ -48,8 +48,6 @@ in
         };
 
         nixpkgs.config.allowUnfree = true;
-        # https://github.com/NixOS/nixpkgs/issues/526914 — remove when bitwarden ships electron 41.
-        nixpkgs.config.permittedInsecurePackages = [ "electron-39.8.10" ];
 
         environment.systemPackages = with pkgs; [
           vim

@@ -56,8 +56,6 @@ With "Require master password on app restart" unticked in its settings, the app 
 
 Zen's Bitwarden extension talks to the app through native messaging: Zen runs the app's `desktop_proxy`, found through `~/.mozilla/native-messaging-hosts/com.8bit.bitwarden.json`. The app writes that manifest itself at every start, before it opens the socket the proxy connects to, so the file must stay writable: a read-only manifest from Nix makes the write fail and the app never listens. The connection needs "Allow browser integration" on in the app's settings and "Unlock with biometrics" on in the extension's.
 
-It also needs an insecure Electron (`permittedInsecurePackages` in `modules/hosts/satie/default.nix`), until Bitwarden ships Electron 41 ([nixpkgs#526914](https://github.com/NixOS/nixpkgs/issues/526914)).
-
 ## Hardware workarounds
 
 All in `modules/hosts/satie/hardware.nix` unless noted.

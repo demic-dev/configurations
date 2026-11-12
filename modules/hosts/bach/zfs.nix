@@ -25,8 +25,6 @@
         };
 
         initrd = {
-          systemd.enable = true;
-
           # Systemd stage-1 asks for the ZFS key via systemd-ask-password, so SSH
           # login goes straight to the pending "Enter key for rpool/..." prompt and
           # disconnects once answered; if the prompt never appears (pool import

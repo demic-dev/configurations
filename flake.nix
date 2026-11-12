@@ -29,7 +29,8 @@
       url = "github:0xc000022070/zen-browser-flake";
       # url = "github:youwen5/zen-browser-flake";
       inputs = {
-        nixpkgs.follows = "nixpkgs";
+        # Temporary: the nixpkgs satie runs, so the deployed builds are reused (no disk space).
+        nixpkgs.url = "github:nixos/nixpkgs/f20cd90e28fe0403873f473b29e42662cd86e8c4";
         home-manager.follows = "home-manager";
       };
     };
@@ -39,11 +40,11 @@
     };
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.url = "github:nixos/nixpkgs/f20cd90e28fe0403873f473b29e42662cd86e8c4";
     };
     noctalia-greeter = {
       url = "github:noctalia-dev/noctalia-greeter";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.url = "github:nixos/nixpkgs/f20cd90e28fe0403873f473b29e42662cd86e8c4";
     };
     fastpotify = {
       url = "github:crmne/fastpotify";

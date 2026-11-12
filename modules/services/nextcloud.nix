@@ -67,9 +67,6 @@ in
       dbhost = "/run/postgresql";
       dbuser = "nextcloud";
       dbname = "nextcloud";
-
-      adminpassFile = config.age.secrets.nextcloud_root_pass.path;
-      adminuser = "root";
     };
 
     settings = {
