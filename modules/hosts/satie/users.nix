@@ -70,11 +70,6 @@ in
           settings.program_options.file_manager = "${pkgs.pcmanfm}/bin/pcmanfm";
         };
 
-        services.gnome-keyring = {
-          enable = true;
-          components = [ "pkcs11" "secrets" ];
-        };
-
         home.packages = with pkgs; [
           # Its tests recompile the whole crate with thin LTO and one codegen unit: twice the build for nothing.
           (inputs.fastpotify.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs { doCheck = false; })

@@ -6,7 +6,7 @@ satie is an M1 MacBook on Asahi Linux with 8 GB of RAM, running niri with the No
 
 The greeter is Noctalia's (`services.displayManager.noctalia-greeter` in `modules/desktop/noctalia.nix`). After login, niri starts with Noctalia as its bar, launcher and lock screen. Both are aspects with a system half and a home half in one file (`modules/desktop/niri/default.nix`, `modules/desktop/noctalia.nix`). niri's own config is `modules/desktop/niri/config.kdl`, linked into `~/.config/niri/`.
 
-At login, niri opens two terminals, both fullscreen: nvim on `~/notes` in the notes workspace, and a plain Ghostty in term. Nothing else starts on its own.
+At login, niri starts the Bitwarden desktop app and opens two terminals, both fullscreen: nvim on `~/notes` in the notes workspace, and a plain Ghostty in term. Nothing else starts on its own.
 
 Both terminals start two seconds after the session. Started together with it, Ghostty exits without an error. Their logs go to `$XDG_RUNTIME_DIR/ghostty-login.log`.
 
@@ -51,6 +51,10 @@ The Bitwarden desktop app needs three workarounds, all in `modules/desktop/deskt
 - It's installed through home-manager, so its polkit action lands where the system polkit daemon doesn't look. A small package copies the action into the system profile.
 - Its biometric setup writes a policy file to `/usr/share/polkit-1/actions`, which is read-only on NixOS. A tmpfiles rule places that file in advance, so the app skips the write.
 - A polkit rule approves its unlock for the active local session, so it opens unlocked without a prompt.
+
+With "Require master password on app restart" unticked in its settings, the app stores its unlock key in gnome-keyring, which PAM starts and unlocks with the login password (`security.pam.services.greetd.enableGnomeKeyring` in `modules/desktop/desktop.nix`). After login, the polkit rule and that key unlock the app without the master password. This needs Bitwarden 2026.10.2 or later.
+
+Zen's Bitwarden extension talks to the app through native messaging: Zen runs the app's `desktop_proxy`, found through `~/.mozilla/native-messaging-hosts/com.8bit.bitwarden.json`. The app writes that manifest itself at every start, before it opens the socket the proxy connects to, so the file must stay writable: a read-only manifest from Nix makes the write fail and the app never listens. The connection needs "Allow browser integration" on in the app's settings and "Unlock with biometrics" on in the extension's.
 
 It also needs an insecure Electron (`permittedInsecurePackages` in `modules/hosts/satie/default.nix`), until Bitwarden ships Electron 41 ([nixpkgs#526914](https://github.com/NixOS/nixpkgs/issues/526914)).
 
