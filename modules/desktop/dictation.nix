@@ -2,8 +2,8 @@
 let
   pauseSeconds = "1.5";
   model = {
-    url = "https://huggingface.co/handy-computer/moonshine-streaming-small-gguf/resolve/e53f28b0cb90308390c852068b950a1aadd238b0/moonshine-streaming-small-Q8_0.gguf";
-    hash = "sha256-0DZw9pYptkkIXQ9Epj2XZotBGRF8yWEaTkrZQ0FxPfw=";
+    url = "https://huggingface.co/handy-computer/moonshine-streaming-medium-gguf/resolve/56302cde2ae162d1357a833d91775bcd06e91e1b/moonshine-streaming-medium-Q8_0.gguf";
+    hash = "sha256-98lWQkm1CPYBKSfsT55TYIfaU6cEf4WMqZdb6l91KZ4=";
   };
 in
 {
@@ -84,7 +84,7 @@ in
           [ "$(soxi -s "$wav")" -gt 0 ] || exit 0
           text=$(wav2text "$wav") || fail "Transcription failed"
           [ -n "$text" ] || exit 0
-          wtype -- "$text"
+          wtype -- "$text "
         '';
       };
     in
