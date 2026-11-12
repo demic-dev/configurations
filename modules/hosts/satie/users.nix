@@ -55,7 +55,7 @@ in
           git
           ghostty
           fish
-          hister
+          # hister
           niri
           noctalia
           nvim

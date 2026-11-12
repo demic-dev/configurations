@@ -67,4 +67,4 @@ All in `modules/hosts/satie/hardware.nix` unless noted.
 
 ## Local search
 
-hister indexes visited pages for full-text search on port 4433 (`modules/services/hister.nix`). Its semantic search gets embeddings from llama-cpp on `localhost:8080` (`modules/services/llama-cpp.nix`). llama-cpp is commented out in satie's list for now, so semantic search has no backend until it's re-enabled.
+hister indexes visited pages for full-text search on port 4433 (`modules/services/hister.nix`). Its semantic search gets embeddings from llama-cpp on `localhost:8080` (`modules/services/llama-cpp.nix`). Both are commented out in satie's lists for now (`modules/hosts/satie/users.nix`, `modules/hosts/satie/default.nix`).
