@@ -25,6 +25,8 @@
 
       environment.systemPackages = [ wrapper ];
 
+      home-manager.users.claude.home.file.".claude/skills/dev-shell/SKILL.md".source = ./claude/dev-shell/SKILL.md;
+
       # SSH_AUTH_SOCK is deliberately not preserved: it would hand claude the Bitwarden agent.
       security.sudo.extraRules = [
         {

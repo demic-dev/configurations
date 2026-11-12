@@ -9,7 +9,7 @@ Coding agents run on satie as separate users, so an agent only reaches the files
 | Claude Code | `claude` | 1001 | `claude` | on |
 | opencode | `ai-agent` | 1002 | `opencode` | off |
 
-Each is a normal user with its own home and group, in the group `repos`. With lingering on, `claude`'s user services keep running without a login. Their home-manager config has git and direnv, plus opencode's own config for `ai-agent`.
+Each is a normal user with its own home and group, in the group `repos`. With lingering on, `claude`'s user services keep running without a login. Their home-manager config has git and direnv, plus opencode's own config for `ai-agent` and, for `claude`, the global skill `dev-shell` (`modules/dev/claude/dev-shell/SKILL.md`), which creates a project's dev shell or adds a `MOTD` to it (see `docs/shell.md`).
 
 michele runs each agent through a wrapper on the `PATH`, which calls `sudo -u <user>`. A sudo rule per agent lets michele do that without a password, for that agent's binary only. `TERM` and `COLORTERM` pass through.
 
