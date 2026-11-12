@@ -51,6 +51,8 @@ workspace "spotify"
 spawn-sh-at-startup "sleep 2; exec ghostty --class=dev.michele.notes --working-directory=$HOME/notes -e nvim . 2>>$XDG_RUNTIME_DIR/ghostty-login.log"
 spawn-at-startup "bitwarden"
 spawn-sh-at-startup "sleep 2; exec ghostty --gtk-single-instance=false 2>>$XDG_RUNTIME_DIR/ghostty-login.log"
+// Noctalia starts with caffeine off and does not remember it; its IPC is not up before the sleep.
+spawn-sh-at-startup "sleep 3; noctalia msg caffeine-enable"
 
 blur {
     passes 2

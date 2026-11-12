@@ -6,7 +6,7 @@ satie is an M1 MacBook on Asahi Linux with 8 GB of RAM, running niri with the No
 
 The greeter is Noctalia's (`services.displayManager.noctalia-greeter` in `modules/desktop/noctalia.nix`). After login, niri starts with Noctalia as its bar, launcher and lock screen. Both are aspects with a system half and a home half in one file (`modules/desktop/niri/default.nix`, `modules/desktop/noctalia.nix`). niri's own config is `modules/desktop/niri/config.kdl`, linked into `~/.config/niri/`.
 
-At login, niri starts the Bitwarden desktop app and opens two terminals, both fullscreen: nvim on `~/notes` in the notes workspace, and a plain Ghostty in term. Nothing else starts on its own.
+At login, niri starts the Bitwarden desktop app and opens two terminals, both fullscreen: nvim on `~/notes` in the notes workspace, and a plain Ghostty in term. Nothing else starts on its own. Three seconds after the session starts, caffeine is switched on (`modules/desktop/niri/config.kdl`), so the screen does not blank or lock on idle until it is switched off. Noctalia does not remember the state across restarts.
 
 Both terminals start two seconds after the session. Started together with it, Ghostty exits without an error. Their logs go to `$XDG_RUNTIME_DIR/ghostty-login.log`.
 
