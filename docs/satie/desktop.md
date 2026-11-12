@@ -34,6 +34,16 @@ niri and Noctalia together use about 160 MB, around 6% of what a session uses. s
 
 </details>
 
+## Dictation
+
+The microphone key on the function row (F5 without Fn, `XF86AudioMicMute`) starts dictation: a short sound, then recording. Recording stops after 1.5 seconds of silence, or on a second press of the key. A second sound marks the stop, and the whole clip is transcribed and typed at the cursor with `wtype`, with no trailing Enter. Mic mute has no key.
+
+Everything runs on satie, on the CPU. The model is Moonshine v2 Small (Q8_0 GGUF, 199 MB) run with transcribe.cpp, built in the same file. It only loads while a clip is transcribed: a 10 second clip takes about 1 to 1.5 seconds and up to 410 MB of RAM. English only. The recording sits in `$XDG_RUNTIME_DIR` and is deleted afterwards.
+
+Silence ends the recording when the level stays below 1% of full scale. A clip that never crosses that level is not transcribed, so pressing the key and saying nothing types nothing. A muted microphone, a missing one or a failed transcription shows a notification instead.
+
+The pause length (`pauseSeconds`) and the model (`model`) are the two values at the top of `modules/desktop/dictation.nix`. The binding is in `modules/desktop/niri/config.kdl`. The transcriber also works on its own as `wav2text` (see `docs/shell.md`).
+
 ## Memory
 
 8 GB is tight with a browser, Electron apps and a couple of Claude Code sessions. Swap is zram first, plus a 10 GB swapfile at `/var/lib/swapfile` as a slower fallback (`modules/hosts/satie/hardware.nix`). zram is a compressed swap device in RAM: idle pages typically compress to a third or a quarter of their size, and the kernel uses it before the swapfile because of its higher priority.

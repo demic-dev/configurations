@@ -80,6 +80,22 @@ share ~/Documents/report.pdf
 share --delete k3x9q2ma
 ```
 
+### wav2text
+
+```sh
+wav2text file.wav
+```
+
+Prints the English speech in `file.wav` as one line of text, using the dictation model (Moonshine v2 Small).
+The file must be a 16 kHz mono WAV, at most 81.9 seconds long.
+Silence prints an empty line.
+It exits non-zero when the file can't be read.
+It works on satie only, from `modules/desktop/dictation.nix`, which also binds dictation to the microphone key (see `docs/satie/desktop.md`).
+
+```sh
+wav2text clip.wav >> notes.txt
+```
+
 ### ls, ll, la
 
 | Alias | Runs |

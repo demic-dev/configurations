@@ -53,6 +53,7 @@ in
 
         imports = with hm; [
           git
+          dictation
           ghostty
           fish
           # hister
