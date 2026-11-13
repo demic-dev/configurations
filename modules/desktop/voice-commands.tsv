@@ -1,6 +1,6 @@
-go to the terminal workspace, show the terminals, the shell, the command line	niri msg action focus-workspace term
+go to the terminal, the terminal workspace, show the terminals, the shell, the command line	niri msg action focus-workspace term
 go to the notes, show my notes	niri msg action focus-workspace notes
-go to the browser workspace, show the web, Zen	niri msg action focus-workspace browser
+go to the browser, the browser workspace, show the web, Zen	niri msg action focus-workspace browser
 go to spotify, show the music player	niri msg action focus-workspace spotify
 focus the first terminal, terminal number one	niri msg action focus-workspace term && niri msg action focus-column 1
 focus the second terminal, terminal number two	niri msg action focus-workspace term && niri msg action focus-column 2

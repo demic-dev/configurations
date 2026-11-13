@@ -99,11 +99,11 @@ wav2text clip.wav >> notes.txt
 ### listen
 
 ```sh
-listen
+listen [seconds]
 ```
 
 Records from the microphone and prints the English transcript as one line: dictation without the typing.
-It plays a sound, records until 1.5 seconds of silence, plays a second sound and transcribes the clip with `wav2text`.
+It plays a sound, records until `seconds` of silence (1.5 by default), plays a second sound and transcribes the clip with `wav2text`.
 Run while another `listen` is recording, it stops that recording and prints nothing, which is what a second press of the microphone key does.
 It prints nothing when nobody spoke.
 A muted or missing microphone shows a notification, and it exits non-zero.
@@ -122,10 +122,10 @@ voice-pick --test tests.tsv [commands.tsv]
 
 Reads a transcript on stdin and prints the shell command of the line it matches in `commands.tsv`, by default `~/.config/voice/commands.tsv`.
 Each line of that file is a description, a tab and a command.
-When no line scores at least 0.75, or the best line is the one whose command is `false`, it prints nothing, shows a notification with the transcript and exits 1.
+When the line whose command is `false` gets a probability above 0.15, or is the best line, it prints nothing, shows a notification with the transcript and exits 1.
 It exits 2 when the file has more than 26 lines.
 With `--test`, it reads `tests.tsv` instead of stdin: a phrase, a tab and the command that phrase should run, or `false` for none.
-It then prints each phrase that was refused or that ran another command, with the probability and the command of its best line, and the totals.
+It then prints each phrase that was refused or that ran another command, with the probability of the `false` line, the probability and the command of its best line, and the totals.
 It works on satie only, from `modules/desktop/dictation.nix` (see `docs/satie/desktop.md`).
 
 ```sh

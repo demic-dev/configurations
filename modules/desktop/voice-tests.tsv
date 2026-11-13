@@ -102,3 +102,19 @@ Hello.	false
 Um.	false
 Search for flights to Lisbon.	false
 Type hello world.	false
+Go to terminal.	niri msg action focus-workspace term
+Go to the terminal.	niri msg action focus-workspace term
+Go to terminals.	niri msg action focus-workspace term
+Terminal.	niri msg action focus-workspace term
+Go to the terminal workspace.	niri msg action focus-workspace term
+Go to notes.	niri msg action focus-workspace notes
+Go to browser.	niri msg action focus-workspace browser
+Browser.	niri msg action focus-workspace browser
+Go to Spotify.	niri msg action focus-workspace spotify
+New terminal.	ghostty
+Open a terminal.	ghostty
+Close.	niri msg action close-window
+Next.	noctalia msg media next
+Mute.	noctalia msg volume-mute
+Screenshot.	screenshot
+Lock.	noctalia msg session lock

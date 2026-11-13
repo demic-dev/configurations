@@ -5,7 +5,8 @@ let
     url = "https://huggingface.co/handy-computer/moonshine-streaming-medium-gguf/resolve/56302cde2ae162d1357a833d91775bcd06e91e1b/moonshine-streaming-medium-Q8_0.gguf";
     hash = "sha256-98lWQkm1CPYBKSfsT55TYIfaU6cEf4WMqZdb6l91KZ4=";
   };
-  voiceThreshold = "0.75";
+  voicePauseSeconds = "0.8";
+  voiceNoneMax = "0.15";
   voiceModel = {
     url = "https://huggingface.co/mradermacher/OneJev1.6-0.8B-GGUF/resolve/54f205a532e283f1b0697d78891f6968c57c3ebc/OneJev1.6-0.8B.Q8_0.gguf";
     hash = "sha256-EiXE+NkHY2wtRyWuXKM6K6MqZOhO/GoJBSg5eQlws64=";
@@ -86,7 +87,7 @@ in
           # Played before recording starts, so the microphone doesn't take it for speech.
           pw-play "$sounds/device-added.oga"
           sox -q -t pulseaudio default -r 16000 -c 1 -b 16 "$wav" \
-            silence 1 0.1 1% 1 ${pauseSeconds} 1% &
+            silence 1 0.1 1% 1 "''${1:-${pauseSeconds}}" 1% &
           echo $! > "$pidfile"
           wait $! || fail "Recording failed"
           rm -f "$pidfile"
@@ -151,7 +152,8 @@ in
           done
 
           # The prompt OneJev was trained on (qev/prompt.py), and the answer read as qev reads it:
-          # the next-token probabilities of the option letters. Prints run, probability, command.
+          # the next-token probabilities of the option letters. Prints run, the probability of the
+          # "none" line, the probability of the best line, and its command.
           ask() {
             jq -Rs --arg state "$1" '
               [split("\n")[] | select(. != "") | split("\t")[0]] as $d
@@ -169,31 +171,31 @@ in
                 | [.completion_probabilities[0].top_logprobs[]
                     | {i: (.token as $t | $l | index($t)), p: (.logprob | exp)} | select(.i)]
                 | (map(.p) | add) as $sum
+                | ((map(select($c[.i] == "false") | .p) | add // 0) / $sum) as $none
                 | max_by(.p)
-                | (.p / $sum) as $p
-                | [$p >= ${voiceThreshold} and $c[.i] != "false", $p, $c[.i]] | @tsv'
+                | [$c[.i] != "false" and $none <= ${voiceNoneMax}, $none, .p / $sum, $c[.i]] | @tsv'
           }
 
           if [ -n "$tests" ]; then
             ok=0 refused=0 wrong=0
             while IFS=$'\t' read -r phrase want; do
-              IFS=$'\t' read -r run p cmd < <(ask "$phrase")
+              IFS=$'\t' read -r run none p cmd < <(ask "$phrase")
               [ "$run" = true ] && got=$cmd || got=false
               if [ "$got" = "$want" ]; then
                 ok=$((ok + 1))
               elif [ "$got" = false ]; then
                 refused=$((refused + 1))
-                printf 'refused\t%.2f\t%s\t%s\n' "$p" "$phrase" "$cmd"
+                printf 'refused\t%.2f\t%.2f\t%s\t%s\n' "$none" "$p" "$phrase" "$cmd"
               else
                 wrong=$((wrong + 1))
-                printf 'wrong\t%.2f\t%s\t%s\n' "$p" "$phrase" "$cmd"
+                printf 'wrong\t%.2f\t%.2f\t%s\t%s\n' "$none" "$p" "$phrase" "$cmd"
               fi
             done < "$tests"
             echo "$ok right, $refused refused, $wrong wrong"
             exit
           fi
 
-          IFS=$'\t' read -r run _ cmd < <(ask "$text") || true
+          IFS=$'\t' read -r run _ _ cmd < <(ask "$text") || true
           if [ "''${run:-}" != true ]; then
             notify-send "Voice control" "No command for: $text"
             exit 1
@@ -210,7 +212,11 @@ in
           voice-pick
         ];
         text = ''
-          cmd=$(listen | voice-pick)
+          text=$(listen ${voicePauseSeconds})
+          [ -n "$text" ] || exit 0
+          # Shown while the model picks. Through niri, whose PATH has noctalia.
+          niri msg action spawn -- noctalia msg osd-show hourglass "$text"
+          cmd=$(voice-pick <<< "$text")
           # Through niri and not sh: the command starts like a bind and outlives this script.
           niri msg action spawn-sh -- "$cmd"
         '';
@@ -271,6 +277,9 @@ in
       ];
 
       xdg.configFile."voice/commands.tsv".source = ./voice-commands.tsv;
+
+      # Without this the spotter keeps Noctalia's microphone indicator lit, and its OSD never shows for a recording.
+      programs.noctalia.settings.shell.privacy.mic_filter_regex = "sherpa-onnx";
 
       systemd.user.services.wake = {
         Unit = {
