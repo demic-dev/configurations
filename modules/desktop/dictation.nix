@@ -10,6 +10,14 @@ let
     url = "https://huggingface.co/mradermacher/OneJev1.6-0.8B-GGUF/resolve/54f205a532e283f1b0697d78891f6968c57c3ebc/OneJev1.6-0.8B.Q8_0.gguf";
     hash = "sha256-EiXE+NkHY2wtRyWuXKM6K6MqZOhO/GoJBSg5eQlws64=";
   };
+  # "hey linux" in the pieces of the model's bpe.model: echo "HEY LINUX" | spm_encode --model bpe.model
+  wakeWord = "▁HE Y ▁LI N U X";
+  wakeBoost = "1.0";
+  wakeThreshold = "0.25";
+  wakeModel = {
+    url = "https://github.com/k2-fsa/sherpa-onnx/releases/download/kws-models/sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01.tar.bz2";
+    hash = "sha256-Jx0DmwZYBPGG7ZLKplqepQPRzCfzq+sj/Cc4sUeaRFk=";
+  };
 in
 {
   flake.homeModules.dictation =
@@ -207,6 +215,51 @@ in
           niri msg action spawn-sh -- "$cmd"
         '';
       };
+      kws = pkgs.fetchzip wakeModel;
+
+      wake = pkgs.writeShellApplication {
+        name = "wake";
+        runtimeInputs = [
+          pkgs.sherpa-onnx
+          pkgs.systemd
+          pkgs.util-linux
+          voice
+        ];
+        text = ''
+          pidfile="$XDG_RUNTIME_DIR/listen.pid"
+          voice_pid=
+          # CPUs 0-3 are the M1's efficiency cores: the spotter has no deadline.
+          taskset -c 0-3 sherpa-onnx-keyword-spotter-alsa \
+            --tokens=${kws}/tokens.txt \
+            --encoder=${kws}/encoder-epoch-12-avg-2-chunk-16-left-64.onnx \
+            --decoder=${kws}/decoder-epoch-12-avg-2-chunk-16-left-64.onnx \
+            --joiner=${kws}/joiner-epoch-12-avg-2-chunk-16-left-64.onnx \
+            --num-threads=1 \
+            --keywords-file=${pkgs.writeText "keywords.txt" "${wakeWord} :${wakeBoost} #${wakeThreshold}\n"} \
+            default 2>&1 |
+            while read -r line; do
+              case "$line" in
+                *'"keyword"'*) ;;
+                *)
+                  echo "$line" >&2
+                  continue
+                  ;;
+              esac
+              # voice runs in the background, so a detection during it is read here and dropped, not queued.
+              if [ -n "$voice_pid" ] && kill -0 "$voice_pid" 2>/dev/null; then
+                continue
+              fi
+              if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+                continue
+              fi
+              # Noctalia's lock screen sets LockedHint. Anything but a plain "no" counts as locked.
+              session=$(loginctl show-user "$USER" -p Display --value) || continue
+              [ "$(loginctl show-session "$session" -p LockedHint --value)" = no ] || continue
+              voice &
+              voice_pid=$!
+            done
+        '';
+      };
     in
     {
       home.packages = [
@@ -218,5 +271,19 @@ in
       ];
 
       xdg.configFile."voice/commands.tsv".source = ./voice-commands.tsv;
+
+      systemd.user.services.wake = {
+        Unit = {
+          Description = "Wake word for voice commands";
+          PartOf = [ "graphical-session.target" ];
+          After = [ "graphical-session.target" ];
+        };
+        Service = {
+          ExecStart = "${wake}/bin/wake";
+          Restart = "always";
+          RestartSec = 5;
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
+      };
     };
 }
