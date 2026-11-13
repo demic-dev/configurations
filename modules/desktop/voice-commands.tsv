@@ -1,0 +1,23 @@
+go to the terminal workspace, show the terminals, the shell, the command line	niri msg action focus-workspace term
+go to the notes, show my notes	niri msg action focus-workspace notes
+go to the browser workspace, show the web, Zen	niri msg action focus-workspace browser
+go to spotify, show the music player	niri msg action focus-workspace spotify
+focus the first terminal, terminal number one	niri msg action focus-workspace term && niri msg action focus-column 1
+focus the second terminal, terminal number two	niri msg action focus-workspace term && niri msg action focus-column 2
+focus the third terminal, terminal number three	niri msg action focus-workspace term && niri msg action focus-column 3
+focus the fourth terminal, terminal number four	niri msg action focus-workspace term && niri msg action focus-column 4
+open a new terminal, start another shell, launch Ghostty	ghostty
+open a new browser window, launch another Zen	zen-beta
+open the file manager, browse files and folders	pcmanfm
+close this window, quit this app	niri msg action close-window
+make this window fullscreen, or leave fullscreen	niri msg action fullscreen-window
+show the overview of all open windows	niri msg action toggle-overview
+play or pause the music, stop or resume the song	noctalia msg media toggle
+next song, skip this track	noctalia msg media next
+previous song, go back a track	noctalia msg media previous
+mute or unmute the sound	noctalia msg volume-mute
+lock the screen, lock the computer	noctalia msg session lock
+take a screenshot, capture the screen	screenshot
+keep the screen awake, or let it sleep again	noctalia msg caffeine-toggle
+turn bluetooth on or off	noctalia msg bluetooth-toggle
+none of these, or not a command	false

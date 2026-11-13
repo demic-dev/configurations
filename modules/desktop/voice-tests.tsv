@@ -1,0 +1,104 @@
+Switch to my shells.	niri msg action focus-workspace term
+Take me to the command line.	niri msg action focus-workspace term
+Show the consoles.	niri msg action focus-workspace term
+Go to the terminals.	niri msg action focus-workspace term
+Show me my notes.	niri msg action focus-workspace notes
+Switch to my notebook.	niri msg action focus-workspace notes
+I want to write something down.	niri msg action focus-workspace notes
+Take me to where I keep my to-do list.	niri msg action focus-workspace notes
+Switch to the web.	niri msg action focus-workspace browser
+Take me to Zen.	niri msg action focus-workspace browser
+Show me the internet.	niri msg action focus-workspace browser
+Go to the browser.	niri msg action focus-workspace browser
+Back to my tabs.	niri msg action focus-workspace browser
+Show me what's playing.	niri msg action focus-workspace spotify
+Switch to the music app.	niri msg action focus-workspace spotify
+Take me to my playlists.	niri msg action focus-workspace spotify
+Go to Spotify.	niri msg action focus-workspace spotify
+Terminal one.	niri msg action focus-workspace term && niri msg action focus-column 1
+Show me the first shell.	niri msg action focus-workspace term && niri msg action focus-column 1
+Go to terminal number one.	niri msg action focus-workspace term && niri msg action focus-column 1
+Focus the first terminal.	niri msg action focus-workspace term && niri msg action focus-column 1
+Second terminal, please.	niri msg action focus-workspace term && niri msg action focus-column 2
+Switch to terminal number two.	niri msg action focus-workspace term && niri msg action focus-column 2
+Terminal two.	niri msg action focus-workspace term && niri msg action focus-column 2
+Focus the second terminal.	niri msg action focus-workspace term && niri msg action focus-column 2
+The third shell.	niri msg action focus-workspace term && niri msg action focus-column 3
+Terminal three.	niri msg action focus-workspace term && niri msg action focus-column 3
+Jump to terminal number three.	niri msg action focus-workspace term && niri msg action focus-column 3
+Focus the third terminal.	niri msg action focus-workspace term && niri msg action focus-column 3
+Jump to the fourth shell.	niri msg action focus-workspace term && niri msg action focus-column 4
+Terminal four.	niri msg action focus-workspace term && niri msg action focus-column 4
+Go to terminal number four.	niri msg action focus-workspace term && niri msg action focus-column 4
+Focus the fourth terminal.	niri msg action focus-workspace term && niri msg action focus-column 4
+I need another shell.	ghostty
+Start a fresh command line.	ghostty
+Launch Ghostty.	ghostty
+Spawn a terminal.	ghostty
+Launch a fresh browser.	zen-beta
+Start another Zen.	zen-beta
+I need one more web browser.	zen-beta
+Open a new browser window.	zen-beta
+Show my files.	pcmanfm
+Let me browse my folders.	pcmanfm
+Launch the file explorer.	pcmanfm
+Get rid of this.	niri msg action close-window
+Shut this one.	niri msg action close-window
+Kill this app.	niri msg action close-window
+Quit this.	niri msg action close-window
+Maximize this.	niri msg action fullscreen-window
+Fill the whole screen with it.	niri msg action fullscreen-window
+Exit full screen.	niri msg action fullscreen-window
+Go full screen.	niri msg action fullscreen-window
+Show me everything that's open.	niri msg action toggle-overview
+Zoom out.	niri msg action toggle-overview
+What do I have open?	niri msg action toggle-overview
+Pause.	noctalia msg media toggle
+Stop the song.	noctalia msg media toggle
+Resume playback.	noctalia msg media toggle
+Pause the music.	noctalia msg media toggle
+Continue playing.	noctalia msg media toggle
+Skip this one.	noctalia msg media next
+Next track.	noctalia msg media next
+I don't like this one, play something else.	noctalia msg media next
+Play the following one.	noctalia msg media next
+Go back one.	noctalia msg media previous
+Play the one before.	noctalia msg media previous
+Previous track.	noctalia msg media previous
+Play that last one again.	noctalia msg media previous
+Silence.	noctalia msg volume-mute
+Be quiet.	noctalia msg volume-mute
+Turn the audio off.	noctalia msg volume-mute
+Unmute.	noctalia msg volume-mute
+Lock my computer.	noctalia msg session lock
+I'm leaving, secure the laptop.	noctalia msg session lock
+Lock it.	noctalia msg session lock
+Capture the screen.	screenshot
+Grab a picture of my display.	screenshot
+Screen capture.	screenshot
+Don't go to sleep.	noctalia msg caffeine-toggle
+Stay awake.	noctalia msg caffeine-toggle
+Prevent the display from turning off.	noctalia msg caffeine-toggle
+You can sleep again.	noctalia msg caffeine-toggle
+Disable Bluetooth.	noctalia msg bluetooth-toggle
+Enable Bluetooth.	noctalia msg bluetooth-toggle
+Switch off the wireless headphones connection.	noctalia msg bluetooth-toggle
+Toggle Bluetooth.	noctalia msg bluetooth-toggle
+I think we should move the meeting to Friday.	false
+The weather is nice today.	false
+Remind me to buy milk tomorrow.	false
+What time is it?	false
+Send an email to my professor.	false
+So anyway, I was telling her about the trip.	false
+Open the pod bay doors.	false
+Increase the brightness.	false
+Turn the volume up.	false
+Delete all my files.	false
+The music in that film was great.	false
+He closed the window because it was cold.	false
+Shut down the computer.	false
+Thank you.	false
+Hello.	false
+Um.	false
+Search for flights to Lisbon.	false
+Type hello world.	false

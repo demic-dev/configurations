@@ -5,6 +5,11 @@ let
     url = "https://huggingface.co/handy-computer/moonshine-streaming-medium-gguf/resolve/56302cde2ae162d1357a833d91775bcd06e91e1b/moonshine-streaming-medium-Q8_0.gguf";
     hash = "sha256-98lWQkm1CPYBKSfsT55TYIfaU6cEf4WMqZdb6l91KZ4=";
   };
+  voiceThreshold = "0.75";
+  voiceModel = {
+    url = "https://huggingface.co/mradermacher/OneJev1.6-0.8B-GGUF/resolve/54f205a532e283f1b0697d78891f6968c57c3ebc/OneJev1.6-0.8B.Q8_0.gguf";
+    hash = "sha256-EiXE+NkHY2wtRyWuXKM6K6MqZOhO/GoJBSg5eQlws64=";
+  };
 in
 {
   flake.homeModules.dictation =
@@ -40,18 +45,17 @@ in
         '';
       };
 
-      dictate = pkgs.writeShellApplication {
-        name = "dictate";
+      listen = pkgs.writeShellApplication {
+        name = "listen";
         runtimeInputs = with pkgs; [
           libnotify
           pipewire
           sox
           wav2text
           wireplumber
-          wtype
         ];
         text = ''
-          pidfile="$XDG_RUNTIME_DIR/dictate.pid"
+          pidfile="$XDG_RUNTIME_DIR/listen.pid"
           if [ -f "$pidfile" ] && kill -INT "$(cat "$pidfile")" 2>/dev/null; then
             exit 0
           fi
@@ -67,7 +71,7 @@ in
             *) fail "No microphone" ;;
           esac
 
-          wav=$(mktemp -p "$XDG_RUNTIME_DIR" --suffix=.wav dictate-XXXXXX)
+          wav=$(mktemp -p "$XDG_RUNTIME_DIR" --suffix=.wav listen-XXXXXX)
           trap 'rm -f "$wav"' EXIT
           sounds=${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo
 
@@ -82,16 +86,137 @@ in
 
           # sox only writes once the level crosses 1%, so no speech means no samples.
           [ "$(soxi -s "$wav")" -gt 0 ] || exit 0
-          text=$(wav2text "$wav") || fail "Transcription failed"
+          wav2text "$wav" || fail "Transcription failed"
+        '';
+      };
+
+      dictate = pkgs.writeShellApplication {
+        name = "dictate";
+        runtimeInputs = [
+          listen
+          pkgs.wtype
+        ];
+        text = ''
+          text=$(listen)
           [ -n "$text" ] || exit 0
           wtype -- "$text "
+        '';
+      };
+      # The same override as modules/services/llama-cpp.nix, so both share one build.
+      llama = pkgs.llama-cpp.override { nodejs_latest = pkgs.nodejs_24; };
+
+      voice-pick = pkgs.writeShellApplication {
+        name = "voice-pick";
+        runtimeInputs = with pkgs; [
+          curl
+          jq
+          libnotify
+          llama
+          util-linux
+        ];
+        text = ''
+          tests=
+          if [ "''${1:-}" = --test ]; then
+            tests=$2
+            shift 2
+          fi
+          file=''${1:-''${XDG_CONFIG_HOME:-$HOME/.config}/voice/commands.tsv}
+          if [ "$(grep -c "" "$file")" -gt 26 ]; then
+            notify-send -u critical "Voice control" "$file has more than 26 lines"
+            echo "voice-pick: $file has more than 26 lines" >&2
+            exit 2
+          fi
+          if [ -z "$tests" ]; then
+            text=$(cat)
+            [ -n "$text" ] || exit 1
+          fi
+
+          # The model loads in 0.4 s and holds 1.8 GB, so the server only lives for the call.
+          dir=$(mktemp -d -p "$XDG_RUNTIME_DIR" voice-XXXXXX)
+          taskset -c 4-7 llama-server --host "$dir/llama.sock" -m ${pkgs.fetchurl voiceModel} \
+            --threads 4 --ctx-size 2048 --fit off --no-warmup --cache-ram 0 --no-webui >/dev/null 2>&1 &
+          server=$!
+          trap 'kill $server; rm -rf "$dir"' EXIT
+          until curl -sf --unix-socket "$dir/llama.sock" http://localhost/health >/dev/null; do
+            kill -0 $server
+            sleep 0.05
+          done
+
+          # The prompt OneJev was trained on (qev/prompt.py), and the answer read as qev reads it:
+          # the next-token probabilities of the option letters. Prints run, probability, command.
+          ask() {
+            jq -Rs --arg state "$1" '
+              [split("\n")[] | select(. != "") | split("\t")[0]] as $d
+              | ("ABCDEFGHIJKLMNOPQRSTUVWXYZ" / "")[:$d | length] as $l
+              | {
+                  prompt: "<|im_start|>system\nApply the question to the state. Choose exactly one of the listed options. Respond with only its uppercase letter, with no explanation or reasoning.<|im_end|>\n<|im_start|>user\n<state>\n\($state)\n</state>\n\nQuestion: Which command is the user asking for?\n\nOptions:\n\([range($d | length) | "\($l[.]). \($d[.])"] | join("\n"))\n\nAnswer with one letter: \($l | join(", ")).<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",
+                  n_predict: 1,
+                  n_probs: 64,
+                  temperature: 0
+                }' "$file" |
+              curl -sf --unix-socket "$dir/llama.sock" http://localhost/completion -d @- |
+              jq -r --rawfile tsv "$file" '
+                [$tsv | split("\n")[] | select(. != "") | split("\t")[1]] as $c
+                | ("ABCDEFGHIJKLMNOPQRSTUVWXYZ" / "")[:$c | length] as $l
+                | [.completion_probabilities[0].top_logprobs[]
+                    | {i: (.token as $t | $l | index($t)), p: (.logprob | exp)} | select(.i)]
+                | (map(.p) | add) as $sum
+                | max_by(.p)
+                | (.p / $sum) as $p
+                | [$p >= ${voiceThreshold} and $c[.i] != "false", $p, $c[.i]] | @tsv'
+          }
+
+          if [ -n "$tests" ]; then
+            ok=0 refused=0 wrong=0
+            while IFS=$'\t' read -r phrase want; do
+              IFS=$'\t' read -r run p cmd < <(ask "$phrase")
+              [ "$run" = true ] && got=$cmd || got=false
+              if [ "$got" = "$want" ]; then
+                ok=$((ok + 1))
+              elif [ "$got" = false ]; then
+                refused=$((refused + 1))
+                printf 'refused\t%.2f\t%s\t%s\n' "$p" "$phrase" "$cmd"
+              else
+                wrong=$((wrong + 1))
+                printf 'wrong\t%.2f\t%s\t%s\n' "$p" "$phrase" "$cmd"
+              fi
+            done < "$tests"
+            echo "$ok right, $refused refused, $wrong wrong"
+            exit
+          fi
+
+          IFS=$'\t' read -r run _ cmd < <(ask "$text") || true
+          if [ "''${run:-}" != true ]; then
+            notify-send "Voice control" "No command for: $text"
+            exit 1
+          fi
+          echo "$cmd"
+        '';
+      };
+
+      voice = pkgs.writeShellApplication {
+        name = "voice";
+        runtimeInputs = [
+          listen
+          pkgs.niri
+          voice-pick
+        ];
+        text = ''
+          cmd=$(listen | voice-pick)
+          # Through niri and not sh: the command starts like a bind and outlives this script.
+          niri msg action spawn-sh -- "$cmd"
         '';
       };
     in
     {
       home.packages = [
         dictate
+        listen
+        voice
+        voice-pick
         wav2text
       ];
+
+      xdg.configFile."voice/commands.tsv".source = ./voice-commands.tsv;
     };
 }

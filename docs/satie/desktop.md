@@ -42,7 +42,33 @@ Everything runs on satie, on the CPU. The model is Moonshine v2 Medium (Q8_0 GGU
 
 Silence ends the recording when the level stays below 1% of full scale. A clip that never crosses that level is not transcribed, so pressing the key and saying nothing types nothing. A muted microphone, a missing one or a failed transcription shows a notification instead.
 
-The pause length (`pauseSeconds`) and the model (`model`) are the two values at the top of `modules/desktop/dictation.nix`. The binding is in `modules/desktop/niri/config.kdl`. The transcriber also works on its own as `wav2text` (see `docs/shell.md`).
+The pause length (`pauseSeconds`) and the model (`model`) are the two values at the top of `modules/desktop/dictation.nix`. The binding is in `modules/desktop/niri/config.kdl`. Recording and transcribing, without the typing, is `listen`, and the transcriber alone is `wav2text` (see `docs/shell.md`).
+
+## Voice commands
+
+Mod + the microphone key runs `voice`. It records and transcribes like dictation, then runs one command from a list instead of typing: "pause the music" or "go to the notes" runs the line of the list that matches best. A second press of the microphone key, with or without Mod, stops the recording.
+
+The list is `modules/desktop/voice-commands.tsv`, installed as `~/.config/voice/commands.tsv`. Each line is a description, a tab, then a shell command. The line whose command is `false` stands for "none of these". The file holds at most 26 lines, because the model answers with one letter per line.
+
+The line is picked by OneJev 1.6 0.8B (Q8_0 GGUF, 812 MB), a small model trained to answer a multiple-choice question with a single letter, run by llama.cpp's `llama-server`. `voice-pick` starts the server for one question and stops it again, which takes about a second and up to 1.8 GB of RAM. It sends the transcript and the descriptions, and reads the probability the model gives to each letter. The model never writes a command: what runs is the text of the chosen line, started through `niri msg action spawn-sh`, the way a key bind starts it. Everything stays on satie.
+
+Nothing runs when the best line scores below 0.75 or is the "none of these" line. A notification shows the transcript instead. The threshold (`voiceThreshold`) and the model (`voiceModel`) are at the top of `modules/desktop/dictation.nix`.
+
+### Add a command
+
+Add a line to `modules/desktop/voice-commands.tsv`. The description is all the model sees, so write it with the words that would be spoken, and separate synonyms with commas. Try a phrase against the edited file without deploying:
+
+```sh
+echo "skip this one" | voice-pick modules/desktop/voice-commands.tsv
+```
+
+`modules/desktop/voice-tests.tsv` holds spoken phrases with the command each one should run, or `false` for a sentence that should run nothing. Add a few phrases for the new line, then run them all:
+
+```sh
+voice-pick --test modules/desktop/voice-tests.tsv modules/desktop/voice-commands.tsv
+```
+
+It prints the phrases that were refused or that ran another command, each with the probability and the command of its best line, then the totals. Deploy once the new phrases pass and no sentence marked `false` runs anything.
 
 ## Memory
 
