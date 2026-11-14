@@ -46,7 +46,7 @@ The pause length (`pauseSeconds`) and the model (`model`) are the two values at 
 
 ## Voice commands
 
-Saying "hey linux", or pressing Mod + the microphone key, runs `voice`. It records and transcribes like dictation, then runs one command from a list instead of typing: "pause the music" or "go to the notes" runs the line of the list that matches best. The recording stops after 0.8 seconds of silence, shorter than dictation's pause because a command is one breath. A second press of the microphone key, with or without Mod, stops the recording.
+Mod + the microphone key runs `voice`. It records and transcribes like dictation, then runs one command from a list instead of typing: "pause the music" or "go to the notes" runs the line of the list that matches best. The recording stops after 0.8 seconds of silence, shorter than dictation's pause because a command is one breath. A second press of the microphone key, with or without Mod, stops the recording.
 
 The list is `modules/desktop/voice-commands.tsv`, installed as `~/.config/voice/commands.tsv`. Each line is a description, a tab, then a shell command. The line whose command is `false` stands for "none of these". The file holds at most 26 lines, because the model answers with one letter per line.
 
@@ -55,22 +55,6 @@ The line is picked by OneJev 1.6 0.8B (Q8_0 GGUF, 812 MB), a small model trained
 The feedback is Noctalia's OSD. Its "microphone active" popup shows when the recording starts, and once the clip is transcribed `voice` shows the transcript in a popup of its own (`noctalia msg osd-show`), which stays up while the model picks.
 
 Nothing runs when the model gives the "none of these" line a probability above 0.15, or when that line is the best one. A notification shows the transcript instead. The probability of the best line is not what decides: two lines that fit about equally ("go to the terminal" against "the first terminal") split it between them, while a sentence that is no command always puts weight on "none of these". The limit (`voiceNoneMax`), the pause (`voicePauseSeconds`) and the model (`voiceModel`) are at the top of `modules/desktop/dictation.nix`.
-
-### Wake word
-
-`wake` is a user service that keeps the microphone open and runs a keyword spotter on it, a small speech model (3.3M parameters, from sherpa-onnx) that only reports when a given phrase is spoken. The audio comes from `pw-record`, under the PipeWire application name `wake`. When it hears "hey linux" it starts `voice`, so the command is spoken after the start sound. It takes about 12% of one efficiency core (it is pinned to CPUs 0-3) and about 100 MB of RAM.
-
-A detection is ignored while the session is locked, while a recording is already running (a dictation is not cut off by the phrase), and while the previous `voice` has not finished. The lock state is logind's `LockedHint`, which Noctalia's lock screen sets. Anything other than a clear "not locked" counts as locked.
-
-That application name is left out of Noctalia's microphone indicator (`shell.privacy.mic_filter_regex`, set in the same file). Otherwise the indicator would stay lit, and the "microphone active" popup would never show for a recording, since the microphone would never go from idle to active.
-
-Muting the microphone switches the wake word off, since the spotter then hears silence. So does stopping the service, until the next login:
-
-```sh
-systemctl --user stop wake
-```
-
-The phrase (`wakeWord`), its boost (`wakeBoost`) and its threshold (`wakeThreshold`) are at the top of `modules/desktop/dictation.nix`. The phrase is written in the model's subword pieces, and the comment above it has the command that converts a new one. A lower threshold or a higher boost makes it trigger more easily, on the phrase and on phrases that sound like it.
 
 ### Add a command
 
