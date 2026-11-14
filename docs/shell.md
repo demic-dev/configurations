@@ -127,7 +127,8 @@ When the line whose command is `false` gets a probability above 0.15, or is the 
 It exits 2 when the file has more than 26 lines.
 With `--test`, it reads `tests.tsv` instead of stdin: a phrase, a tab and the command that phrase should run, or `false` for none.
 It then prints each phrase that was refused or that ran another command, with the probability of the `false` line, the probability and the command of its best line, and the totals.
-It works on satie only, from `modules/desktop/dictation.nix` (see `docs/satie/desktop.md`).
+It is not installed while voice commands are switched off (see `docs/satie/desktop.md`).
+It works on satie only, from `modules/desktop/dictation.nix`.
 
 ```sh
 echo "pause the music" | voice-pick

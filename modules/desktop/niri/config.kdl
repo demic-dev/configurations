@@ -189,7 +189,6 @@ binds {
     XF86AudioLowerVolume allow-when-locked=true { spawn "noctalia" "msg" "volume-down"; }
     XF86AudioMute allow-when-locked=true { spawn "noctalia" "msg" "volume-mute"; }
     XF86AudioMicMute repeat=false { spawn "dictate"; }
-    Mod+XF86AudioMicMute repeat=false { spawn "voice"; }
 
     XF86MonBrightnessUp allow-when-locked=true { spawn "noctalia" "msg" "brightness-up"; }
     XF86MonBrightnessDown allow-when-locked=true { spawn "noctalia" "msg" "brightness-down"; }

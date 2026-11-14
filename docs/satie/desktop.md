@@ -46,6 +46,12 @@ The pause length (`pauseSeconds`) and the model (`model`) are the two values at 
 
 ## Voice commands
 
+Voice commands are switched off: they pick the wrong line or none too often, and a command starts two to three seconds after its sentence. The code stays in `modules/desktop/dictation.nix`, and the rest of this section describes it. To switch them on, add `voice` and `voice-pick` to `home.packages` there, add `xdg.configFile."voice/commands.tsv".source = ./voice-commands.tsv;` next to it, and bind the key in `modules/desktop/niri/config.kdl`:
+
+```kdl
+Mod+XF86AudioMicMute repeat=false { spawn "voice"; }
+```
+
 Mod + the microphone key runs `voice`, which listens until Mod + the microphone key is pressed again or nobody has spoken for 20 seconds. A sound marks the start and the end. Each sentence spoken in between runs one command from a list: "pause the music" or "go to the notes" runs the line of the list that matches best, and a sentence that matches none runs nothing. A sentence ends at a pause of 0.4 seconds, so several commands can follow each other in one breath each. A command starts two to three seconds after its sentence ends.
 
 `sox` records the whole time and closes one clip per sentence, so nothing said while a command is being picked is lost. Each clip is transcribed like dictation, by `wav2text`.

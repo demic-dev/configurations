@@ -259,14 +259,11 @@ in
       };
     in
     {
+      # Voice commands are off: voice and voice-pick are left out (docs/satie/desktop.md).
       home.packages = [
         dictate
         listen
-        voice
-        voice-pick
         wav2text
       ];
-
-      xdg.configFile."voice/commands.tsv".source = ./voice-commands.tsv;
     };
 }
