@@ -58,11 +58,11 @@ Nothing runs when the model gives the "none of these" line a probability above 0
 
 ### Wake word
 
-`wake` is a user service that keeps the microphone open and runs a keyword spotter on it, a small speech model (3.3M parameters, from sherpa-onnx) that only reports when a given phrase is spoken. When it hears "hey linux" it starts `voice`, so the command is spoken after the start sound. It takes about 12% of one efficiency core (it is pinned to CPUs 0-3) and about 100 MB of RAM.
+`wake` is a user service that keeps the microphone open and runs a keyword spotter on it, a small speech model (3.3M parameters, from sherpa-onnx) that only reports when a given phrase is spoken. The audio comes from `pw-record`, under the PipeWire application name `wake`. When it hears "hey linux" it starts `voice`, so the command is spoken after the start sound. It takes about 12% of one efficiency core (it is pinned to CPUs 0-3) and about 100 MB of RAM.
 
 A detection is ignored while the session is locked, while a recording is already running (a dictation is not cut off by the phrase), and while the previous `voice` has not finished. The lock state is logind's `LockedHint`, which Noctalia's lock screen sets. Anything other than a clear "not locked" counts as locked.
 
-The spotter is left out of Noctalia's microphone indicator (`shell.privacy.mic_filter_regex`, set in the same file). Otherwise the indicator would stay lit, and the "microphone active" popup would never show for a recording, since the microphone would never go from idle to active.
+That application name is left out of Noctalia's microphone indicator (`shell.privacy.mic_filter_regex`, set in the same file). Otherwise the indicator would stay lit, and the "microphone active" popup would never show for a recording, since the microphone would never go from idle to active.
 
 Muting the microphone switches the wake word off, since the spotter then hears silence. So does stopping the service, until the next login:
 

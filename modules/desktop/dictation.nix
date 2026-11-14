@@ -223,9 +223,20 @@ in
       };
       kws = pkgs.fetchzip wakeModel;
 
+      alsaStdin = pkgs.writeText "asound.conf" ''
+        pcm.stdin {
+          type file
+          slave.pcm { type null }
+          file "/dev/null"
+          infile "/dev/stdin"
+          format "raw"
+        }
+      '';
+
       wake = pkgs.writeShellApplication {
         name = "wake";
         runtimeInputs = [
+          pkgs.pipewire
           pkgs.sherpa-onnx
           pkgs.systemd
           pkgs.util-linux
@@ -234,15 +245,21 @@ in
         text = ''
           pidfile="$XDG_RUNTIME_DIR/listen.pid"
           voice_pid=
+          # The spotter only reads ALSA devices, and its own way into PipeWire fails on satie, so pw-record
+          # feeds it through an ALSA device that reads stdin. It spins on end of input: when the recorder
+          # dies the script goes down with it and systemd restarts both.
           # CPUs 0-3 are the M1's efficiency cores: the spotter has no deadline.
-          taskset -c 0-3 sherpa-onnx-keyword-spotter-alsa \
+          {
+            pw-record --raw --rate 16000 --channels 1 --format s16 -P '{ application.name = wake }' - || true
+            kill 0
+          } | ALSA_CONFIG_PATH=${alsaStdin} taskset -c 0-3 sherpa-onnx-keyword-spotter-alsa \
             --tokens=${kws}/tokens.txt \
             --encoder=${kws}/encoder-epoch-12-avg-2-chunk-16-left-64.onnx \
             --decoder=${kws}/decoder-epoch-12-avg-2-chunk-16-left-64.onnx \
             --joiner=${kws}/joiner-epoch-12-avg-2-chunk-16-left-64.onnx \
             --num-threads=1 \
             --keywords-file=${pkgs.writeText "keywords.txt" "${wakeWord} :${wakeBoost} #${wakeThreshold}\n"} \
-            default 2>&1 |
+            stdin 2>&1 |
             while read -r line; do
               case "$line" in
                 *'"keyword"'*) ;;
@@ -279,7 +296,7 @@ in
       xdg.configFile."voice/commands.tsv".source = ./voice-commands.tsv;
 
       # Without this the spotter keeps Noctalia's microphone indicator lit, and its OSD never shows for a recording.
-      programs.noctalia.settings.shell.privacy.mic_filter_regex = "sherpa-onnx";
+      programs.noctalia.settings.shell.privacy.mic_filter_regex = "^wake$";
 
       systemd.user.services.wake = {
         Unit = {
