@@ -37,6 +37,13 @@
       systemctl --user -M ${env.userSettings.satie.user}@ restart pipewire pipewire-pulse wireplumber || true
     '';
 
+    # The daemon panics when the speaker codec isn't ready yet (ENXIO), and the stock 10 retries in 1 s run out
+    # before it is. Only the udev rule starts it, so once it gives up the speakers stay muted until reboot.
+    systemd.services.speakersafetyd = {
+      unitConfig.StartLimitIntervalSec = 0;
+      serviceConfig.RestartSec = 5;
+    };
+
     hardware.bluetooth = {
       enable = true;
       powerOnBoot = true;

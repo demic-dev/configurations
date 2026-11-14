@@ -71,6 +71,7 @@ Zen's Bitwarden extension talks to the app through native messaging: Zen runs th
 All in `modules/hosts/satie/hardware.nix` unless noted.
 
 - After resume, the speakers come back in an error state, and PipeWire never retries them. A resume hook restarts the user's PipeWire and WirePlumber.
+- `speakersafetyd`, which keeps the speaker amplifiers unmuted, panics when the speaker codec is not ready yet. It is retried every 5 seconds without a limit (`modules/hosts/satie/hardware.nix`). With systemd's default limit it gave up after 10 seconds and the speakers stayed silent until a reboot.
 - Bluetooth headphones reconnect in the headset profile, with no output. WirePlumber is set to prefer AAC and to force A2DP (`modules/desktop/desktop.nix`).
 - The Wi-Fi driver runs with roaming and two firmware features off (`brcmfmac.roamoff=1`, `brcmfmac.feature_disable=0x82000`).
 - logind ignores the power key (`modules/desktop/desktop.nix`).
