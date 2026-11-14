@@ -5,7 +5,8 @@ let
     url = "https://huggingface.co/handy-computer/moonshine-streaming-medium-gguf/resolve/56302cde2ae162d1357a833d91775bcd06e91e1b/moonshine-streaming-medium-Q8_0.gguf";
     hash = "sha256-98lWQkm1CPYBKSfsT55TYIfaU6cEf4WMqZdb6l91KZ4=";
   };
-  voicePauseSeconds = "0.8";
+  voicePauseSeconds = "0.4";
+  voiceIdleSeconds = "20";
   voiceNoneMax = "0.15";
   voiceModel = {
     url = "https://huggingface.co/mradermacher/OneJev1.6-0.8B-GGUF/resolve/54f205a532e283f1b0697d78891f6968c57c3ebc/OneJev1.6-0.8B.Q8_0.gguf";
@@ -103,8 +104,11 @@ in
           wtype -- "$text "
         '';
       };
-      # The same override as modules/services/llama-cpp.nix, so both share one build.
-      llama = pkgs.llama-cpp.override { nodejs_latest = pkgs.nodejs_24; };
+      # nodejs as in modules/services/llama-cpp.nix. On the GPU a pick takes 1 s, on the CPU 1.5 s.
+      llama = pkgs.llama-cpp.override {
+        nodejs_latest = pkgs.nodejs_24;
+        vulkanSupport = true;
+      };
 
       voice-pick = pkgs.writeShellApplication {
         name = "voice-pick";
@@ -113,7 +117,6 @@ in
           jq
           libnotify
           llama
-          util-linux
         ];
         text = ''
           tests=
@@ -127,15 +130,11 @@ in
             echo "voice-pick: $file has more than 26 lines" >&2
             exit 2
           fi
-          if [ -z "$tests" ]; then
-            text=$(cat)
-            [ -n "$text" ] || exit 1
-          fi
 
-          # The model loads in 0.4 s and holds 1.8 GB, so the server only lives for the call.
+          # The model holds 1.8 GB, so the server only lives as long as this script.
           dir=$(mktemp -d -p "$XDG_RUNTIME_DIR" voice-XXXXXX)
-          taskset -c 4-7 llama-server --host "$dir/llama.sock" -m ${pkgs.fetchurl voiceModel} \
-            --threads 4 --ctx-size 2048 --fit off --no-warmup --cache-ram 0 --no-webui >/dev/null 2>&1 &
+          llama-server --host "$dir/llama.sock" -m ${pkgs.fetchurl voiceModel} --n-gpu-layers 99 \
+            --ctx-size 2048 --fit off --no-warmup --cache-ram 0 --no-webui >/dev/null 2>&1 &
           server=$!
           trap 'kill $server; rm -rf "$dir"' EXIT
           until curl -sf --unix-socket "$dir/llama.sock" http://localhost/health >/dev/null; do
@@ -187,30 +186,75 @@ in
             exit
           fi
 
-          IFS=$'\t' read -r run _ _ cmd < <(ask "$text") || true
-          if [ "''${run:-}" != true ]; then
-            notify-send "Voice control" "No command for: $text"
-            exit 1
-          fi
-          echo "$cmd"
+          while IFS= read -r text; do
+            [ -n "$text" ] || continue
+            printf 'heard\t%s\n' "$text"
+            IFS=$'\t' read -r run _ _ cmd < <(ask "$text") || true
+            [ "''${run:-}" != true ] || printf 'run\t%s\n' "$cmd"
+          done
         '';
       };
 
       voice = pkgs.writeShellApplication {
         name = "voice";
         runtimeInputs = [
-          listen
+          pkgs.libnotify
           pkgs.niri
+          pkgs.pipewire
+          pkgs.procps
+          pkgs.sox
+          pkgs.wireplumber
           voice-pick
+          wav2text
         ];
         text = ''
-          text=$(listen ${voicePauseSeconds})
-          [ -n "$text" ] || exit 0
-          # Shown while the model picks. Through niri, whose PATH has noctalia.
-          niri msg action spawn -- noctalia msg osd-show hourglass "$text"
-          cmd=$(voice-pick <<< "$text")
-          # Through niri and not sh: the command starts like a bind and outlives this script.
-          niri msg action spawn-sh -- "$cmd"
+          pidfile="$XDG_RUNTIME_DIR/voice.pid"
+          if [ -f "$pidfile" ] && pkill -P "$(cat "$pidfile")" sox; then
+            exit 0
+          fi
+
+          case "$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>&1)" in
+            *MUTED*) notify-send -u critical "Voice control" "The microphone is muted"; exit 1 ;;
+            Volume:*) ;;
+            *) notify-send -u critical "Voice control" "No microphone"; exit 1 ;;
+          esac
+
+          echo $$ > "$pidfile"
+          dir=$(mktemp -d -p "$XDG_RUNTIME_DIR" voice-XXXXXX)
+          sox=
+          trap 'kill $sox 2>/dev/null || true; rm -rf "$pidfile" "$dir"' EXIT
+          sounds=${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo
+          pw-play "$sounds/device-added.oga"
+
+          # One clip per sentence: sox closes clipNNN.wav at each pause and opens the next.
+          sox -q -t pulseaudio default -r 16000 -c 1 -b 16 "$dir/clip.wav" \
+            silence 1 0.1 1% 1 ${voicePauseSeconds} 1% : newfile : restart &
+          sox=$!
+
+          n=1 idle=0
+          while kill -0 $sox 2>/dev/null; do
+            printf -v clip '%s/clip%03d.wav' "$dir" "$n"
+            printf -v next '%s/clip%03d.wav' "$dir" "$((n + 1))"
+            if [ -e "$next" ]; then
+              # Under 0.2 s is a click or a cough.
+              [ "$(stat -c %s "$clip")" -lt 6400 ] || wav2text "$clip" || true
+              rm "$clip"
+              n=$((n + 1)) idle=0
+            elif [ "$idle" -ge $((${voiceIdleSeconds} * 10)) ]; then
+              kill $sox
+            else
+              # ponytail: polls; inotifywait if a tenth of a second ever matters.
+              sleep 0.1
+              idle=$((idle + 1))
+            fi
+          done | voice-pick | while IFS=$'\t' read -r kind text; do
+            # Through niri: its PATH has noctalia, and a command started like a bind outlives this script.
+            case $kind in
+              heard) niri msg action spawn -- noctalia msg osd-show hourglass "$text" ;;
+              run) niri msg action spawn-sh -- "$text" ;;
+            esac
+          done
+          pw-play "$sounds/device-removed.oga"
         '';
       };
     in
