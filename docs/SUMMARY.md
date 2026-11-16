@@ -22,7 +22,7 @@
 
 - [Desktop](satie/desktop.md)
 - [eduroam](satie/eduroam.md)
-- [Agent users](satie/agent.md)
+- [Agent user](satie/agent.md)
 
 # Recovery
 

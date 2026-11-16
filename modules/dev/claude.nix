@@ -1,36 +1,22 @@
 { ... }:
 {
+  # Relies on the agent aspect for the user and its home.
   flake.nixosModules.claude =
     { pkgs, ... }:
     let
       wrapper = pkgs.writeShellScriptBin "claude" ''
-        exec /run/wrappers/bin/sudo -H -u claude --preserve-env=TERM,COLORTERM \
+        exec /run/wrappers/bin/sudo -H -u agent --preserve-env=TERM,COLORTERM \
           ${pkgs.claude-code}/bin/claude "$@"
       '';
     in
     {
-      users.groups.repos = { };
-      users.groups.claude.gid = 1001;
-
-      users.users.claude = {
-        isNormalUser = true;
-        uid = 1001;
-        group = "claude";
-        extraGroups = [ "repos" ];
-        linger = true;
-        packages = [ pkgs.claude-code ];
-      };
-
-      users.users.michele.extraGroups = [ "repos" ];
+      users.users.agent.packages = [ pkgs.claude-code ];
 
       environment.systemPackages = [ wrapper ];
 
-      home-manager.users.claude =
+      home-manager.users.agent =
         { config, ... }:
         {
-          home.file.".claude/skills/dev-shell/SKILL.md".source = ./agent/dev-shell/SKILL.md;
-          home.file.".claude/skills/agents-file/SKILL.md".source = ./agent/agents-file/SKILL.md;
-
           # Out of store while the wording is tuned: an edit is live in the next session without a rebuild.
           home.file.".claude/CLAUDE.md".source =
             config.lib.file.mkOutOfStoreSymlink "/home/michele/repos/nixos/modules/dev/agent/AGENTS.md";
@@ -38,11 +24,11 @@
 
       environment.etc."claude-code/managed-settings.json".text = builtins.toJSON { attribution = false; };
 
-      # SSH_AUTH_SOCK is deliberately not preserved: it would hand claude the Bitwarden agent.
+      # SSH_AUTH_SOCK is deliberately not preserved: it would hand the agent the Bitwarden agent.
       security.sudo.extraRules = [
         {
           users = [ "michele" ];
-          runAs = "claude";
+          runAs = "agent";
           commands = [
             {
               command = "${pkgs.claude-code}/bin/claude";
@@ -50,14 +36,6 @@
             }
           ];
         }
-      ];
-
-      systemd.tmpfiles.rules = [
-        "d /home/michele/repos 2750 michele repos -"
-        "a+ /home/michele/repos - - - - g:repos:rwX,d:g:repos:rwX"
-        "L+ /home/michele/nixos - - - - /home/michele/repos/nixos"
-        # Only "other" is touched, so the repos entries claude-allow adds stay effective.
-        "a+ /home/michele/Nextcloud - - - - other::---,default:other::---"
       ];
     };
 }

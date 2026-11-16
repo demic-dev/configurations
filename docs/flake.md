@@ -70,7 +70,7 @@ modules/
   hosts/<host>/    one folder per machine
   base/            every host: core, michele, ssh, tailscale, impermanence
   desktop/         desktop, niri, noctalia, gtk, xdg, zen, ghostty, screenshot, pcmanfm
-  dev/             git, fish (with `update`), nvim, claude
+  dev/             git, fish (with `update`), nvim, agent, claude, opencode
   services/        one file per service, plus tailnet-server
 secrets/           agenix secrets, and git-agecrypt values in secrets/sensitive/
 scripts/           helpers for secrets

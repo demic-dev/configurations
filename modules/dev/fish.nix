@@ -102,8 +102,8 @@ in
             nixos-rebuild $args $argv
           '';
 
-          # Give the agents (repos group) rw access to a folder (default: cwd), including files created later: `claude-allow [--no-more] [path]`
-          claude-allow = ''
+          # Give the agents (repos group) rw access to a folder (default: cwd), including files created later: `agent-allow [--no-more] [path]`
+          agent-allow = ''
             argparse no-more -- $argv
             or return 1
             set -l dir (realpath (string length -q -- $argv[1]; and echo $argv[1]; or echo .))

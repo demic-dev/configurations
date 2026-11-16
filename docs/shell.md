@@ -43,20 +43,20 @@ An alias for `ssh root@<bach's IP> -p 2222`: the ssh server in bach's initrd, wh
 The session opens on the "Enter key for rpool" prompt.
 After the passphrase it closes and boot continues.
 
-### claude-allow
+### agent-allow
 
 ```sh
-claude-allow [--no-more] [path]
+agent-allow [--no-more] [path]
 ```
 
-Gives the agent users (`claude` and `ai-agent`) read and write access to `path` (default: the current directory) through ACLs for the `repos` group, including files created later.
+Gives the agent user (`agent`) read and write access to `path` (default: the current directory) through ACLs for the `repos` group, including files created later.
 Each parent up to the home folder gets traverse-only access, unless it already has a wider entry.
 `--no-more` removes the access to `path` and leaves the parents alone.
-It works on satie only, where `modules/dev/claude.nix` creates the `repos` group.
+It works on satie only, where `modules/dev/agent.nix` creates the `repos` group.
 
 ```sh
-claude-allow ~/Nextcloud/notes
-claude-allow --no-more ~/Nextcloud/notes
+agent-allow ~/Nextcloud/notes
+agent-allow --no-more ~/Nextcloud/notes
 ```
 
 ### share
@@ -258,11 +258,11 @@ git add secrets/sensitive/fqdn.age
 
 See `docs/secrets.md`.
 
-### Give the agents access to a folder
+### Give the agent access to a folder
 
 ```sh
-claude-allow ~/Nextcloud/notes
-claude-allow --no-more ~/Nextcloud/notes
+agent-allow ~/Nextcloud/notes
+agent-allow --no-more ~/Nextcloud/notes
 ```
 
 See `docs/satie/agent.md`.

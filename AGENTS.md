@@ -43,7 +43,7 @@ modules/hosts/<host>/  default.nix (nixosConfigurations, aspect list, host basic
                        hardware.nix/zfs.nix (<host>-hardware), network/users/… (<host> aspect)
 modules/base/          every host: core, michele, ssh, tailscale, impermanence
 modules/desktop/       niri, noctalia, gtk, xdg, zen, ghostty, …
-modules/dev/           git, fish (incl. `update`), nvim, claude
+modules/dev/           git, fish (incl. `update`), nvim, agent, claude, opencode
 modules/services/      one file per service, plus tailnet-server
 secrets/               agenix + git-agecrypt (see docs/secrets.md)
 docs/                  the documentation (mdBook, served on the tailnet)

@@ -23,6 +23,7 @@ in
       
       # users
       michele
+      agent
       claude
       opencode
 

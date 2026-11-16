@@ -133,39 +133,5 @@ in
         home.stateVersion = "26.05";
         programs.home-manager.enable = true;
       };
-
-      home-manager.users.claude = { ... }: {
-        home.username = "claude";
-        home.homeDirectory = "/home/claude";
-
-        imports = with hm; [ git ];
-
-        programs.direnv = {
-          enable = true;
-          enableBashIntegration = true;
-          nix-direnv.enable = true;
-        };
-
-        home.stateVersion = "26.05";
-      };
-
-      home-manager.users.ai-agent = { ... }: {
-        home.username = "ai-agent";
-        home.homeDirectory = "/home/ai-agent";
-
-        imports = with hm; [ git opencode ];
-
-        programs.direnv = {
-          enable = true;
-          enableBashIntegration = true;
-          nix-direnv.enable = true;
-        };
-
-        # The repos belong to michele, so git and Nix refuse them as "dubious ownership" otherwise.
-        # "*" and not "/home/michele/repos/*": Nix's libgit2 ignores the path wildcard.
-        programs.git.settings.safe.directory = "*";
-
-        home.stateVersion = "26.05";
-      };
     };
 }
