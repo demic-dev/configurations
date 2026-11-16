@@ -37,13 +37,19 @@
       ];
     };
 
-  flake.homeModules.opencode = {
-    programs.opencode = {
-      enable = true;
-      settings = {
-        autoupdate = false;
-        share = "disabled";
+  flake.homeModules.opencode =
+    { config, ... }:
+    {
+      programs.opencode = {
+        enable = true;
+        settings = {
+          autoupdate = false;
+          share = "disabled";
+        };
       };
+
+      # Out of store while the wording is tuned: an edit is live in the next session without a rebuild.
+      xdg.configFile."opencode/AGENTS.md".source =
+        config.lib.file.mkOutOfStoreSymlink "/home/michele/repos/nixos/modules/dev/agent/AGENTS.md";
     };
-  };
 }

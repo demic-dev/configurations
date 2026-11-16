@@ -9,7 +9,7 @@ Coding agents run on satie as separate users, so an agent only reaches the files
 | Claude Code | `claude` | 1001 | `claude` | on |
 | opencode | `ai-agent` | 1002 | `opencode` | off |
 
-Each is a normal user with its own home and group, in the group `repos`. With lingering on, `claude`'s user services keep running without a login. Their home-manager config has git and direnv, plus opencode's own config for `ai-agent` and, for `claude`, the global skill `dev-shell` (`modules/dev/claude/dev-shell/SKILL.md`), which creates a project's dev shell or adds a `MOTD` to it (see `docs/shell.md`).
+Each is a normal user with its own home and group, in the group `repos`. With lingering on, `claude`'s user services keep running without a login. Their home-manager config has git and direnv, plus opencode's own config for `ai-agent` and, for `claude`, the global skill `dev-shell` (`modules/dev/agent/dev-shell/SKILL.md`), which creates a project's dev shell or adds a `MOTD` to it (see `docs/shell.md`), and `agents-file` (see "Global instructions").
 
 michele runs each agent through a wrapper on the `PATH`, which calls `sudo -u <user>`. A sudo rule per agent lets michele do that without a password, for that agent's binary only. `TERM` and `COLORTERM` pass through.
 
@@ -50,3 +50,18 @@ The repositories belong to michele, so git and Nix refuse to work in them as ano
 ## opencode
 
 opencode's global config (`~/.config/opencode/opencode.json` in `ai-agent`'s home) turns off update checks, since Nix owns the version, and session sharing to opencode's servers. It sets no model or provider: the login and the model choice are made by hand, and the credentials stay in `ai-agent`'s home.
+
+## Global instructions
+
+One `AGENTS.md` holds the rules every agent session follows, in any folder: `modules/dev/agent/AGENTS.md`. A folder's own `AGENTS.md` is loaded after it and wins where the two disagree. It's linked into each agent's home, at the path its harness reads:
+
+| Harness | User | Link |
+|---|---|---|
+| Claude Code | `claude` | `~/.claude/CLAUDE.md` (`modules/dev/claude.nix`) |
+| opencode | `ai-agent` | `~/.config/opencode/AGENTS.md` (`modules/dev/opencode.nix`) |
+
+The links point at the checkout, `/home/michele/repos/nixos/modules/dev/agent/AGENTS.md`, not at the store, so an edit there applies to the next session without a rebuild. Both users read it through the `repos` group.
+
+The skill `agents-file` (`modules/dev/agent/agents-file/SKILL.md`, linked for `claude` at `~/.claude/skills/agents-file/SKILL.md`) writes a folder's `AGENTS.md` with only what the global file doesn't already say.
+
+Claude Code adds a `Co-Authored-By` trailer to commits and a line to pull requests by default. `/etc/claude-code/managed-settings.json` sets `"attribution": false`, which turns both off (`modules/dev/claude.nix`). Managed settings rank above `~/.claude/settings.json`, which Claude Code writes to itself and so can't be a store link.

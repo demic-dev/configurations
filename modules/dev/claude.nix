@@ -25,7 +25,18 @@
 
       environment.systemPackages = [ wrapper ];
 
-      home-manager.users.claude.home.file.".claude/skills/dev-shell/SKILL.md".source = ./claude/dev-shell/SKILL.md;
+      home-manager.users.claude =
+        { config, ... }:
+        {
+          home.file.".claude/skills/dev-shell/SKILL.md".source = ./agent/dev-shell/SKILL.md;
+          home.file.".claude/skills/agents-file/SKILL.md".source = ./agent/agents-file/SKILL.md;
+
+          # Out of store while the wording is tuned: an edit is live in the next session without a rebuild.
+          home.file.".claude/CLAUDE.md".source =
+            config.lib.file.mkOutOfStoreSymlink "/home/michele/repos/nixos/modules/dev/agent/AGENTS.md";
+        };
+
+      environment.etc."claude-code/managed-settings.json".text = builtins.toJSON { attribution = false; };
 
       # SSH_AUTH_SOCK is deliberately not preserved: it would hand claude the Bitwarden agent.
       security.sudo.extraRules = [
