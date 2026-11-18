@@ -59,25 +59,16 @@ Common tasks:
 - **Persist state** → `environment.persistence."/persist"` lines go in the service's own file.
   Hosts without `/persist` (satie) import `impermanence` with that location disabled.
 
-## Rules for the code you write
+## Nix code
 
-**Keep it simple. This is the rule that overrides everything else.**
+The global rules apply. What they mean here:
 
-- No overengineering. Solve exactly what I asked, nothing more. No speculative options, no
-  future-proofing, no configurability I did not ask for.
-- No overabstraction. Prefer plain, literal NixOS/home-manager config over `let` helpers,
-  generator functions, `mkMerge` gymnastics or custom module options. A little repetition beats
-  a clever abstraction.
-- Use upstream nixpkgs options instead of hand-rolling systemd units, scripts or wrappers.
-- Match the surrounding file's style and naming.
+- Plain, literal NixOS and home-manager config. No `let` helpers, generator functions, `mkMerge` gymnastics or custom module options: a little repetition beats a clever abstraction.
+- Upstream nixpkgs options before hand-rolled systemd units, scripts or wrappers.
 
-**Comments: fewer than the minimum.**
+## Working here
 
-- Add one only if the code is genuinely inexplicable without it: a non-obvious workaround, an
-  upstream bug, a subtle ordering constraint.
-- Explain the **why**, never the **what**. If it restates the code, delete it.
-- One or two lines. Never a paragraph. Never a section header or a banner.
-- Do not comment out code as documentation, and do not narrate your changes in the file.
+Work on a branch in this checkout, not in a worktree: git-agecrypt's smudge filter doesn't run in a worktree, so `secrets/sensitive/` stays ciphertext there and nothing evaluates. On approval, merge the branch into `main` fast-forward and delete it.
 
 ## Docs
 
@@ -87,19 +78,15 @@ Common tasks:
 
 `docs/shell.md` is also the man page `configurations(7)` on both hosts, built by `modules/dev/fish.nix`. A commit that adds, removes or changes an alias or function in that file, or a script in `scripts/`, updates `docs/shell.md` too, and so does one that changes a command a walkthrough there uses. That page has one sentence per line, which mdoc requires. Build and lint the man page as in step 5 of the `docs-sync` skill.
 
-Writing rules for `docs/`:
+Writing rules for `docs/`, on top of the global ones:
 
-- Describe the system as it is now, like the docs of a public library. No history, no dates, no "we changed X".
 - "Why not" blocks are rare. Write one only for a real design decision, where a serious alternative was weighed and rejected for a reason that still holds (deny-by-default vs an allow list per vhost, zram vs swap on a zvol). Never for implementation details, workarounds or choices made in passing while writing the code. Format: right after the setting, `<details>`, `<summary>Why not X?</summary>`, a short paragraph, `</details>`.
 - Impersonal voice for explanations ("The ARC is capped at 1 GiB"). Imperative for steps ("Run `unlock-bach` after a reboot").
 - The reader knows NixOS and has a CS undergraduate background (git, networking, VPNs, filesystems). Don't explain flakes, modules or home-manager. Explain niche things (the ZFS ARC, zram, Authenticated Origin Pulls) in one sentence where they first appear.
 - Every page opens with one sentence saying what it covers. The rest follows the content.
 - Headings are nouns ("Swap", "Public vhosts"); how-to sections use tasks ("Restore a few files").
-- Repeat concrete values (1 GiB, port 2222) and name the file that sets them, as a plain path from the repo root.
 - Nix snippets only when the exact shape is the point. Shell commands in code blocks, ready to copy.
 - No bold except for warnings where data or access is at stake. No emoji. `> [!WARNING]` boxes, rarely.
-- Human prose: short paragraphs, describe instead of selling, no filler, no recaps. Lists for real lists, tables for comparisons.
-- Never use em dashes, here or anywhere else (commit messages included). Use commas, colons, parentheses or full stops.
 - The repo is public: nothing git-agecrypt hides (domains, bach's public IP, repository URLs) and no names of people.
 
 Preview while writing: `nix run nixpkgs#mdbook -- serve docs`.
