@@ -18,8 +18,6 @@ in
 
       dnsProvider = "cloudflare";
       environmentFile = config.age.secrets.cloudflare_dns_challenge.path;
-
-      dnsPropagationCheck = true;
     };
 
     certs = {
