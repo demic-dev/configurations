@@ -186,7 +186,7 @@ A check that fails prints nothing for its line.
 ## Dev shell MOTD
 
 A project's dev shell can list its commands each time direnv loads it.
-The project sets `MOTD` on `mkShell`:
+The project sets `MOTD` on `mkShell`, and optionally `MOTD_LOGO`, a few lines of ASCII art:
 
 ```nix
 pkgs.mkShell {
@@ -194,11 +194,18 @@ pkgs.mkShell {
   MOTD = ''
     build   compile every PDF into uploads/
   '';
+  MOTD_LOGO = ''
+     ___
+    |   \
+    |    |
+    |____|
+  '';
 }
 ```
 
 `mkShell` attributes become environment variables, which direnv exports into fish, with `use flake` and `use nix` alike.
-The fish function `motd` in `modules/dev/fish.nix` runs whenever `MOTD` changes and prints the name of the directory holding the `.envrc`, then the value, next to a small λ.
+The fish function `motd` in `modules/dev/fish.nix` runs at each prompt and, when `MOTD` or `MOTD_LOGO` has changed, prints the art, and beside it the name of the directory holding the `.envrc`, then the value of `MOTD`.
+Without `MOTD_LOGO` the art is a small λ.
 That happens on every `cd` into the project, on a move from one project straight into another, and in every new terminal opened inside it.
 Leaving a project, or loading one without `MOTD`, prints nothing.
 `nix develop` and `nix-shell` start bash, which has no such hook.

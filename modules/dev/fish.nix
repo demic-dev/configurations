@@ -60,24 +60,6 @@ in
             end
           '';
 
-          motd = {
-            onVariable = "MOTD";
-            body = ''
-              set -q MOTD; and test -n "$MOTD"; or return
-              # direnv exports in no fixed order, so DIRENV_DIR may still be the old project's here.
-              set -l dir $PWD
-              while not test -e $dir/.envrc; and test $dir != /
-                set dir (path dirname $dir)
-              end
-              set -l lines (path basename $dir) (string trim -r -- $MOTD | string split \n)
-              set -l logo ' \\' '  \\' '  /\\' ' /  \\'
-              for i in (seq (math max (count $logo), (count $lines)))
-                set_color blue; printf '%-7s' $logo[$i]; set_color normal
-                echo $lines[$i]
-              end
-            '';
-          };
-
           # `update [--build host] [--deploy host] [--mode switch|boot|test|…] [nixos-rebuild args]`; defaults: this host, switch.
           update = ''
             argparse -i 'b/build=' 'd/deploy=' 'm/mode=' -- $argv
@@ -163,11 +145,25 @@ in
           { name = "bobthefish"; src = pkgs.fishPlugins.bobthefish.src; }
         ];
 
-        # bobthefish tuning
-        interactiveShellInit = ''
+        # bobthefish tuning, then `motd`. Order 2000 puts this after direnv's hook (mkAfter, 1500), so `motd` runs after direnv's export on each prompt: direnv sets variables in no fixed order, so a handler on one of them can see the others stale.
+        interactiveShellInit = lib.mkOrder 2000 ''
           set -g theme_display_date no
           set -g theme_display_screen yes
           set -g theme_display_cmd_duration yes
+
+          function motd --on-event fish_prompt
+            test "$MOTD$MOTD_LOGO" = "$__motd_shown"; and return
+            set -g __motd_shown "$MOTD$MOTD_LOGO"
+            set -q DIRENV_DIR; and test -n "$MOTD"; or return
+            set -l lines (path basename (string sub -s 2 -- $DIRENV_DIR)) (string trim -r -- $MOTD | string split \n)
+            set -l logo ' \\' '  \\' '  /\\' ' /  \\'
+            set -q MOTD_LOGO; and set logo (string trim -r -- $MOTD_LOGO | string split \n)
+            set -l width (math 2 + (string length -- $logo | sort -n)[-1])
+            for i in (seq (math max (count $logo), (count $lines)))
+              set_color blue; printf "%-$width"s $logo[$i]; set_color normal
+              echo $lines[$i]
+            end
+          end
         '';
       };
 

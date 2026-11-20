@@ -5,8 +5,8 @@ description: Create a project's Nix dev shell (a dev flake, or shell.nix), or up
 
 # Dev shell with a MOTD
 
-On Michele's hosts, fish prints a dev shell's `MOTD` every time direnv loads it, with the project's name and a small λ (function `motd` in `modules/dev/fish.nix` of the NixOS configuration, `/home/michele/repos/nixos`).
-`mkShell` attributes become environment variables, so the whole contract is one attribute:
+On Michele's hosts, fish prints a dev shell's `MOTD` every time direnv loads it, beside a small piece of ASCII art (function `motd` in `modules/dev/fish.nix` of the NixOS configuration, `/home/michele/repos/nixos`).
+`mkShell` attributes become environment variables, so the contract is two attributes: `MOTD`, and an optional `MOTD_LOGO` that replaces the default λ.
 
 ```nix
 pkgs.mkShell {
@@ -14,7 +14,84 @@ pkgs.mkShell {
   MOTD = ''
     build   compile every PDF into uploads/
   '';
+  MOTD_LOGO = ''
+     ___
+    |   \
+    |    |
+    |____|
+  '';
 }
+```
+
+fish prints the art in its own column, and beside it the name of the directory holding the `.envrc`, then the `MOTD` lines.
+The shell above, in a folder named `notes`, prints:
+
+```
+ ___    notes
+|   \   build   compile every PDF into uploads/
+|    |
+|____|
+```
+
+Without `MOTD_LOGO` it is the λ, as in the NixOS configuration's own `shell.nix`:
+
+```
+ \     nixos
+  \    scripts/add-sensitive.fish   add a git-agecrypt value
+  /\   scripts/rekey.fish           re-encrypt the agenix secrets a key can read
+ /  \
+```
+
+Other shapes, to pick from or adapt to what the project is.
+
+A command-line tool:
+
+```
+ ____
+|>_  |
+|____|
+```
+
+A library or package:
+
+```
+ ___
+|   |
+|___|
+```
+
+Documents (the example above):
+
+```
+ ___
+|   \
+|    |
+|____|
+```
+
+A diamond:
+
+```
+ /\
+/  \
+\  /
+ \/
+```
+
+Mountains:
+
+```
+    /\
+ /\/  \
+/      \
+```
+
+Waves:
+
+```
+ ~ ~
+~ ~ ~
+ ~ ~
 ```
 
 ## Steps
@@ -31,8 +108,9 @@ pkgs.mkShell {
    - One command per line: the name as typed (with its short argument form, e.g. `build <file>`), then a short lowercase description. Names in one left-aligned column, at least two spaces before the descriptions.
    - Only the project's own commands. No generic tools (`git`, `python`, `cargo build`) unless the project wraps them, and not every package in the shell.
    - A handful of lines. If nothing is worth listing, add no `MOTD` and say so.
+   - Add a `MOTD_LOGO` that fits the project: one of the shapes above, or a new one in the same style. Plain ASCII only (a wide character breaks the column), three or four lines, at most eight columns. In a Nix `''` string, write `''` as `'''` and `${` as `''${`.
 6. Verify:
-   - `nix flake check` (or `nix-instantiate --eval -A MOTD shell.nix`), and `nix eval --raw .#devShells.<system>.default.MOTD` to see the text.
+   - `nix flake check` (or `nix-instantiate --eval -A MOTD shell.nix`), and `nix eval --raw .#devShells.<system>.default.MOTD` (and `.MOTD_LOGO`) to see the text.
    - Optionally `direnv allow && direnv exec . printenv MOTD`. If `.envrc` is new, Michele still has to run `direnv allow` once from their own account.
 7. Show the diff. Commit only when asked, in the project's commit style. Never push.
 
