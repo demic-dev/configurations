@@ -211,7 +211,7 @@ Leaving a project, or loading one without `MOTD`, prints nothing.
 `nix develop` and `nix-shell` start bash, which has no such hook.
 
 This repository has its own dev shell in `shell.nix`, loaded by `.envrc` with `use nix`, which `flake.nix` also exposes as `devShells.default`.
-Its `MOTD` lists the scripts in `scripts/`.
+Its `MOTD` lists the scripts in `scripts/`, and its `MOTD_LOGO` is a snowflake.
 Run `direnv allow` once in the checkout to enable it.
 
 ## Walkthroughs

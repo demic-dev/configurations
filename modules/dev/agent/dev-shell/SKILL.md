@@ -33,12 +33,12 @@ The shell above, in a folder named `notes`, prints:
 |____|
 ```
 
-Without `MOTD_LOGO` it is the λ, as in the NixOS configuration's own `shell.nix`:
+Without `MOTD_LOGO` it is the λ:
 
 ```
- \     nixos
-  \    scripts/add-sensitive.fish   add a git-agecrypt value
-  /\   scripts/rekey.fish           re-encrypt the agenix secrets a key can read
+ \
+  \
+  /\
  /  \
 ```
 
@@ -67,6 +67,14 @@ Documents (the example above):
 |   \
 |    |
 |____|
+```
+
+A snowflake (the NixOS configuration's `shell.nix`):
+
+```
+ \ | /
+-- * --
+ / | \
 ```
 
 A diamond:
