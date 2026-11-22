@@ -16,12 +16,6 @@ let
         add_header Content-Disposition 'inline; filename="michele-de-cillis-cv.pdf"';
       '';
     };
-    "= /resume-ats" = {
-      alias = "${filesRoot}/resume-ATS.pdf";
-      extraConfig = ''
-        add_header Content-Disposition 'inline; filename="michele-de-cillis-cv-ATS.pdf"';
-      '';
-    };
   };
 in
 {

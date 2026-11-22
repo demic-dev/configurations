@@ -75,7 +75,7 @@ The fish function `share` (`modules/dev/fish.nix`) publishes a file through the 
 
 `<ext>` is the source file's last extension in lower case, kept only if it is 1 to 10 characters of `a-z0-9`, so `report.tar.gz` becomes `<id>.gz`. It gives the browser the content type, so PDFs and images open inline; a share without one is served as `application/octet-stream` and downloads. The original file name is not kept.
 
-The content goes over `ssh bach` on stdin, and since michele's shell on bach is fish, the file is written with fish's `>?` redirection, which fails instead of overwriting an existing file. It lands flat in `/data/static-files/` with mode 0640 and the `static-files` group that nginx reads through. `--list` and `--delete` only see regular files at the top level whose name is an id plus an optional extension, so `resume.pdf`, `resume-ATS.pdf` (published by the `cv-resume` service in `modules/services/static-files.nix`) and anything else there are out of their reach.
+The content goes over `ssh bach` on stdin, and since michele's shell on bach is fish, the file is written with fish's `>?` redirection, which fails instead of overwriting an existing file. It lands flat in `/data/static-files/` with mode 0640 and the `static-files` group that nginx reads through. `--list` and `--delete` only see regular files at the top level whose name is an id plus an optional extension, so `resume.pdf` (published by the `cv-resume` service in `modules/services/static-files.nix`) and anything else there are out of their reach.
 
 ## Cloudflare only
 

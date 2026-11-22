@@ -28,7 +28,6 @@ in
 
       out=$(nix build github:${cvGithubUri} --no-link --print-out-paths --extra-experimental-features nix-command --extra-experimental-features flakes --refresh --no-write-lock-file)
       install -m 0640 "$out/resume.pdf" ${filesRoot}/resume.pdf
-      install -m 0640 "$out/resume-ATS.pdf" ${filesRoot}/resume-ATS.pdf
     '';
   };
 
