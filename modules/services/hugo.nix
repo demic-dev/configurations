@@ -26,13 +26,21 @@ in
     '';
     serviceConfig = {
       Type = "oneshot";
+      StateDirectory = "website";
     };
-    path = [ pkgs.nix ];
+    path = [ pkgs.nix pkgs.git ];
     startAt = "*:0/5";
     script = ''
-      set -ex
+      set -e
 
-      nix build github:${githubUri} --out-link ${webRoot} --extra-experimental-features nix-command --extra-experimental-features flakes --refresh --no-write-lock-file
+      rev=$(git ls-remote https://github.com/${githubUri} HEAD)
+      rev=''${rev%%[[:space:]]*}
+      if [ "$rev" = "$(cat "$STATE_DIRECTORY/rev" 2>/dev/null)" ] && [ -e ${webRoot} ]; then
+        exit 0
+      fi
+
+      nix build github:${githubUri}/$rev --out-link ${webRoot} --extra-experimental-features nix-command --extra-experimental-features flakes --no-write-lock-file
+      echo "$rev" > "$STATE_DIRECTORY/rev"
     '';
   };
 

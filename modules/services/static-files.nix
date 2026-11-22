@@ -14,8 +14,8 @@ in
   # disable_symlinks/try_files hardening as everything else being served.
   systemd.services.cv-resume = {
     description = "Fetch and publish resume PDF into static files";
-    path = [ pkgs.nix ];
-    startAt = "*:0/2";
+    path = [ pkgs.nix pkgs.git ];
+    startAt = "*:0/5";
     environment.HOME = "/var/lib/static-files";
     serviceConfig = {
       Type = "oneshot";
@@ -24,10 +24,17 @@ in
       StateDirectory = "static-files";
     };
     script = ''
-      set -ex
+      set -e
 
-      out=$(nix build github:${cvGithubUri} --no-link --print-out-paths --extra-experimental-features nix-command --extra-experimental-features flakes --refresh --no-write-lock-file)
+      rev=$(git ls-remote https://github.com/${cvGithubUri} HEAD)
+      rev=''${rev%%[[:space:]]*}
+      if [ "$rev" = "$(cat "$STATE_DIRECTORY/rev" 2>/dev/null)" ] && [ -e ${filesRoot}/resume.pdf ]; then
+        exit 0
+      fi
+
+      out=$(nix build github:${cvGithubUri}/$rev --no-link --print-out-paths --extra-experimental-features nix-command --extra-experimental-features flakes --no-write-lock-file)
       install -m 0640 "$out/resume.pdf" ${filesRoot}/resume.pdf
+      echo "$rev" > "$STATE_DIRECTORY/rev"
     '';
   };
 
