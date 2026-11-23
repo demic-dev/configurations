@@ -33,6 +33,7 @@ in
       hugo
       static-files
       docs
+      health
 
       bach
       ({ pkgs, inputs, ... }: {

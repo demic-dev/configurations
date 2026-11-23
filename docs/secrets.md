@@ -20,7 +20,7 @@ The recipient groups:
 
 | Secrets | Recipients |
 |---|---|
-| bach's services (borg, Nextcloud, OnlyOffice, Miniflux, Cloudflare DNS token) | bach's host key, michele@bach |
+| bach's services (borg, Nextcloud, OnlyOffice, Miniflux, Cloudflare DNS token, `homelab_smtp_token`, `healthchecks_ping_url`) | bach's host key, michele@bach |
 | satie only (`michele-password`, `git-agecrypt-key`, `eduroam`) | satie's host key, michele@satie |
 | git emails | both host keys, both michele keys |
 | `root-at-bach` | satie's host key |

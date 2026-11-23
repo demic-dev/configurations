@@ -25,6 +25,15 @@ Not backed up: the Nix store and the OS, which are rebuilt from the flake, and `
 
 The jobs authenticate to BorgBase with bach's ssh host key and keep their cache in `/var/cache/borg`.
 
+## Monitoring
+
+A failed job mails an alert, like any failed service on bach. Two more checks are in `modules/services/health.nix`:
+
+- After each successful `borg create`, the `generic` job pings healthchecks.io, which mails when a ping is missing. A missed backup and bach being down both show up this way.
+- `borg-check` runs `borg check` on the `generic` repository on the 3rd of each month at 04:00, and mails if it fails.
+
+The `immich` job has neither. [Health checks](health.md) covers the alerts.
+
 ## What an archive contains
 
 Plain files, not a ZFS dataset. The snapshot is only a consistent place to read from. `borg extract` gives regular files and needs no ZFS.

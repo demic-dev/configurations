@@ -66,6 +66,17 @@ in
     micheleAtBach
   ];
 
+  # Health alerts: Proton SMTP token for homelab@, and the healthchecks.io ping URL.
+  "homelab_smtp_token.age".publicKeys = [
+    bachSystem
+    micheleAtBach
+  ];
+
+  "healthchecks_ping_url.age".publicKeys = [
+    bachSystem
+    micheleAtBach
+  ];
+
   # Ghost's Secrets
   "ghost-storiedisilicio-env.age".publicKeys = [
     micheleAtBach
