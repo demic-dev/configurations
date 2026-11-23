@@ -52,7 +52,7 @@ agent-allow [--no-more] [path]
 Gives the agent user (`agent`) read and write access to `path` (default: the current directory) through ACLs for the `repos` group, including files created later.
 Each parent up to the home folder gets traverse-only access, unless it already has a wider entry.
 `--no-more` removes the access to `path` and leaves the parents alone.
-It works on satie only, where `modules/dev/agent.nix` creates the `repos` group.
+It needs the `repos` group, which `modules/dev/agent.nix` creates on both hosts.
 
 ```sh
 agent-allow ~/Nextcloud/notes

@@ -116,6 +116,7 @@ Behind Cloudflare, nginx and the apps see Cloudflare's addresses, so a ban hits 
 | Port | What |
 |---|---|
 | TCP 80, 443 | nginx |
+| TCP 22 | OpenSSH, on `tailscale0` only |
 | TCP 2222 | ssh in the initrd, only while bach waits for the disk passphrase (see [Disk and boot](disk.md)) |
 | UDP 41641 | Tailscale direct connections; without it, traffic falls back to the slower DERP relays |
 
@@ -123,7 +124,27 @@ The services themselves listen on loopback.
 
 ## SSH
 
-OpenSSH doesn't run on bach. SSH goes through Tailscale SSH, served by tailscaled on port 22 of the tailnet address (`--ssh` in `modules/services/tailnet-server.nix`). The Tailscale policy decides who may log in, and it's michele only. If Tailscale breaks, the way in is the VPS provider's VNC console.
+OpenSSH runs on port 22 with the settings every host shares (`modules/base/ssh.nix`): keys only, no root login, no agent forwarding, no SFTP, and the host key at `/etc/ssh/ssh_host_ed25519_key`, persisted in `/persist`. sshd listens on every address, but the firewall opens port 22 on `tailscale0` only (`networking.firewall.interfaces.tailscale0` in `modules/hosts/bach/network.nix`), so it can't be reached from the internet. `AllowUsers` admits `michele` and `agent`:
+
+| User | Key | File |
+|---|---|---|
+| `michele` | `michele@satie` | `modules/hosts/bach/users.nix` |
+| `agent` | `agent@satie` | `modules/hosts/bach/users.nix` |
+
+Two checks happen in turn. The Tailscale policy decides which devices reach port 22 at all: michele's, not `group:family`. Then sshd checks the key, which tells michele and `agent` apart even though both come from satie. [Agent user](../satie/agent.md#the-agent-on-bach) covers what `agent` can do on bach.
+
+Tailscale SSH is off: `modules/services/tailnet-server.nix` runs `tailscale set --ssh=false`. With it on, tailscaled answers port 22 on the tailnet address itself and OpenSSH never sees the connection. `tailscale set` only changes the flags it is given, and the setting persists in `/var/lib/tailscale`, so the flag has to say `false` explicitly.
+
+satie pins bach's host key for every user in `programs.ssh.knownHosts` (`modules/hosts/satie/users.nix`), so the first connection asks nothing.
+
+If sshd won't start or Tailscale is down, the ways in are in [Disaster recovery](../RECOVERY.md#ways-into-bach).
+
+<details>
+<summary>Why not Tailscale SSH?</summary>
+
+It never checks a client key: it trusts the tailnet identity of the source machine, so every user on satie, `agent` included, is michele to it. It can't be set to check keys or to use another port ([Tailscale SSH](https://tailscale.com/kb/1193/tailscale-ssh)).
+
+</details>
 
 ## Tailscale policy
 

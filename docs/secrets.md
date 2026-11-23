@@ -27,7 +27,7 @@ The recipient groups:
 | git emails | both host keys, both michele keys |
 | `root-at-bach` | satie's host key |
 | `root-at-satie` | bach's host key |
-| `michele-at-bach`, `michele-at-satie` | their own host's key |
+| `michele-at-bach`, `michele-at-satie`, `agent-at-satie` | their own host's key |
 
 The `root-at-*` files are copies of each host's private host key, encrypted to the other host. They aren't deployed anywhere. They let the surviving host hand back the dead one's key during [disaster recovery](RECOVERY.md).
 

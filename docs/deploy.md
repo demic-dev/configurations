@@ -24,7 +24,7 @@ update -d bach -m boot                # build here, make it bach's next boot
 update -b bach -m test --show-trace   # other flags go to nixos-rebuild
 ```
 
-When the target is another host, `update` asks for that host's sudo password locally and passes it over ssh, since sudo on the target has no terminal to prompt on. Remote builds and deploys use substitutes, so the remote side downloads from the caches instead of copying everything from here.
+When the target is another host, `update` asks for that host's sudo password locally and passes it over ssh, since sudo on the target has no terminal to prompt on. It logs in with michele's key, whose passphrase is asked once per run: nixos-rebuild shares one ssh connection for the whole run, and the `bach` entry in michele's ssh config (`modules/hosts/satie/users.nix`) adds the key to the ssh agent, so later runs don't ask. Remote builds and deploys use substitutes, so the remote side downloads from the caches instead of copying everything from here.
 
 The usual way to deploy either host is to build on bach: `update -b bach` on satie, `update -b bach -d bach` for bach.
 

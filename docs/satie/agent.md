@@ -1,6 +1,6 @@
 # Agent user on satie
 
-Coding agents run on satie as one user, `agent`, so an agent only reaches the files it's been given. This page covers that user, how access is granted, and how a harness is added (`modules/dev/agent.nix`, `modules/dev/claude.nix`, `modules/dev/opencode.nix`).
+Coding agents run on satie as one user, `agent`, so an agent only reaches the files it's been given. This page covers that user, how access is granted, how a harness is added, and the same user on bach (`modules/dev/agent.nix`, `modules/dev/claude.nix`, `modules/dev/opencode.nix`).
 
 ## The user
 
@@ -39,7 +39,7 @@ Then add `<name>` after `agent` in `modules/hosts/satie/default.nix`. The file r
 
 ## Access
 
-By default the agent reaches nothing in michele's home. Access goes through the group `repos` and ACLs, set up in `modules/dev/agent.nix`. `repos` has the fixed gid 1100 and two members, michele and `agent`.
+By default the agent reaches nothing in michele's home. Access goes through the group `repos`, created in `modules/dev/agent.nix`, and ACLs, set up in `modules/hosts/satie/users.nix`. `repos` has the fixed gid 1100 and two members, michele and `agent`.
 
 - `~/repos` is mode 2750, group `repos`, with a default ACL that gives `repos` read and write on everything inside, including files created later. The agent works there.
 - `~/nixos` is a symlink to `~/repos/nixos`.
@@ -80,3 +80,31 @@ The links point at the checkout, `/home/michele/repos/nixos/modules/dev/agent/AG
 The skill `agents-file` (`modules/dev/agent/agents-file/SKILL.md`, linked at `~/.claude/skills/agents-file/SKILL.md`) writes a folder's `AGENTS.md` with only what the global file doesn't already say.
 
 Claude Code adds a `Co-Authored-By` trailer to commits and a line to pull requests by default. `/etc/claude-code/managed-settings.json` sets `"attribution": false`, which turns both off (`modules/dev/claude.nix`). Managed settings rank above `~/.claude/settings.json`, which Claude Code writes to itself and so can't be a store link.
+
+## The agent on bach
+
+bach imports the same `agent` aspect, so `agent` has the same uid 1001, gid 1001 and `repos` gid 1100 there, its home `/home/agent` (persisted with the rest of `/home`, `modules/hosts/bach/persistence.nix`) and the same home-manager config. The `~/repos` folder, the `~/nixos` link and the `~/Nextcloud` ACL are satie's only. The git email files on bach are readable by `repos` too (`modules/hosts/bach/users.nix`): git stops with "unable to access" on an include it can't read.
+
+### Logging in
+
+`agent` logs into bach from satie over OpenSSH, with a key of its own:
+
+- The private key is the agenix secret `agent-at-satie`, at `/home/agent/.ssh/id_ed25519` on satie, owned by `agent` with mode 600 and no passphrase, since nobody is there to type one. It's encrypted to satie's host key only (`secrets/secrets.nix`).
+- The public key is `satie.ssh.agent` in `env.nix`, authorized for `agent` on bach (`modules/hosts/bach/users.nix`).
+- `agent`'s ssh config (`modules/hosts/satie/users.nix`) has `Host bach` with that key and `IdentitiesOnly yes`, so `ssh bach` logs in as `agent` and offers nothing else.
+- bach's host key is pinned in `/etc/ssh/ssh_known_hosts` on satie, so the first connection asks nothing.
+
+The key can't log in as michele: sshd only accepts it for `agent`. [Network](../bach/network.md#ssh) covers the rest of sshd on bach.
+
+### What it can't do
+
+`agent` on bach is a normal user: it can read world-readable files, run processes, use the disk, and build with Nix. It can't change the system:
+
+| It can't | Because |
+|---|---|
+| run `sudo` | `security.sudo.execWheelOnly = true` (`modules/base/core.nix`): the sudo wrapper is executable by `wheel` only, and `agent` isn't in `wheel` |
+| switch the system (`nixos-rebuild switch`, `switch-to-configuration`) | both need root, and `agent` has no way to become root |
+| write `/nix/var/nix/profiles/system` | the profiles directory belongs to root, mode 755 |
+| import unsigned store paths, or change trusted Nix settings | `nix.settings.trusted-users` is `root` and `@wheel` (`modules/base/core.nix`), and `require-sigs` is on |
+
+Whoever becomes `agent` on satie becomes `agent` on bach. On bach it also reaches what listens on localhost: the internal vhosts through nginx, which trusts `127.0.0.1` as it trusts the tailnet, and the services behind them, most with a login of their own. Some answer without one: the Redis servers of Immich (port 2284) and Nextcloud (port 8444) on TCP, RabbitMQ for OnlyOffice with the built-in `guest` account, and Immich's machine learning on port 3003.

@@ -46,6 +46,10 @@
           value = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILybbzqNCmNotFldfobNebniei51OEG/EW8obXzODK1k git-agecrypt@michele";
           location = "/home/michele/.ssh/git-agecrypt_ed25519";
         };
+        agent = {
+          value = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDzcZSuvn2/xaygaWaRm6i2ZkdheOgTBwGxcTzpKxv2o agent@satie";
+          location = "/home/agent/.ssh/id_ed25519";
+        };
         root = {
           value = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBjIqDJcBd5/kw+kA8DNdM1KB2IZivH17GrIN+wEiTp5 root@satie";
           location = "/etc/ssh/ssh_host_ed25519_key";

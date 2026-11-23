@@ -22,22 +22,28 @@
       users.users.root.initialHashedPassword = "$6$9joJdfYW9u7849iq$5jFEhesBUwM6yvSA8g8iMiog15pFTOIOEF28zzmgB2P1evUludMC0vboBsCFDylCvQWw6WFu8tc7VkhMjYKzr.";
 
       users.users.michele = {
+        openssh.authorizedKeys.keys = [ env.userSettings.satie.ssh.michele.value ];
         initialHashedPassword = "$6$DptngetaTDY6G.qa$tEWVAEGlpkvzUltZXYaZpQz4c40KOQG3eQXhwhcQn33oM02NyemgBFSa/G6Mzb9iKbTroI7uKd7AWgBfKuUGF.";
       };
+
+      users.users.agent.openssh.authorizedKeys.keys = [ env.userSettings.satie.ssh.agent.value ];
 
       # agenix decrypts inside the pre-switch-root initrd activation — ~6s BEFORE
       # impermanence bind-mounts /persist/etc/ssh/ssh_host_ed25519_key onto /etc/ssh.
       age.identityPaths = [ "/persist${env.userSettings.bach.ssh.root.location}" ];
 
+      # Readable by repos: agent's git config includes them, and git dies on an unreadable include.
       age.secrets.git-email = {
         file = ../../../secrets/git-email.age;
         owner = env.userSettings.bach.user;
-        group = "users";
+        group = "repos";
+        mode = "0440";
       };
       age.secrets.noreply-github-email = {
         file = ../../../secrets/noreply-github-email.age;
         owner = env.userSettings.bach.user;
-        group = "users";
+        group = "repos";
+        mode = "0440";
       };
 
       age.secrets.michele-at-bach = {

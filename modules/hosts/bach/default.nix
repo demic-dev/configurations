@@ -17,8 +17,10 @@ in
       
       # users
       michele
+      agent
 
       # services
+      ssh
       tailscale
       tailnet-server
       nginx

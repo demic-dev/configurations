@@ -9,7 +9,7 @@ My personal NixOS configuration: one dendritic flake for all my machines.
 - **`bach`**: aarch64-linux VPS. Self-hosted services (Nextcloud + OnlyOffice, Immich, Miniflux,
   Calibre-Web, Hugo, static files; Ghost configured but off). Encrypted ZFS with remote unlock in
   the initrd (port 2222), tmpfs root + impermanence. nginx is tailnet-only by default: a public vhost
-  opts in with `allow all; ssl_verify_client on;` (Cloudflare only). SSH is Tailscale SSH.
+  opts in with `allow all; ssl_verify_client on;` (Cloudflare only). SSH is OpenSSH, keys only, open on the tailnet only.
 - **`satie`**: aarch64-linux Apple-Silicon (Asahi) laptop. niri + noctalia desktop.
 
 Both are aarch64. Don't build x86_64 outputs locally.

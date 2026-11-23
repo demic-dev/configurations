@@ -25,6 +25,10 @@
           interface = "enp7s0";
         };
         firewall.enable = true;
+        # Never in allowedTCPPorts: sshd listens on every address, and this keeps it off the public one.
+        firewall.interfaces.tailscale0.allowedTCPPorts = [ 22 ];
       };
+
+      services.openssh.settings.AllowUsers = [ "michele" "agent" ];
     };
 }

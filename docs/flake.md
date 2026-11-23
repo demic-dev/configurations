@@ -35,7 +35,7 @@ A layout like `tailscale/{common,bach,satie}.nix` works, thanks to the merging a
 
 `modules/hosts/<host>/default.nix` defines `flake.nixosConfigurations.<host>` and lists the aspects that host runs. That list is the only switch: importing an aspect turns it on, removing it turns it off. There are no custom `enable` options.
 
-When a feature differs between hosts, it splits by role, not by host. Tailscale is an example: `tailscale` (in `modules/base/`) runs on every host, and `tailnet-server` (in `modules/services/`) adds the server parts, Tailscale SSH and the open UDP port, on bach only.
+When a feature differs between hosts, it splits by role, not by host. Tailscale is an example: `tailscale` (in `modules/base/`) runs on every host, and `tailnet-server` (in `modules/services/`) adds the server parts, the open UDP port and Tailscale SSH switched off, on bach only.
 
 A host folder holds only what's about that machine:
 

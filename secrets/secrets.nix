@@ -99,10 +99,11 @@ in
   "root-at-bach.age".publicKeys = [ satieSystem ];
   "root-at-satie.age".publicKeys = [ bachSystem ];
 
-  # michele-at-* ARE deployed on their own host at boot (hence that host's system key);
+  # michele-at-* and agent-at-satie ARE deployed on their own host at boot (hence that host's system key);
   # on recovery they come back for free once the host's root key is restored.
   "michele-at-bach.age".publicKeys = [ bachSystem ];
   "michele-at-satie.age".publicKeys = [ satieSystem ];
+  "agent-at-satie.age".publicKeys = [ satieSystem ];
 
 
   # Passphraseless key used ONLY by git-agecrypt to decrypt secrets/sensitive/*.age silently.

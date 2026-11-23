@@ -28,6 +28,29 @@ in
         mode = "600";
       };
 
+      # Passphraseless: the agent logs into bach with it, and nobody is there to type one.
+      age.secrets.agent-at-satie = {
+        file = ../../../secrets/agent-at-satie.age;
+        path = env.userSettings.satie.ssh.agent.location;
+        owner = "agent";
+        group = "agent";
+        mode = "600";
+      };
+
+      home-manager.users.agent.programs.ssh = {
+        enable = true;
+        enableDefaultConfig = false;
+        settings.bach = {
+          IdentityFile = env.userSettings.satie.ssh.agent.location;
+          IdentitiesOnly = "yes";
+        };
+      };
+
+      programs.ssh.knownHosts.bach = {
+        hostNames = [ "bach" ];
+        publicKey = env.userSettings.bach.ssh.root.value;
+      };
+
       # Dedicated PASSPHRASELESS key used ONLY by git-agecrypt to decrypt secrets/sensitive/*.age silently. The login key above is passphrase-protected, which makes git-agecrypt prompt on every git command; this key avoids that. Its public key is a recipient in root/git-agecrypt.toml, and the git home module points git-agecrypt at this path.
       age.secrets.git-agecrypt-key = {
         file = ../../../secrets/git-agecrypt-key.age;
@@ -116,6 +139,12 @@ in
 
             settings."github.com" = {
               User = "git";
+              IdentityFile = "~/.ssh/id_ed25519";
+              AddKeysToAgent = "yes";
+            };
+
+            # nixos-rebuild already shares one connection per run (ControlMaster=auto); this caches the passphrase across runs and `share`.
+            settings.bach = {
               IdentityFile = "~/.ssh/id_ed25519";
               AddKeysToAgent = "yes";
             };

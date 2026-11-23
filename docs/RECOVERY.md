@@ -15,6 +15,7 @@ Every secret is encrypted to one or more public keys, and recovering it needs th
 | michele@bach | `/home/michele/.ssh/id_ed25519` on bach | `micheleAtBach` |
 | michele@satie | `/home/michele/.ssh/id_ed25519` on satie | `micheleAtSatie` |
 | git-agecrypt, passphraseless | `/home/michele/.ssh/git-agecrypt_ed25519` on satie | `satie.ssh.git-agecrypt` |
+| agent@satie, passphraseless | `/home/agent/.ssh/id_ed25519` on satie | `satie.ssh.agent` |
 | bach initrd host key | `/persist/etc/secrets/initrd/ssh_host_ed25519_key` | `bach.ssh.boot` |
 
 Two encryption systems are involved (details in [Secrets](secrets.md)):
@@ -27,7 +28,7 @@ Two encryption systems are involved (details in [Secrets](secrets.md)):
 Two kinds of agenix file exist only for recovery, each encrypted to exactly the key that needs it:
 
 - `root-at-bach` is encrypted to `satieSystem`, and `root-at-satie` to `bachSystem`. A host never decrypts its own root key. The other host does, and hands it back during recovery. These files aren't deployed anywhere.
-- `michele-at-bach` is encrypted to `bachSystem`, and `michele-at-satie` to `satieSystem`. These are deployed at boot. Once a host's root key is back, the host redeploys its own michele key at the next boot, with no extra step.
+- `michele-at-bach` is encrypted to `bachSystem`, and `michele-at-satie` and `agent-at-satie` to `satieSystem`. These are deployed at boot. Once a host's root key is back, the host redeploys its own user keys at the next boot, with no extra step.
 
 That's what makes losing one host recoverable without the off-machine kit: the survivor decrypts the dead host's `root-at-*` file and hands over its key.
 
@@ -57,6 +58,36 @@ These live outside both machines: in Bitwarden, plus one offline copy (paper or 
 4. satie is recovered through bach: bach decrypts satie's host key, then satie decrypts its own secrets. bach's key never decrypts satie's secrets directly.
 5. The backup holds data, not the OS: reinstall from the flake, then restore data.
 
+## Ways into bach
+
+A running bach has three ways in, from the everyday one to the last resort:
+
+| Way | When it works | Who |
+|---|---|---|
+| OpenSSH on port 22 of the tailnet address | bach booted, tailscaled and sshd up | michele and `agent`, each with their own key from satie |
+| ssh on port 2222 of the public address (`unlock-bach`) | only in the initrd, while boot waits for the ZFS passphrase | root, with michele's satie key, to the passphrase prompt only |
+| The VPS provider's VNC console | always | anyone with the provider account and root's password |
+
+Port 22 is closed on the public address, and Tailscale SSH is off, so a booted bach without tailscaled or without sshd is reachable only through the console. Details in [Network](bach/network.md#ssh) and [Disk and boot](bach/disk.md).
+
+### If sshd won't start
+
+The symptom is `Connection refused` on port 22 from satie, while `tailscale ping bach` works. If `tailscale ping` fails too, tailscaled is the problem, not sshd.
+
+1. If the last deploy was `--mode test` (or a `switch` you can afford to undo), reboot from the provider's panel and run `unlock-bach`. bach boots the default generation, which had working ssh.
+2. Otherwise, log in as root on the VNC console and read why it failed:
+   ```sh
+   systemctl status sshd
+   journalctl -u sshd -b
+   sshd -t -f /etc/ssh/sshd_config
+   ```
+   A missing host key shows up here: `/etc/ssh/ssh_host_ed25519_key` is bind-mounted from `/persist/etc/ssh/`. Check that the file is in `/persist`.
+3. To go back to a generation that worked, from the console:
+   ```sh
+   nixos-rebuild switch --rollback
+   ```
+   Or pick an older generation in the systemd-boot menu at the next reboot.
+
 ## One host lost, the other alive
 
 ### bach died, satie alive
@@ -80,7 +111,7 @@ These live outside both machines: in Bitwarden, plus one offline copy (paper or 
    sudo age -d -i /etc/ssh/ssh_host_ed25519_key root-at-satie.age > satie_host_key
    ```
 2. Install NixOS on the new satie from the flake. Before rebuilding, put `satie_host_key` at `/etc/ssh/ssh_host_ed25519_key` (mode 600, owner root).
-3. Run `nixos-rebuild switch --flake .#satie`. satie's identity is `satieSystem` again, so it decrypts `michele-password`, `git-agecrypt-key` and `michele-at-satie` itself. bach couldn't have decrypted those; it only handed satie its key.
+3. Run `nixos-rebuild switch --flake .#satie`. satie's identity is `satieSystem` again, so it decrypts `michele-password`, `git-agecrypt-key`, `michele-at-satie` and `agent-at-satie` itself. bach couldn't have decrypted those; it only handed satie its key.
 
 ## Total loss
 
