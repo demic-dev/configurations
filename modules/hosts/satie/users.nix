@@ -11,6 +11,14 @@ in
         openssh.authorizedKeys.keys = [ env.userSettings.bach.ssh.michele.value ];
       };
 
+      systemd.tmpfiles.rules = [
+        "d /home/michele/repos 2750 michele repos -"
+        "a+ /home/michele/repos - - - - g:repos:rwX,d:g:repos:rwX"
+        "L+ /home/michele/nixos - - - - /home/michele/repos/nixos"
+        # Only "other" is touched, so the repos entries agent-allow adds stay effective.
+        "a+ /home/michele/Nextcloud - - - - other::---,default:other::---"
+      ];
+
       age.secrets.michele-password.file = ../../../secrets/michele-password.age;
       age.secrets.michele-at-satie = {
         file = ../../../secrets/michele-at-satie.age;
