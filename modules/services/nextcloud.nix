@@ -82,8 +82,11 @@ in
       # Cloudflare refuses bodies over 100 MB; the default chunk is 100 MiB.
       "files.chunked_upload.max_size" = 50 * 1024 * 1024;
 
+      # Through msmtp from ./health.nix. Proton only accepts its own address as the sender.
       mail_smtpmode = "sendmail";
       mail_sendmailmode = "pipe";
+      mail_from_address = "homelab";
+      mail_domain = fqdn;
 
       maintenance_window_start = 1;
 
@@ -144,6 +147,10 @@ in
 
   # Agenix
   age.secrets = {
+    # Declared in ./health.nix. msmtp's passwordeval runs as the caller, here nextcloud;
+    # root (the health alerts) reads it anyway. Not the nextcloud group: nginx is in it.
+    homelab_smtp_token.owner = "nextcloud";
+
     nextcloud_root_pass = {
       file = ../../secrets/nextcloud_root_pass.age;
       owner = "nextcloud";
@@ -196,6 +203,11 @@ in
       requires = [ "postgresql.service" ];
       after = [ "postgresql.service" ];
     };
+
+    # Nextcloud looks for sendmail in PATH and falls back to /usr/sbin/sendmail
+    # (lib/private/Mail/Mailer.php). php-fpm's PATH has /run/wrappers/bin, the cron unit's doesn't,
+    # so mail from background jobs (activity, notifications) would fail.
+    services."nextcloud-cron".path = [ "/run/wrappers" ];
   };
 
   # Nginx

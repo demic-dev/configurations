@@ -16,6 +16,8 @@ The repository is public. Both kinds are committed as ciphertext.
 
 Each secret is encrypted to a list of public keys in `secrets/secrets.nix`. At activation, agenix decrypts the secrets a host needs using that host's ssh host key (`age.identityPaths`), so a host can only read secrets it's a recipient of. Evaluation never sees their contents.
 
+A decrypted secret is owned by root with mode 0400, unless its declaration sets `owner`, `group` or `mode`. `homelab_smtp_token` is declared in `modules/services/health.nix` and owned by `nextcloud` from `modules/services/nextcloud.nix`, still with mode 0400, so Nextcloud's msmtp can read it. Root reads it regardless of the owner. Immich needs no access: the Immich module passes the file to its unit through systemd's `LoadCredential=`, which reads it as root.
+
 The recipient groups:
 
 | Secrets | Recipients |

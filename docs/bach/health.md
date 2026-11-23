@@ -1,10 +1,19 @@
 # Health checks
 
-bach mails an alert when something on it breaks. This page covers what is checked, how the mail goes out, and how to test it. Everything is in `modules/services/health.nix`.
+bach mails an alert when something on it breaks. This page covers what is checked, how the mail goes out, and how to test it. The alerts are in `modules/services/health.nix`.
 
 ## Mail
 
 Alerts go out through msmtp, set as the system `sendmail`, to Proton's SMTP server. They are sent from and to `homelab@` the domain in `env.cloudSettings.fqdn`. msmtp reads the SMTP token from the agenix secret `homelab_smtp_token` through `passwordeval`, so the token stays out of the Nix store.
+
+`passwordeval` runs as whoever calls `sendmail`: the wrapper in `/run/wrappers/bin` isn't setuid. The secret is owned by `nextcloud` with mode 0400, so root and Nextcloud can read it and other users can't.
+
+### Mail from Nextcloud and Immich
+
+Nextcloud and Immich send their own mail (password resets, share and album notifications, Immich's welcome mail) from the same `homelab@` address with the same token.
+
+- Nextcloud pipes to the same msmtp `sendmail`, as the `nextcloud` user (`modules/services/nextcloud.nix`). `mail_from_address` and `mail_domain` make the sender `homelab@`, the only one Proton accepts. Nextcloud looks for `sendmail` in its `PATH`, so `nextcloud-cron` gets `/run/wrappers/bin` added for the mail its background jobs send.
+- Immich talks SMTP to Proton itself, through `notifications.smtp` in `services.immich.settings` (`modules/services/immich.nix`). The password is a `_secret` entry: the module loads the file with `LoadCredential=` and writes it into `/run/immich/config.json` when the unit starts. While that file is in use, the admin page can't change any setting.
 
 ## Checks
 

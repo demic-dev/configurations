@@ -1,7 +1,7 @@
 { ... }:
 {
   flake.nixosModules.immich =
-{ pkgs, env, ... }:
+{ config, pkgs, env, ... }:
 let
   fqdn = env.cloudSettings.fqdn;
   domain = "${env.cloudSettings.services.immich.subdomain}.${fqdn}";
@@ -59,6 +59,19 @@ in
     settings = {
       server.externalDomain = "https://${domain}";
       backup.database.enabled = true;
+
+      # The module hands _secret files to the unit with LoadCredential, which systemd reads as
+      # root, so the immich user needs no access to the token.
+      notifications.smtp = {
+        enabled = true;
+        from = "homelab@${fqdn}";
+        transport = {
+          host = "smtp.protonmail.ch";
+          port = 587;
+          username = "homelab@${fqdn}";
+          password._secret = config.age.secrets.homelab_smtp_token.path;
+        };
+      };
     };
 
   };
