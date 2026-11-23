@@ -5,8 +5,6 @@
 let
   internal = env.cloudSettings.internal;
   domain = "${env.cloudSettings.services.nextcloud.subdomain}.${internal}";
-  port = env.cloudSettings.services.nextcloud.port;
-  redisPort = port + 1;
   maxUploadSize = env.cloudSettings.services.nextcloud.maxUploadSize;
   client_max_body_size = env.cloudSettings.services.nextcloud.client_max_body_size;
 
@@ -120,6 +118,15 @@ in
     allowLocalConnections = true;
   };
 
+  # OnlyOffice logs into RabbitMQ as guest:guest, which RabbitMQ accepts from loopback, and
+  # RabbitMQ has no unix socket: so only OnlyOffice's processes may connect to it.
+  networking.firewall.extraCommands = ''
+    iptables -w -A OUTPUT -o lo -p tcp --dport 5672 -m owner ! --uid-owner onlyoffice -j REJECT
+  '';
+  networking.firewall.extraStopCommands = ''
+    iptables -w -D OUTPUT -o lo -p tcp --dport 5672 -m owner ! --uid-owner onlyoffice -j REJECT 2>/dev/null || true
+  '';
+
   # Postgres
   services.postgresql = {
     ensureDatabases = [ "nextcloud" ];
@@ -136,13 +143,6 @@ in
     location = "/home/.backups/postgres/nextcloud";
     databases = [ "nextcloud" ];
     startAt = "*-*-* 03:15:00";
-  };
-
-  # Redis
-  services.redis.servers.nextcloud = {
-    enable = true;
-    port = redisPort;
-    bind = "127.0.0.1";
   };
 
   # Agenix

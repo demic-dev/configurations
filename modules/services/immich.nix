@@ -10,7 +10,6 @@ let
   internalDomain = "${env.cloudSettings.services.immich.subdomain}.${internalFqdn}";
 
   port = env.cloudSettings.services.immich.port;
-  redisPort = port + 1;
 
   mountPoint = "/var/tmp/immich-borgbase";
 
@@ -49,12 +48,8 @@ in
       host = "/run/postgresql";
     };
 
-    redis = {
-      enable = true;
-
-      host = "127.0.0.1";
-      port = redisPort;
-    };
+    # The module's default: its unix socket only, no TCP port for every local user.
+    redis.enable = true;
 
     settings = {
       server.externalDomain = "https://${domain}";
@@ -85,13 +80,6 @@ in
         ensureDBOwnership = true;
       }
     ];
-  };
-
-  # Redis
-  services.redis.servers.immich = {
-    enable = true;
-    port = redisPort;
-    bind = "127.0.0.1";
   };
 
   # Shouldn't be necessary anymore since it's under /persist/data

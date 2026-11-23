@@ -7,7 +7,6 @@
     services = {
       nextcloud = {
         subdomain = lib.fileContents ./secrets/sensitive/nextcloud-subdomain.age;
-        port = 8443; # redisPort = port + 1;
         maxUploadSize = "8G";
         client_max_body_size = "8000M";
       };
@@ -18,7 +17,7 @@
       immich = {
         borg-repository = lib.fileContents ./secrets/sensitive/immich-borg-repository.age;
         subdomain = lib.fileContents ./secrets/sensitive/immich-subdomain.age;
-        port = 2283; # redisPort = port + 1;
+        port = 2283;
       };
       miniflux = {
         subdomain = "rss";
