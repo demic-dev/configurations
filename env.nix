@@ -15,7 +15,7 @@
         port = 8000;
       };
       immich = {
-        borg-repository = lib.fileContents ./secrets/sensitive/immich-borg-repository.age;
+        borg-repository = lib.fileContents ./secrets/sensitive/immich-borgbase-repository.age;
         subdomain = lib.fileContents ./secrets/sensitive/immich-subdomain.age;
         port = 2283;
       };
