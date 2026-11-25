@@ -54,4 +54,8 @@ unlock-bach
 
 ## Housekeeping
 
-On every host (`modules/base/core.nix`), the store is optimised daily at 04:00, and garbage collection runs weekly and deletes generations older than 15 days.
+On every host, the store is optimised daily at 04:00 (`modules/base/core.nix`).
+Once a week, `cleanup.service` runs `cleanup` (`modules/base/cleanup.nix`, described in [Shell reference](shell.md)): it keeps the last 2 system generations and collects garbage.
+Both timers are persistent: a run missed while the host was off or asleep happens once, soon after it wakes up.
+During a build, Nix also collects garbage on its own when less than 10 GiB is free, until 30 GiB is free (`min-free` and `max-free` in `modules/base/core.nix`).
+That only removes paths no generation uses.

@@ -15,6 +15,7 @@ in
       # machine + shared + desktop aspects
       satie-hardware
       core
+      cleanup
       impermanence
       tailscale
       desktop

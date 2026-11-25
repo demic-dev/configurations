@@ -14,6 +14,7 @@ in
       # base machine + shared aspects
       bach-hardware
       core
+      cleanup
       
       # users
       michele

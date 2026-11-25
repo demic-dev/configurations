@@ -80,6 +80,20 @@ share ~/Documents/report.pdf
 share --delete k3x9q2ma
 ```
 
+### cleanup
+
+```sh
+cleanup
+```
+
+Frees disk space in the Nix store.
+It deletes every system generation except the last 2, so the boot menu keeps one to roll back to, and rewrites the boot menu to match.
+Then it collects garbage and prints `df -h /` before and after.
+Last, it prints the size of the journal, `/var/cache`, the coredumps and each user's `~/.cache`, without deleting any of them.
+It runs itself through `sudo` when started as another user.
+The dev shells of projects survive it: their direnv GC roots are left alone.
+It works on both hosts, from `modules/base/cleanup.nix`, and also runs weekly as `cleanup.service` (see Housekeeping in `docs/deploy.md`).
+
 ### wav2text
 
 ```sh
