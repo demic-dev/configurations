@@ -8,6 +8,8 @@
     boot.loader.efi.canTouchEfiVariables = false;
     boot.loader.systemd-boot.graceful = true;
 
+    boot.tmp.cleanOnBoot = true;
+
     boot.kernel.sysctl."vm.mmap_rnd_bits" = 31;
 
     boot.kernelParams = [ "brcmfmac.roamoff=1" ];

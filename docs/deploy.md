@@ -59,3 +59,5 @@ Once a week, `cleanup.service` runs `cleanup` (`modules/base/cleanup.nix`, descr
 Both timers are persistent: a run missed while the host was off or asleep happens once, soon after it wakes up.
 During a build, Nix also collects garbage on its own when less than 10 GiB is free, until 30 GiB is free (`min-free` and `max-free` in `modules/base/core.nix`).
 That only removes paths no generation uses.
+
+Both hosts empty `/tmp` at boot (`boot.tmp.cleanOnBoot`), so GC roots left there by builds and agent sessions disappear with it.
