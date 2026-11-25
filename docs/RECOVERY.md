@@ -46,6 +46,7 @@ These live outside both machines: in Bitwarden, plus one offline copy (paper or 
 - [ ] The borg passphrase of the `immich` repository.
 - [ ] The borg passphrase of satie's `home` repository.
 - [ ] All three borg repository URLs, in plain text. They're in `secrets/sensitive/`, so without a copy here the repositories can't be addressed.
+- [ ] The exported key of each of the three repositories. In `repokey` mode, the key that encrypts the data lives in the repository, locked with the passphrase; if that copy is damaged, the passphrase alone opens nothing. Export with `sudo borg-job-generic key export --paper` and `sudo borg-job-immich key export --paper` on bach, `sudo borg-job-home key export --paper` on satie. The export is encrypted with the passphrase. Bring it back with `borg key import --paper`.
 - [ ] bach's ZFS pool passphrase, typed over ssh on port 2222 at boot. Needed to unlock the existing pool. A rebuild from scratch can set a new one.
 - [ ] Recommended: the git-agecrypt private key. It decrypts `secrets/sensitive/` directly and saves a step. Without it, use the other recipient, michele@bach's key (no passphrase), decrypted from `secrets/michele-at-bach.age` with the `root@bach` key. The backup doesn't contain either key.
 
