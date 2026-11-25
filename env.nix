@@ -55,6 +55,8 @@
         };
       };
 
+      borg-repository = lib.fileContents ./secrets/sensitive/satie-borgbase-repository.age;
+
       id = "3e042fee";
 
       configPath = "/home/michele/repos/nixos/";

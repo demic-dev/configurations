@@ -44,7 +44,8 @@ These live outside both machines: in Bitwarden, plus one offline copy (paper or 
 - [ ] The `root@bach` private key (bach's host key). BorgBase authorises it, so it's the way into the backups, and it's bach's identity for agenix. The `generic` archive does contain it, but that archive can only be opened with this key, so the kit is the copy that counts.
 - [ ] The borg passphrase of the `generic` repository.
 - [ ] The borg passphrase of the `immich` repository.
-- [ ] Both borg repository URLs, in plain text. They're in `secrets/sensitive/`, so without a copy here the repositories can't be addressed.
+- [ ] The borg passphrase of satie's `home` repository.
+- [ ] All three borg repository URLs, in plain text. They're in `secrets/sensitive/`, so without a copy here the repositories can't be addressed.
 - [ ] bach's ZFS pool passphrase, typed over ssh on port 2222 at boot. Needed to unlock the existing pool. A rebuild from scratch can set a new one.
 - [ ] Recommended: the git-agecrypt private key. It decrypts `secrets/sensitive/` directly and saves a step. Without it, use the other recipient, michele@bach's key (no passphrase), decrypted from `secrets/michele-at-bach.age` with the `root@bach` key. The backup doesn't contain either key.
 
@@ -112,6 +113,7 @@ The symptom is `Connection refused` on port 22 from satie, while `tailscale ping
    ```
 2. Install NixOS on the new satie from the flake. Before rebuilding, put `satie_host_key` at `/etc/ssh/ssh_host_ed25519_key` (mode 600, owner root).
 3. Run `nixos-rebuild switch --flake .#satie`. satie's identity is `satieSystem` again, so it decrypts `michele-password`, `git-agecrypt-key`, `michele-at-satie` and `agent-at-satie` itself. bach couldn't have decrypted those; it only handed satie its key.
+4. Restore the data from satie's backup, as root: `cd / && borg-job-home extract ::<archive> home/michele var/lib/iwd var/lib/bluetooth var/lib/tailscale` (see [Backup](satie/backup.md)).
 
 ## Total loss
 

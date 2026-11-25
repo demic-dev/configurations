@@ -112,4 +112,7 @@ in
   "git-agecrypt-key.age".publicKeys = [ micheleAtSatie satieSystem ];
 
   "eduroam.age".publicKeys = [ micheleAtSatie satieSystem ];
+
+  "satie_backup_passphrase.age".publicKeys = [ micheleAtSatie satieSystem ];
+  "satie_healthchecks_ping_url.age".publicKeys = [ micheleAtSatie satieSystem ];
 }

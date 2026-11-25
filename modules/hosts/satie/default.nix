@@ -30,6 +30,7 @@ in
 
       # services
       ssh
+      satie-backup
       print-scan
       # llama-cpp
       eduroam

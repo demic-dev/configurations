@@ -24,6 +24,7 @@
 - [Desktop](satie/desktop.md)
 - [eduroam](satie/eduroam.md)
 - [Agent user](satie/agent.md)
+- [Backup](satie/backup.md)
 
 # Recovery
 

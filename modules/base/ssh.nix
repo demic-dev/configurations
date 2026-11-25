@@ -35,6 +35,11 @@ in
     ];
   };
 
+  # Declared because bach's impermanence would erase a known_hosts entry learned on first use.
+  services.openssh.knownHosts."*.repo.borgbase.com" = {
+    publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMS3185JdDy7ffnr0nLWqVy8FaAQeVh1QYUSiNpW5ESq";
+  };
+
   users.users.sshd.uid = 993;
   users.groups.sshd.gid = 993;
 }
