@@ -86,10 +86,23 @@ share --delete k3x9q2ma
 cleanup
 ```
 
+```
+removed generations 457 458
+kept generations 459 460
+freed 19G, now 41G free (72% used)
+2.1G	/home/michele/.cache
+509M	/var/log/journal
+59M	/var/lib/systemd/coredump
+39M	/var/cache
+```
+
 Frees disk space in the Nix store.
 It deletes every system generation except the last 2, so the boot menu keeps one to roll back to, and rewrites the boot menu to match.
-Then it collects garbage and prints `df -h /` before and after.
-Last, it prints the size of the journal, `/var/cache`, the coredumps and each user's `~/.cache`, without deleting any of them.
+Then it collects garbage.
+It prints the generations it removed and kept, the space freed, and the free space left.
+Last, it lists the size of the journal, `/var/cache`, the coredumps and each user's `~/.cache`, largest first, without deleting any of them.
+On a terminal it names each step on stderr while it runs.
+The output of the tools it calls shows only when one of them fails.
 It runs itself through `sudo` when started as another user.
 The dev shells of projects survive it: their direnv GC roots are left alone.
 It works on both hosts, from `modules/base/cleanup.nix`, and also runs weekly as `cleanup.service` (see Housekeeping in `docs/deploy.md`).
