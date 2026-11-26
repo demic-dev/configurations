@@ -25,7 +25,7 @@ Mod+5 to Mod+0 go to ordinary dynamic workspaces below them. Mod+Shift+number mo
 
 The notes terminal is told apart from other Ghostty windows by its app-id, set with `--class`. Only terminals opened at login are fullscreen; later ones open normally (`at-startup=true` in the window rule).
 
-Mod+S starts spotifast, a Spotify client from the fastpotify flake. Its tests are skipped in `modules/hosts/satie/users.nix`, because they rebuild the whole crate with thin LTO and double the build time.
+Mod+S starts spotifast, a Spotify client, from nixpkgs.
 
 <details>
 <summary>Why not a lighter compositor?</summary>

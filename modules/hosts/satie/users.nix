@@ -103,8 +103,7 @@ in
         };
 
         home.packages = with pkgs; [
-          # Its tests recompile the whole crate with thin LTO and one codegen unit: twice the build for nothing.
-          (inputs.fastpotify.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs { doCheck = false; })
+          spotifast
           proton-authenticator
           anki
           zip

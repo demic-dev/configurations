@@ -32,10 +32,8 @@
     };
 
   flake.homeModules.noctalia =
-    { inputs, config, ... }:
+    { config, ... }:
     {
-      imports = [ inputs.noctalia.homeModules.default ];
-
       programs.noctalia = {
         enable = true;
         systemd.enable = true;

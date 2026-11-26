@@ -31,19 +31,6 @@
       url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.url = "github:nixos/nixpkgs/f20cd90e28fe0403873f473b29e42662cd86e8c4";
-    };
-    noctalia-greeter = {
-      url = "github:noctalia-dev/noctalia-greeter";
-      inputs.nixpkgs.url = "github:nixos/nixpkgs/f20cd90e28fe0403873f473b29e42662cd86e8c4";
-    };
-    fastpotify = {
-      url = "github:crmne/fastpotify";
-      # Otherwise it links an older glibc than the system's Mesa needs, and EGL fails to load.
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     hister = {
       url = "github:asciimoo/hister";
       inputs.nixpkgs.follows = "nixpkgs";

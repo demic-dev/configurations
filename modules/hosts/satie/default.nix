@@ -10,7 +10,6 @@ in
       inputs.nixos-apple-silicon.nixosModules.default
       inputs.agenix.nixosModules.default
       inputs.home-manager.nixosModules.home-manager
-      inputs.noctalia-greeter.nixosModules.default
 
       # machine + shared + desktop aspects
       satie-hardware
