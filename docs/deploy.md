@@ -34,13 +34,7 @@ bach builds for both hosts, alongside its services. To keep builds from pushing 
 
 A build that needs more than that fails instead of slowing bach down. spotifast's test phase (now skipped) was OOM-killed on bach, and calibre's duckdb dependency fails to build on bach (calibre is commented out in `modules/hosts/satie/users.nix`). Build those on satie: run plain `update` there.
 
-Every host trusts the nixos-apple-silicon cache (`modules/base/core.nix`). bach needs it too, because it builds satie: without it, bach would compile the Asahi kernel from source.
-
-## The Asahi pin
-
-satie's kernel and U-Boot are only cached when built against the exact nixpkgs that nixos-apple-silicon's CI used. `flake.nix` pins `nixpkgs-asahi` to that revision, and `hardware.asahi.pkgs` (`modules/hosts/satie/hardware.nix`) builds just those two packages from it. The rest of satie follows the main nixpkgs.
-
-To update it, read the nixpkgs revision from nixos-apple-silicon's own `flake.lock` and set `nixpkgs-asahi` to it in the same commit that bumps nixos-apple-silicon. Never let it float.
+satie's kernel and U-Boot (from nixos-apple-silicon, which follows our nixpkgs) aren't in cache.nixos.org, so bach compiles them whenever nixpkgs moves.
 
 ## After a reboot of bach
 
