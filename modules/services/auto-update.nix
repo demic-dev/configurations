@@ -157,8 +157,9 @@ in
           if ! git diff --quiet flake.lock; then
             run git commit -m "chore(flake): update inputs" flake.lock
           fi
-          # The lock commit reaches your main only when your checkout is on main with no changes.
-          run git -C ${repo} branch --force auto-update HEAD
+          # The lock commit reaches your main only when your checkout is on main with no changes. HEAD here is the
+          # worktree's: with -C ${repo} it would be your checkout's, and the lock commit would be left behind.
+          run git branch --force auto-update HEAD
           if [ "$(git -C ${repo} branch --show-current)" = main ] && [ -z "$(git -C ${repo} status --porcelain)" ]; then
             run git -C ${repo} merge --ff-only auto-update
           elif ! git -C ${repo} merge-base --is-ancestor auto-update main; then
