@@ -49,6 +49,10 @@
           value = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDzcZSuvn2/xaygaWaRm6i2ZkdheOgTBwGxcTzpKxv2o agent@satie";
           location = "/home/agent/.ssh/id_ed25519";
         };
+        auto-update = {
+          value = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINZlKy87KGYMMVRHlGzfTrT8ZbGD8N6nH9GlHXUgHirk auto-update@satie";
+          location = "/run/agenix/auto-update-at-satie";
+        };
         root = {
           value = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBjIqDJcBd5/kw+kA8DNdM1KB2IZivH17GrIN+wEiTp5 root@satie";
           location = "/etc/ssh/ssh_host_ed25519_key";

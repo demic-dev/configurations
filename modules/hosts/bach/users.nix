@@ -22,7 +22,11 @@
       users.users.root.initialHashedPassword = "$6$9joJdfYW9u7849iq$5jFEhesBUwM6yvSA8g8iMiog15pFTOIOEF28zzmgB2P1evUludMC0vboBsCFDylCvQWw6WFu8tc7VkhMjYKzr.";
 
       users.users.michele = {
-        openssh.authorizedKeys.keys = [ env.userSettings.satie.ssh.michele.value ];
+        openssh.authorizedKeys.keys = [
+          env.userSettings.satie.ssh.michele.value
+          # No forwarding, no terminal: satie's night job copies bach's system and writes its path (modules/services/auto-update.nix).
+          "restrict ${env.userSettings.satie.ssh.auto-update.value}"
+        ];
         initialHashedPassword = "$6$DptngetaTDY6G.qa$tEWVAEGlpkvzUltZXYaZpQz4c40KOQG3eQXhwhcQn33oM02NyemgBFSa/G6Mzb9iKbTroI7uKd7AWgBfKuUGF.";
       };
 

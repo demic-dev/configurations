@@ -37,6 +37,7 @@ in
       static-files
       docs
       health
+      auto-update-apply
 
       bach
       ({ pkgs, inputs, ... }: {

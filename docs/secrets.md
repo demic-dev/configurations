@@ -7,7 +7,7 @@ The flake uses two encryption tools for two kinds of secret. agenix handles secr
 | Files | `secrets/*.age` | `secrets/sensitive/*.age` |
 | Examples | passwords, API tokens, borg passphrases | domains, bach's IP and gateway, borg repo URLs, the Tailscale policy |
 | Decrypted | at activation, on the host, into `/run/agenix/` | in the working tree, by a git filter |
-| Decrypted with | the host's ssh host key | a dedicated key on satie |
+| Decrypted with | the host's ssh host key | a dedicated key on satie, michele@bach's key on bach |
 | Recipients in | `secrets/secrets.nix` | `git-agecrypt.toml` |
 
 The repository is public. Both kinds are committed as ciphertext.
@@ -23,7 +23,7 @@ The recipient groups:
 | Secrets | Recipients |
 |---|---|
 | bach's services (borg, Nextcloud, OnlyOffice, Miniflux, Cloudflare DNS token, `homelab_smtp_token`, `healthchecks_ping_url`) | bach's host key, michele@bach |
-| satie only (`michele-password`, `git-agecrypt-key`, `eduroam`, `satie_backup_passphrase`, `satie_healthchecks_ping_url`) | satie's host key, michele@satie |
+| satie only (`michele-password`, `git-agecrypt-key`, `auto-update-at-satie`, `eduroam`, `satie_backup_passphrase`, `satie_healthchecks_ping_url`) | satie's host key, michele@satie |
 | git emails | both host keys, both michele keys |
 | `root-at-bach` | satie's host key |
 | `root-at-satie` | bach's host key |
@@ -68,7 +68,7 @@ A plain `agenix --rekey` fails on any secret the current key can't decrypt. The 
 
 This has consequences:
 
-- bach can't even be evaluated without the decrypted files. Evaluate on satie.
+- bach can't even be evaluated without the decrypted files. Evaluate on satie. bach's `~/nixos` decrypts them too, with michele@bach's key, for the [automatic updates](deploy.md#automatic-updates).
 - The filter is registered in `.git/config`, which isn't cloned. A fresh clone checks out ciphertext until `git-agecrypt init` runs in it. The git aspect (`modules/dev/git/default.nix`) ships a `post-checkout` hook through `init.templateDir` that does this on every clone, provided the key is present.
 - The filter decrypts with `~/.ssh/git-agecrypt_ed25519`, a passphraseless key that agenix deploys on satie. The login key has a passphrase, and using it would make every git command prompt.
 - git-agecrypt only re-encrypts a file when its plain content changes. Changing the recipients alone leaves existing ciphertext as it is.

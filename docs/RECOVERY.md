@@ -28,7 +28,7 @@ Two encryption systems are involved (details in [Secrets](secrets.md)):
 Two kinds of agenix file exist only for recovery, each encrypted to exactly the key that needs it:
 
 - `root-at-bach` is encrypted to `satieSystem`, and `root-at-satie` to `bachSystem`. A host never decrypts its own root key. The other host does, and hands it back during recovery. These files aren't deployed anywhere.
-- `michele-at-bach` is encrypted to `bachSystem`, and `michele-at-satie` and `agent-at-satie` to `satieSystem`. These are deployed at boot. Once a host's root key is back, the host redeploys its own user keys at the next boot, with no extra step.
+- `michele-at-bach` is encrypted to `bachSystem`, and `michele-at-satie`, `agent-at-satie` and `auto-update-at-satie` to `satieSystem`. These are deployed at boot. Once a host's root key is back, the host redeploys its own user keys at the next boot, with no extra step.
 
 That's what makes losing one host recoverable without the off-machine kit: the survivor decrypts the dead host's `root-at-*` file and hands over its key.
 
@@ -113,7 +113,7 @@ The symptom is `Connection refused` on port 22 from satie, while `tailscale ping
    sudo age -d -i /etc/ssh/ssh_host_ed25519_key root-at-satie.age > satie_host_key
    ```
 2. Install NixOS on the new satie from the flake. Before rebuilding, put `satie_host_key` at `/etc/ssh/ssh_host_ed25519_key` (mode 600, owner root).
-3. Run `nixos-rebuild switch --flake .#satie`. satie's identity is `satieSystem` again, so it decrypts `michele-password`, `git-agecrypt-key`, `michele-at-satie` and `agent-at-satie` itself. bach couldn't have decrypted those; it only handed satie its key.
+3. Run `nixos-rebuild switch --flake .#satie`. satie's identity is `satieSystem` again, so it decrypts `michele-password`, `git-agecrypt-key`, `michele-at-satie`, `agent-at-satie` and `auto-update-at-satie` itself. bach couldn't have decrypted those; it only handed satie its key.
 4. Restore the data from satie's backup, as root: `cd / && borg-job-home extract ::<archive> home/michele var/lib/iwd var/lib/bluetooth var/lib/tailscale` (see [Backup](satie/backup.md)).
 
 ## Total loss

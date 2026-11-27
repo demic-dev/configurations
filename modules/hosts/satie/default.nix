@@ -33,6 +33,7 @@ in
       print-scan
       # llama-cpp
       eduroam
+      auto-update-build
 
       satie
       ({ pkgs, inputs, ... }: {

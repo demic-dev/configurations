@@ -111,6 +111,9 @@ in
   # ../git-agecrypt.toml. Encrypted to satie's host key so agenix can decrypt it at boot.
   "git-agecrypt-key.age".publicKeys = [ micheleAtSatie satieSystem ];
 
+  # Passphraseless: satie's auto-update unit reads bach's builds with it.
+  "auto-update-at-satie.age".publicKeys = [ micheleAtSatie satieSystem ];
+
   "eduroam.age".publicKeys = [ micheleAtSatie satieSystem ];
 
   "satie_backup_passphrase.age".publicKeys = [ micheleAtSatie satieSystem ];

@@ -98,8 +98,8 @@ nix flake check                                                       # evaluate
 nix eval --raw .#nixosConfigurations.<host>.config.system.build.toplevel.drvPath
 ```
 
-- **Evaluate on satie.** Only its checkout has git-agecrypt decrypting `secrets/sensitive/`;
-  elsewhere those values are ciphertext. New files must be `git add`ed before the flake sees them.
+- **Evaluate on satie.** Only its checkout and bach's `~/nixos` (used by `auto-update`) have
+  git-agecrypt decrypting `secrets/sensitive/`; elsewhere those values are ciphertext. New files must be `git add`ed before the flake sees them.
 - **Pure refactors must be proven no-ops**: identical drvPath for both hosts before and after.
   List options (e.g. `environment.systemPackages`) are ordered by module depth, so moving a list
   definition into a deeper module changes the hash. That's why the host basics stay inline in
